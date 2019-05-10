@@ -61,26 +61,26 @@ class iot_hub:
         """
         wifi_type = str(type(wifi_manager))
         if 'ESPSPI_WiFiManager' in wifi_type:
-            self.wifi = wifi_manager
+            self._wifi = wifi_manager
         else:
             raise TypeError("This library requires a WiFiManager object.")
         self._iot_hub_url = "https://{0}.azure-devices.net".format(iot_hub_name)
         self._sas_token = sas_token
-        self.azure_header = {"Authorization":'SharedAccessSignature sr=azure-airlift-test-hub.azure-devices.net&sig=4WbbY2AWdwJJzsxKKNliRnQ5mzX87JW8ToEoc%2FezuoU%3D&skn=iothubowner&se=1557550171'}
+        self.azure_header = {"Authorization":self._sas_token}
 
     # HTTP Request Methods
     def _post(self, path, payload):
-        response = self.wifi.post(
+        response = self._wifi.post(
             path,
             json=payload,
             headers=self.azure_header)
-        return response.json()
+        #return response.json()
 
-    def _get(self, path, payload):
-        response = self.wifi.get(
+    def _get(self, path):
+        response = self._wifi.get(
             path,
-            json=payload,
             headers=self.azure_header)
+        print(response.text)
         return response.json()
 
     # Device Messaging 
@@ -99,8 +99,14 @@ class iot_hub:
     def get_devices(self):
         """Retrieve devices from the identity registry of your IoT hub.
         """
-        path = "https://{0}/devices/?api-version={1}".format(self._iot_hub_url, AZURE_API_VERSION)
+        path = "{0}/devices/?api-version={1}".format(self._iot_hub_url, AZURE_API_VERSION)
         self._get(path)
 
+    def get_device(self, device_id):
+        """Retrieves a device from the identity registry of an IoT hub.
+        :param str device_id: Device Identifier.
+        """
+        path = "{0}/devices/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZURE_API_VERSION)
+        self._get(path)
 
     # IoT Hub Resource Provider
