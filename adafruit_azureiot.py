@@ -66,24 +66,35 @@ class iot_hub:
         self._sas_token = sas_token
         self._azure_header = {"Authorization":self._sas_token}
 
+    def _parse_http_status(self, error_code, reason):
+        """Parses HTTP Status, throws error based on Azure IoT Common Error Codes.
+        """
+        error_codes = [400, 401, 404, 403, 412, 429, 500]
+        for error in error_codes:
+            if error == error_code:
+                raise TypeError("Error {0}: {1}".format(error_code, reason))
+
     # HTTP Request Methods
     def _post(self, path, payload):
         response = self._wifi.post(
             path,
             json=payload,
             headers = self._azure_header)
-        #return response.json()
+        self._parse_http_status(response.error_code, response.reason)
+        return response.json()
 
     def _get(self, path):
         response = self._wifi.get(
             path,
             headers = self._azure_header)
+        self._parse_http_status(response.error_code, response.reason)
         return response.json()
     
     def _delete(self, path):
         response = self._wifi.delete(
             path,
             headers = self._azure_header)
+        self._parse_http_status(response.error_code, response.reason)
         return response.json()
     
     def _patch(self, path, payload):
@@ -91,7 +102,17 @@ class iot_hub:
             path,
             json = payload,
             headers = self._azure_header)
+        self._parse_http_status(response.error_code, response.reason)
         return response.json()
+
+    def _put(self, path, payload):
+        response = self._wifi.put(
+            path,
+            json = payload,
+            headers = self._azure_header)
+        self._parse_http_status(response.error_code, response.reason)
+        return response.json()
+
 
     # Device Messaging 
     # D2C: Device-to-Cloud
@@ -105,7 +126,7 @@ class iot_hub:
 
     # TODO: Cloud-to-Device Communication
 
-    # Device Twin Service
+    # Device Twin
     def get_device_twin(self, device_id):
         """Returns a device twin
         :param str device_id: Device Identifier.
@@ -120,6 +141,12 @@ class iot_hub:
         """
         path = "{0}/twins/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZURE_API_VERSION)
         return self._patch(path, properties)
+
+    def replace_device_twin(self, device_id, properties):
+        """
+        """
+        path = "{0}/twins/{1}?api-version-{2}"
+        return self._put(self, device_id, properties)
 
     # IoT Hub Service
     def get_devices(self):
