@@ -40,8 +40,6 @@ Implementation Notes
 * Adafruit's ESP32SPI library: https://github.com/adafruit/Adafruit_CircuitPython_ESP32SPI
 """
 
-# imports
-
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_AzureIoT.git"
 
@@ -49,14 +47,14 @@ AZURE_API_VERSION = "2018-06-30" # Azure URI API Version Identifier
 
 class iot_hub:
     """
-    Provides access to Azure IoT Hub.
+    Provides access to an Azure IoT Hub.
     https://docs.microsoft.com/en-us/rest/api/iothub/
     """
     def __init__(self, wifi_manager, iot_hub_name, sas_token):
         """ Creates an instance of an Azure IoT Hub Client.
-        :param wifi_manager: WiFiManager object from ESPSPI_WiFiManager
-        :param str iot_hub_name: Name of your IoT Hub
-        :param str sas_token: SAS Token Identifier
+        :param wifi_manager: WiFiManager object from ESPSPI_WiFiManager.
+        :param str iot_hub_name: Name of your IoT Hub.
+        :param str sas_token: SAS Token Identifier.
                                 (https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security)
         """
         wifi_type = str(type(wifi_manager))
@@ -66,21 +64,33 @@ class iot_hub:
             raise TypeError("This library requires a WiFiManager object.")
         self._iot_hub_url = "https://{0}.azure-devices.net".format(iot_hub_name)
         self._sas_token = sas_token
-        self.azure_header = {"Authorization":self._sas_token}
+        self._azure_header = {"Authorization":self._sas_token}
 
     # HTTP Request Methods
     def _post(self, path, payload):
         response = self._wifi.post(
             path,
             json=payload,
-            headers=self.azure_header)
+            headers = self._azure_header)
         #return response.json()
 
     def _get(self, path):
         response = self._wifi.get(
             path,
-            headers=self.azure_header)
-        print(response.text)
+            headers = self._azure_header)
+        return response.json()
+    
+    def _delete(self, path):
+        response = self._wifi.delete(
+            path,
+            headers = self._azure_header)
+        return response.json()
+    
+    def _patch(self, path, payload):
+        response = self._wifi.patch(
+            path,
+            json = payload,
+            headers = self._azure_header)
         return response.json()
 
     # Device Messaging 
@@ -93,20 +103,41 @@ class iot_hub:
         path = "{0}/devices/{1}/messages/events?api-version={2}".format(self._iot_hub_url, device_id, AZURE_API_VERSION)
         self._post(path, message)
 
-    # C2D: Cloud-to-Device
+    # TODO: Cloud-to-Device Communication
+
+    # Device Twin Service
+    def get_device_twin(self, device_id):
+        """Returns a device twin
+        :param str device_id: Device Identifier.
+        """
+        path = "{0}/twins/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZURE_API_VERSION)
+        return self._get(path)
+    
+    def update_device_twin(self, device_id, properties):
+        """Updates tags and desired properties of a device twin.
+        :param str device_id: Device Identifier.
+        :param str properties: Device Twin Properties (see: https://docs.microsoft.com/en-us/rest/api/iothub/service/updatetwin#twinproperties)
+        """
+        path = "{0}/twins/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZURE_API_VERSION)
+        return self._patch(path, properties)
 
     # IoT Hub Service
     def get_devices(self):
         """Retrieve devices from the identity registry of your IoT hub.
         """
         path = "{0}/devices/?api-version={1}".format(self._iot_hub_url, AZURE_API_VERSION)
-        self._get(path)
+        return self._get(path)
 
     def get_device(self, device_id):
         """Retrieves a device from the identity registry of an IoT hub.
         :param str device_id: Device Identifier.
         """
         path = "{0}/devices/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZURE_API_VERSION)
-        self._get(path)
+        return self._get(path)
 
-    # IoT Hub Resource Provider
+    def delete_device(self, device_id):
+        """Deletes a specified device_id from the identity register of an IoT Hub.
+        :param str device_id: Device Identifier.
+        """
+        path = "{0}/devices/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZURE_API_VERSION)
+        self._delete(path)
