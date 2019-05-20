@@ -42,7 +42,7 @@ Implementation Notes
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_AzureIoT.git"
 
-AZURE_API_VER = "2018-06-30" # Azure URI API Version Identifier
+AZ_API_VER = "2018-06-30" # Azure URI API Version Identifier
 AZURE_HTTP_ERROR_CODES = [400, 401, 404, 403, 412, 429, 500] # Azure HTTP Status Codes
 
 class IOT_HUB:
@@ -76,23 +76,29 @@ class IOT_HUB:
                 raise TypeError("Error {0}: {1}".format(status_code, status_reason))
 
     def get_hub_message(self, device_id):
-      """Gets a message from a Microsoft Azure IoT Hub (Cloud-to-Device).
-      NOTE: HTTP Cloud-to-Device messages are throttled. Poll every 25 minutes, or more.
-      :param int device_id: Device identifier.
-      """
-      # GET device-bound notification
-      path = "{0}/devices/{1}/messages/deviceBound?api-version={2}".format(self._iot_hub_url, device_id, AZURE_API_VER)
-      data = self._get(path, is_c2d = True)
-      # check for etag in header
-      print(data)
-      etag = data[1]['etag']
-      if etag is not None:
-          print('etag: ', etag)
-          # DELETE https://fully-qualified-iothubname.azure-devices.net/devices/{id}/messages/deviceBound/{etag}?api-version=2018-06-30
-          path_complete = "https://{0}.azure-devices.net/devices/{1}/messages/deviceBound/{2}?api-version=2018-06-30".format(self._iot_hub_url, device_id, etag)
-          print(path_complete)
-          self._delete(path_complete)
-          print('deleted!')
+        """Gets a message from a Microsoft Azure IoT Hub (Cloud-to-Device).
+        NOTE: HTTP Cloud-to-Device messages are throttled. Poll every 25 minutes, or more.
+        :param int device_id: Device identifier.
+        """
+        # GET device-bound notification
+        path = "{0}/devices/{1}/messages/deviceBound?api-version={2}".format(self._iot_hub_url,
+                                                                             device_id, AZ_API_VER)
+        data = self._get(path, is_c2d=True)
+        reject_message = True
+        # check for etag in header
+        print(data)
+        etag = data[1]['etag']
+        if etag: # either complete or nack the message
+            reject_message = False
+            etag = etag.strip('\'"')
+            path_complete = "https://{0}.azure-devices.net/devices/{1}/messages/    \
+                            deviceBound/{2}?api-version={3}".format(self._iot_hub_url,
+                                                                    device_id, etag, AZ_API_VER)
+            print(path_complete)
+            if reject_message:
+                path_complete += '&reject'
+            self._delete(path_complete)
+            print('deleted!')
 
     # Device Messaging
     def send_device_message(self, device_id, message):
@@ -101,7 +107,7 @@ class IOT_HUB:
         :param string message: Message.
         """
         path = "{0}/devices/{1}/messages/events?api-version={2}".format(self._iot_hub_url,
-                                                                        device_id, AZURE_API_VER)
+                                                                        device_id, AZ_API_VER)
         self._post(path, message)
 
     # Device Twin
@@ -109,7 +115,7 @@ class IOT_HUB:
         """Returns a device twin
         :param str device_id: Device Identifier.
         """
-        path = "{0}/twins/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZURE_API_VER)
+        path = "{0}/twins/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZ_API_VER)
         return self._get(path)
 
     def update_device_twin(self, device_id, properties):
@@ -118,7 +124,7 @@ class IOT_HUB:
         :param str properties: Device Twin Properties
         (https://docs.microsoft.com/en-us/rest/api/iothub/service/updatetwin#twinproperties)
         """
-        path = "{0}/twins/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZURE_API_VER)
+        path = "{0}/twins/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZ_API_VER)
         return self._patch(path, properties)
 
     def replace_device_twin(self, device_id, properties):
@@ -126,28 +132,28 @@ class IOT_HUB:
         :param str device_id: Device Identifier.
         :param str properties: Device Twin Properties.
         """
-        path = "{0}/twins/{1}?api-version-{2}".format(self._iot_hub_url, device_id, AZURE_API_VER)
+        path = "{0}/twins/{1}?api-version-{2}".format(self._iot_hub_url, device_id, AZ_API_VER)
         return self._put(path, properties)
 
     # IoT Hub Service
     def get_devices(self):
         """Enumerate devices from the identity registry of your IoT hub.
         """
-        path = "{0}/devices/?api-version={1}".format(self._iot_hub_url, AZURE_API_VER)
+        path = "{0}/devices/?api-version={1}".format(self._iot_hub_url, AZ_API_VER)
         return self._get(path)
 
     def get_device(self, device_id):
         """Gets device information from the identity registry of an IoT hub.
         :param str device_id: Device Identifier.
         """
-        path = "{0}/devices/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZURE_API_VER)
+        path = "{0}/devices/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZ_API_VER)
         return self._get(path)
 
     def delete_device(self, device_id):
         """Deletes a specified device from the identity register of an IoT Hub.
         :param str device_id: Device Identifier.
         """
-        path = "{0}/devices/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZURE_API_VER)
+        path = "{0}/devices/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZ_API_VER)
         self._delete(path)
 
     # HTTP Helper Methods
@@ -162,7 +168,6 @@ class IOT_HUB:
             headers=self._azure_header)
         self._parse_http_status(response.status_code, response.reason)
         return response.json()
-        response.close()
 
     def _get(self, path, is_c2d=False):
         """HTTP GET
@@ -178,7 +183,6 @@ class IOT_HUB:
             raise TypeError('No data within message queue')
         self._parse_http_status(response.status_code, response.reason)
         return response.json()
-        response.close()
 
     def _delete(self, path):
         """HTTP DELETE
@@ -190,7 +194,6 @@ class IOT_HUB:
         print(response.status_code, response.reason)
         self._parse_http_status(response.status_code, response.reason)
         return response.json()
-        response.close()
 
     def _patch(self, path, payload):
         """HTTP PATCH
@@ -203,7 +206,6 @@ class IOT_HUB:
             headers=self._azure_header)
         self._parse_http_status(response.status_code, response.reason)
         return response.json()
-        response.close()
 
     def _put(self, path, payload=None):
         """HTTP PUT
@@ -217,4 +219,3 @@ class IOT_HUB:
         self._parse_http_status(response.status_code, response.reason)
         print('Resp:', response.status_code, response.reason)
         return response.json()
-        response.close()
