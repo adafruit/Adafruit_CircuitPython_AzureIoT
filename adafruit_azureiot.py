@@ -82,7 +82,6 @@ class IOT_HUB:
             json=payload,
             headers=self._azure_header)
         self._parse_http_status(response.status_code, response.reason)
-        return response.json()
 
     def _get(self, path):
         response = self._wifi.get(

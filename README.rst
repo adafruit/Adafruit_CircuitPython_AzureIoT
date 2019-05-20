@@ -13,8 +13,7 @@ Introduction
     :target: https://travis-ci.com/adafruit/Adafruit_CircuitPython_AzureIoT
     :alt: Build Status
 
-Access to Microsoft Azure IoT from CircuitPython
-
+Access to Microsoft Azure IoT from a CircuitPython device.
 
 Dependencies
 =============
@@ -26,38 +25,56 @@ Please ensure all dependencies are available on the CircuitPython filesystem.
 This is easily achieved by downloading
 `the Adafruit library and driver bundle <https://github.com/adafruit/Adafruit_CircuitPython_Bundle>`_.
 
-Installing from PyPI
---------------------
-.. note:: This library is not available on PyPI yet. Install documentation is included
-   as a standard element. Stay tuned for PyPI availability!
-.. todo:: Remove the above note if PyPI version is/will be available at time of release.
-   If the library is not planned for PyPI, remove the entire 'Installing from PyPI' section.
-On supported GNU/Linux systems like the Raspberry Pi, you can install the driver locally `from
-PyPI <https://pypi.org/project/adafruit-circuitpython-azureiot/>`_. To install for current user:
-
-.. code-block:: shell
-
-    pip3 install adafruit-circuitpython-azureiot
-
-To install system-wide (this may be required in some cases):
-
-.. code-block:: shell
-
-    sudo pip3 install adafruit-circuitpython-azureiot
-
-To install in a virtual environment in your current project:
-
-.. code-block:: shell
-
-    mkdir project-name && cd project-name
-    python3 -m venv .env
-    source .env/bin/activate
-    pip3 install adafruit-circuitpython-azureiot
-
 Usage Example
 =============
 
-.. todo:: Add a quick, simple example. It and other examples should live in the examples folder and be included in docs/examples.rst.
+Create an instance of an Azure IoT Hub:
+
+.. code-block:: python
+
+    my_hub = IOT_HUB(wifi, 'Azure_IOT_Hub_Name', 'Azure_IOT_Hub_SAS_Token')
+
+Send a device-to-cloud message:  
+
+.. code-block:: python
+
+    my_hub.send_device_message('deviceID', 'Hi Azure IoT!')
+
+Enumerate all devices on an Azure IOT Hub:
+
+.. code-block:: python
+
+    hub_devices = my_hub.get_devices()
+
+Get a specified device on an Azure IoT Hub:
+
+.. code-block:: python
+
+    device_info = my_hub.get_device('deviceID')
+
+Create a new device on an Azure IoT Hub:
+
+.. code-block:: python
+
+    my_hub.create_device('deviceID')
+
+Delete a device from an Azure IoT Hub:
+
+.. code-block:: python
+
+    my_hub.delete_device('deviceID')
+
+Get a device twin:
+
+.. code-block:: python
+
+    twin_info = my_hub.get_device_twin('deviceID')
+
+Update a device twin's properties:
+
+.. code-block:: python
+
+    my_hub.update_device_twin('Blinka', device_properties)
 
 Contributing
 ============
