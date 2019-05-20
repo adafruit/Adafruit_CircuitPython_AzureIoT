@@ -91,9 +91,7 @@ class IOT_HUB:
         if etag: # either complete or nack the message
             reject_message = False
             etag = etag.strip('\'"')
-            path_complete = "https://{0}.azure-devices.net/devices/{1}/messages/    \
-                            deviceBound/{2}?api-version={3}".format(self._iot_hub_url,
-                                                                    device_id, etag, AZ_API_VER)
+            path_complete = "{0}.azure-devices.net/devices/{1}/messages/deviceBound/{2}?api-version={3}".format(self._iot_hub_url, device_id, etag, AZ_API_VER)
             print(path_complete)
             if reject_message:
                 path_complete += '&reject'
