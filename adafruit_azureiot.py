@@ -23,8 +23,7 @@
 `Adafruit_AzureIoT`
 ================================================================================
 
-Access to Microsoft Azure IoT from CircuitPython
-
+Microsoft Azure IoT for CircuitPython
 
 * Author(s): Brent Rubell
 
@@ -44,6 +43,7 @@ __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_AzureIoT.git"
 
 AZURE_API_VERSION = "2018-06-30" # Azure URI API Version Identifier
+AZURE_ERROR_CODES = [400, 401, 404, 403, 412, 429, 500]
 
 class iot_hub:
     """
@@ -57,8 +57,8 @@ class iot_hub:
         :param str sas_token: SAS Token Identifier.
                                 (https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security)
         """
-        wifi_type = str(type(wifi_manager))
-        if 'ESPSPI_WiFiManager' in wifi_type:
+        _wifi_type = str(type(wifi_manager))
+        if 'ESPSPI_WiFiManager' in _wifi_type:
             self._wifi = wifi_manager
         else:
             raise TypeError("This library requires a WiFiManager object.")
@@ -66,13 +66,15 @@ class iot_hub:
         self._sas_token = sas_token
         self._azure_header = {"Authorization":self._sas_token}
 
-    def _parse_http_status(self, error_code, reason):
+    def _parse_http_status(self, status_code, status_reason):
         """Parses HTTP Status, throws error based on Azure IoT Common Error Codes.
+        :param int status_code: HTTP status code.
+        :param str status_reason: Description of HTTP status.
         """
-        error_codes = [400, 401, 404, 403, 412, 429, 500]
-        for error in error_codes:
-            if error == error_code:
-                raise TypeError("Error {0}: {1}".format(error_code, reason))
+        for error in AZURE_ERROR_CODES:
+            if error == status_code:
+                raise TypeError("Error {0}: {1}".format(status_code, status_reason))
+
 
     # HTTP Request Methods
     def _post(self, path, payload):
@@ -80,21 +82,21 @@ class iot_hub:
             path,
             json=payload,
             headers = self._azure_header)
-        self._parse_http_status(response.error_code, response.reason)
+        self._parse_http_status(response.status_code, response.reason)
         return response.json()
 
     def _get(self, path):
         response = self._wifi.get(
             path,
             headers = self._azure_header)
-        self._parse_http_status(response.error_code, response.reason)
+        self._parse_http_status(response.status_code, response.reason)
         return response.json()
     
     def _delete(self, path):
         response = self._wifi.delete(
             path,
             headers = self._azure_header)
-        self._parse_http_status(response.error_code, response.reason)
+        self._parse_http_status(response.status_code, response.reason)
         return response.json()
     
     def _patch(self, path, payload):
@@ -102,7 +104,7 @@ class iot_hub:
             path,
             json = payload,
             headers = self._azure_header)
-        self._parse_http_status(response.error_code, response.reason)
+        self._parse_http_status(response.status_code, response.reason)
         return response.json()
 
     def _put(self, path, payload):
@@ -110,9 +112,8 @@ class iot_hub:
             path,
             json = payload,
             headers = self._azure_header)
-        self._parse_http_status(response.error_code, response.reason)
+        self._parse_http_status(response.status_code, response.reason)
         return response.json()
-
 
     # Device Messaging 
     # D2C: Device-to-Cloud
@@ -147,6 +148,7 @@ class iot_hub:
         """
         path = "{0}/twins/{1}?api-version-{2}"
         return self._put(self, device_id, properties)
+
 
     # IoT Hub Service
     def get_devices(self):
