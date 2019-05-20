@@ -67,7 +67,7 @@ class IOT_HUB:
 
     @staticmethod
     def _parse_http_status(status_code, status_reason):
-        """Parses HTTP Status, throws error based on Azure IoT Common Error Codes.
+        """Parses status code, throws error based on Azure IoT Common Error Codes.
         :param int status_code: HTTP status code.
         :param str status_reason: Description of HTTP status.
         """
@@ -75,46 +75,26 @@ class IOT_HUB:
             if error == status_code:
                 raise TypeError("Error {0}: {1}".format(status_code, status_reason))
 
-    # HTTP Request Methods
-    def _post(self, path, payload):
-        response = self._wifi.post(
-            path,
-            json=payload,
-            headers=self._azure_header)
-        self._parse_http_status(response.status_code, response.reason)
-
-    def _get(self, path):
-        response = self._wifi.get(
-            path,
-            headers=self._azure_header)
-        self._parse_http_status(response.status_code, response.reason)
-        return response.json()
-
-    def _delete(self, path):
-        response = self._wifi.delete(
-            path,
-            headers=self._azure_header)
-        self._parse_http_status(response.status_code, response.reason)
-        return response.json()
-
-    def _patch(self, path, payload):
-        response = self._wifi.patch(
-            path,
-            json=payload,
-            headers=self._azure_header)
-        self._parse_http_status(response.status_code, response.reason)
-        return response.json()
-
-    def _put(self, path, payload):
-        response = self._wifi.put(
-            path,
-            json=payload,
-            headers=self._azure_header)
-        self._parse_http_status(response.status_code, response.reason)
-        return response.json()
+    def get_hub_message(self, device_id):
+      """Gets a message from a Microsoft Azure IoT Hub (Cloud-to-Device).
+      NOTE: HTTP Cloud-to-Device messages are throttled. Poll every 25 minutes, or more.
+      :param int device_id: Device identifier.
+      """
+      # GET device-bound notification
+      path = "{0}/devices/{1}/messages/deviceBound?api-version={2}".format(self._iot_hub_url, device_id, AZURE_API_VER)
+      data = self._get(path, is_c2d = True)
+      # check for etag in header
+      print(data)
+      etag = data[1]['etag']
+      if etag is not None:
+          print('etag: ', etag)
+          # DELETE https://fully-qualified-iothubname.azure-devices.net/devices/{id}/messages/deviceBound/{etag}?api-version=2018-06-30
+          path_complete = "https://{0}.azure-devices.net/devices/{1}/messages/deviceBound/{2}?api-version=2018-06-30".format(self._iot_hub_url, device_id, etag)
+          print(path_complete)
+          self._delete(path_complete)
+          print('deleted!')
 
     # Device Messaging
-    # D2C: Device-to-Cloud
     def send_device_message(self, device_id, message):
         """Sends a device-to-cloud message.
         :param string device_id: Device Identifier.
@@ -123,8 +103,6 @@ class IOT_HUB:
         path = "{0}/devices/{1}/messages/events?api-version={2}".format(self._iot_hub_url,
                                                                         device_id, AZURE_API_VER)
         self._post(path, message)
-
-    # TODO: Cloud-to-Device Communication
 
     # Device Twin
     def get_device_twin(self, device_id):
@@ -153,21 +131,90 @@ class IOT_HUB:
 
     # IoT Hub Service
     def get_devices(self):
-        """Retrieve devices from the identity registry of your IoT hub.
+        """Enumerate devices from the identity registry of your IoT hub.
         """
         path = "{0}/devices/?api-version={1}".format(self._iot_hub_url, AZURE_API_VER)
         return self._get(path)
 
     def get_device(self, device_id):
-        """Retrieves a device from the identity registry of an IoT hub.
+        """Gets device information from the identity registry of an IoT hub.
         :param str device_id: Device Identifier.
         """
         path = "{0}/devices/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZURE_API_VER)
         return self._get(path)
 
     def delete_device(self, device_id):
-        """Deletes a specified device_id from the identity register of an IoT Hub.
+        """Deletes a specified device from the identity register of an IoT Hub.
         :param str device_id: Device Identifier.
         """
         path = "{0}/devices/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZURE_API_VER)
         self._delete(path)
+
+    # HTTP Helper Methods
+    def _post(self, path, payload):
+        """HTTP POST
+        :param str path: Formatted Azure IOT Hub Path.
+        :param str payload: JSON-formatted Data Payload.
+        """
+        response = self._wifi.post(
+            path,
+            json=payload,
+            headers=self._azure_header)
+        self._parse_http_status(response.status_code, response.reason)
+        return response.json()
+        response.close()
+
+    def _get(self, path, is_c2d=False):
+        """HTTP GET
+        :param str path: Formatted Azure IOT Hub Path.
+        :param bool is_c2d: Cloud-to-device message request.
+        """
+        response = self._wifi.get(
+            path,
+            headers=self._azure_header)
+        if is_c2d:
+            if response.status_code == 200:
+                return response.text, response.headers
+            raise TypeError('No data within message queue')
+        self._parse_http_status(response.status_code, response.reason)
+        return response.json()
+        response.close()
+
+    def _delete(self, path):
+        """HTTP DELETE
+        :param str path: Formatted Azure IOT Hub Path.
+        """
+        response = self._wifi.delete(
+            path,
+            headers=self._azure_header)
+        print(response.status_code, response.reason)
+        self._parse_http_status(response.status_code, response.reason)
+        return response.json()
+        response.close()
+
+    def _patch(self, path, payload):
+        """HTTP PATCH
+        :param str path: Formatted Azure IOT Hub Path.
+        :param str payload: JSON-formatted payload.
+        """
+        response = self._wifi.patch(
+            path,
+            json=payload,
+            headers=self._azure_header)
+        self._parse_http_status(response.status_code, response.reason)
+        return response.json()
+        response.close()
+
+    def _put(self, path, payload=None):
+        """HTTP PUT
+        :param str path: Formatted Azure IOT Hub Path.
+        :param str payload: JSON-formatted payload.
+        """
+        response = self._wifi.put(
+            path,
+            json=payload,
+            headers=self._azure_header)
+        self._parse_http_status(response.status_code, response.reason)
+        print('Resp:', response.status_code, response.reason)
+        return response.json()
+        response.close()
