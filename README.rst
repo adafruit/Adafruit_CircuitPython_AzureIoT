@@ -1,4 +1,4 @@
-Introduction
+Adafruit_CircuitPython_AzureIoT
 ============
 
 .. image:: https://readthedocs.org/projects/adafruit-circuitpython-azureiot/badge/?version=latest
@@ -13,7 +13,7 @@ Introduction
     :target: https://travis-ci.com/adafruit/Adafruit_CircuitPython_AzureIoT
     :alt: Build Status
 
-Access to Microsoft Azure IoT from a CircuitPython device. This library can perform device
+Access to `Microsoft Azure IoT <https://azure.microsoft.com/en-us/overview/iot/>`_ from a CircuitPython device. This library can perform device
 messaging services (cloud-to-device, device-to-cloud), device services, and job services.
 
 Dependencies
@@ -29,7 +29,7 @@ This is easily achieved by downloading
 Usage Example
 =============
 
-Create an instance of an Azure IoT Hub:
+Create an instance of an Azure IoT Hub (you'll need your SAS Token).
 
 .. code-block:: python
 
