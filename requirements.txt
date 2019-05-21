@@ -1,3 +1,2 @@
 Adafruit-Blinka
-adafruit-bus-device
-adafruit-circuitpython-esp32spi
+Adafruit_CircuitPython_ESP32SPI
