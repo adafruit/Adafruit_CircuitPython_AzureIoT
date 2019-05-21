@@ -99,7 +99,6 @@ class IOT_HUB:
             if del_status == 204:
                 return data[0]
             return -1
-        
 
     # Device Messaging
     def send_device_message(self, device_id, message):
@@ -177,7 +176,6 @@ class IOT_HUB:
         :param str path: Formatted Azure IOT Hub Path.
         :param bool is_c2d: Cloud-to-device get request.
         """
-        print(path)
         response = self._wifi.get(
             path,
             headers=self._azure_header)
@@ -223,5 +221,4 @@ class IOT_HUB:
             json=payload,
             headers=self._azure_header)
         self._parse_http_status(response.status_code, response.reason)
-        print('Resp:', response.status_code, response.reason)
         return response.json()

@@ -13,7 +13,8 @@ Introduction
     :target: https://travis-ci.com/adafruit/Adafruit_CircuitPython_AzureIoT
     :alt: Build Status
 
-Access to Microsoft Azure IoT from a CircuitPython device.
+Access to Microsoft Azure IoT from a CircuitPython device. This library can perform device
+messaging services (cloud-to-device, device-to-cloud), device services, and job services.
 
 Dependencies
 =============
