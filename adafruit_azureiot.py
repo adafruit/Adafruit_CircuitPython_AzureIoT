@@ -75,6 +75,7 @@ class IOT_Hub:
             if error == status_code:
                 raise TypeError("Error {0}: {1}".format(status_code, status_reason))
 
+    # Cloud-to-Device Messaging
     def get_hub_message(self, device_id):
         """Returns a message from a Microsoft Azure IoT Hub (Cloud-to-Device), or -1
         if the message queue is empty.
@@ -91,10 +92,8 @@ class IOT_Hub:
         etag = data[1]['etag']
         if etag: # either complete or nack the message
             reject_message = False
-            # prepare the device-bound completion URL
-            etag = etag.strip('\'"')
             path_complete = "{0}/devices/{1}/messages/deviceBound/{2}?api-version={3}".format(
-                self._iot_hub_url, device_id, etag, AZ_API_VER)
+                self._iot_hub_url, device_id, etag.strip('\'"'), AZ_API_VER)
             if reject_message:
                 path_complete += '&reject'
             del_status = self._delete(path_complete)
@@ -102,7 +101,7 @@ class IOT_Hub:
             return data[0]
         return -1
 
-    # Device Messaging
+    # Device-to-Cloud Messaging
     def send_device_message(self, device_id, message):
         """Sends a device-to-cloud message.
         :param string device_id: Device Identifier.
