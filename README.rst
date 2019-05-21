@@ -1,5 +1,5 @@
 Adafruit_CircuitPython_AzureIoT
-============
+================================
 
 .. image:: https://readthedocs.org/projects/adafruit-circuitpython-azureiot/badge/?version=latest
     :target: https://circuitpython.readthedocs.io/projects/azureiot/en/latest/
