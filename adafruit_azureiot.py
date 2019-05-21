@@ -76,7 +76,8 @@ class IOT_HUB:
                 raise TypeError("Error {0}: {1}".format(status_code, status_reason))
 
     def get_hub_message(self, device_id):
-        """Returns a message from a Microsoft Azure IoT Hub (Cloud-to-Device), or -1 if the message queue is empty.
+        """Returns a message from a Microsoft Azure IoT Hub (Cloud-to-Device), or -1
+        if the message queue is empty.
         NOTE: HTTP Cloud-to-Device messages are throttled. Poll every 25 minutes, or more.
         :param int device_id: Device identifier.
         """
@@ -92,13 +93,14 @@ class IOT_HUB:
             reject_message = False
             # prepare the device-bound completion URL
             etag = etag.strip('\'"')
-            path_complete = "{0}/devices/{1}/messages/deviceBound/{2}?api-version={3}".format(self._iot_hub_url, device_id, etag, AZ_API_VER)
+            path_complete = "{0}/devices/{1}/messages/deviceBound/{2}?api-version={3}".format(
+                self._iot_hub_url, device_id, etag, AZ_API_VER)
             if reject_message:
                 path_complete += '&reject'
             del_status = self._delete(path_complete, is_c2d=True)
-            if del_status == 204:
-                return data[0]
-            return -1
+        if del_status == 204:
+            return data[0]
+        return -1
 
     # Device Messaging
     def send_device_message(self, device_id, message):
@@ -169,7 +171,7 @@ class IOT_HUB:
         self._parse_http_status(response.status_code, response.reason)
         if return_response:
             return response.json()
-        response.close()
+        return response.text
 
     def _get(self, path, is_c2d=False):
         """HTTP GET
