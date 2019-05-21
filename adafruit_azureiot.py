@@ -97,7 +97,7 @@ class IOT_Hub:
                 self._iot_hub_url, device_id, etag, AZ_API_VER)
             if reject_message:
                 path_complete += '&reject'
-            del_status = self._delete(path_complete, is_c2d=True)
+            del_status = self._delete(path_complete)
         if del_status == 204:
             return data[0]
         return -1
@@ -139,24 +139,25 @@ class IOT_Hub:
 
     # IoT Hub Service
     def get_devices(self):
-        """Enumerate devices from the identity registry of your IoT hub.
+        """Enumerate devices from the identity registry of your IoT Hub.
         """
         path = "{0}/devices/?api-version={1}".format(self._iot_hub_url, AZ_API_VER)
         return self._get(path)
 
     def get_device(self, device_id):
-        """Gets device information from the identity registry of an IoT hub.
+        """Gets device information from the identity registry of an IoT Hub.
         :param str device_id: Device Identifier.
         """
         path = "{0}/devices/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZ_API_VER)
         return self._get(path)
 
-    def delete_device(self, device_id):
+    def delete_device(self, device_id, device_etag):
         """Deletes a specified device from the identity register of an IoT Hub.
         :param str device_id: Device Identifier.
+        :param str device_etag: Device Identity Tag.
         """
         path = "{0}/devices/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZ_API_VER)
-        self._delete(path)
+        self._delete(path, etag=device_etag)
 
     # HTTP Helper Methods
     def _post(self, path, payload, return_response=True):
@@ -188,18 +189,19 @@ class IOT_Hub:
         self._parse_http_status(response.status_code, response.reason)
         return response.json()
 
-    def _delete(self, path, is_c2d=False):
+    def _delete(self, path, etag=None):
         """HTTP DELETE
         :param str path: Formatted Azure IOT Hub Path.
-        :param bool is_c2d: Cloud-to-device delete request.
         """
+        if etag:
+            data_headers = {"Authorization":self._sas_token, "If-Match":'"%s"'%etag}
+        else:
+            data_headers = self._azure_header
         response = self._wifi.delete(
             path,
-            headers=self._azure_header)
+            headers=data_headers)
         self._parse_http_status(response.status_code, response.reason)
-        if is_c2d: # check server response for complete message request
-            return response.status_code
-        return response.json()
+        return response.status_code
 
     def _patch(self, path, payload):
         """HTTP PATCH
