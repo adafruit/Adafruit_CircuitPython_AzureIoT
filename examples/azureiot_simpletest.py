@@ -1,4 +1,4 @@
-import microcontroller
+from random import randint
 import board
 import busio
 from digitalio import DigitalInOut
@@ -36,9 +36,9 @@ hub = IOT_Hub(wifi, secrets['azure_iot_hub'], secrets['azure_iot_sas'])
 device_id = 'Blinka'
 
 # Send a Device-to-Cloud message
-cpu_temp = microcontroller.cpu.temperature
-print('Sending Temperature to Azure IoT Hub...')
-hub.send_device_message(device_id, str(cpu_temp))
+print('Sending Data to Azure IoT Hub...')
+data = randint(0, 100)
+hub.send_device_message(device_id, str(data))
 print('Data Sent!')
 
 # Receive a Cloud-to-Device message
