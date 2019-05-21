@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 """
-`Adafruit_AzureIoT`
+`adafruit_azureiot`
 ================================================================================
 
 Microsoft Azure IoT for CircuitPython
