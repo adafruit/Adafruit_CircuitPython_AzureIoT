@@ -76,27 +76,30 @@ class IOT_HUB:
                 raise TypeError("Error {0}: {1}".format(status_code, status_reason))
 
     def get_hub_message(self, device_id):
-        """Gets a message from a Microsoft Azure IoT Hub (Cloud-to-Device).
+        """Returns a message from a Microsoft Azure IoT Hub (Cloud-to-Device), or -1 if the message queue is empty.
         NOTE: HTTP Cloud-to-Device messages are throttled. Poll every 25 minutes, or more.
         :param int device_id: Device identifier.
         """
-        # GET device-bound notification
+        reject_message = True
+        # get a device-bound notification
         path = "{0}/devices/{1}/messages/deviceBound?api-version={2}".format(self._iot_hub_url,
                                                                              device_id, AZ_API_VER)
         data = self._get(path, is_c2d=True)
-        reject_message = True
-        # check for etag in header
-        print(data)
+        if data == 204: # device's message queue is empty
+            return -1
         etag = data[1]['etag']
         if etag: # either complete or nack the message
             reject_message = False
+            # prepare the device-bound completion URL
             etag = etag.strip('\'"')
-            path_complete = "{0}.azure-devices.net/devices/{1}/messages/deviceBound/{2}?api-version={3}".format(self._iot_hub_url, device_id, etag, AZ_API_VER)
-            print(path_complete)
+            path_complete = "{0}/devices/{1}/messages/deviceBound/{2}?api-version={3}".format(self._iot_hub_url, device_id, etag, AZ_API_VER)
             if reject_message:
                 path_complete += '&reject'
-            self._delete(path_complete)
-            print('deleted!')
+            del_status = self._delete(path_complete, is_c2d=True)
+            if del_status == 204:
+                return data[0]
+            return -1
+        
 
     # Device Messaging
     def send_device_message(self, device_id, message):
@@ -106,7 +109,7 @@ class IOT_HUB:
         """
         path = "{0}/devices/{1}/messages/events?api-version={2}".format(self._iot_hub_url,
                                                                         device_id, AZ_API_VER)
-        self._post(path, message)
+        self._post(path, message, return_response=False)
 
     # Device Twin
     def get_device_twin(self, device_id):
@@ -155,7 +158,7 @@ class IOT_HUB:
         self._delete(path)
 
     # HTTP Helper Methods
-    def _post(self, path, payload):
+    def _post(self, path, payload, return_response=True):
         """HTTP POST
         :param str path: Formatted Azure IOT Hub Path.
         :param str payload: JSON-formatted Data Payload.
@@ -165,32 +168,37 @@ class IOT_HUB:
             json=payload,
             headers=self._azure_header)
         self._parse_http_status(response.status_code, response.reason)
-        return response.json()
+        if return_response:
+            return response.json()
+        response.close()
 
     def _get(self, path, is_c2d=False):
         """HTTP GET
         :param str path: Formatted Azure IOT Hub Path.
-        :param bool is_c2d: Cloud-to-device message request.
+        :param bool is_c2d: Cloud-to-device get request.
         """
+        print(path)
         response = self._wifi.get(
             path,
             headers=self._azure_header)
-        if is_c2d:
+        if is_c2d: # check status of azure message queue
             if response.status_code == 200:
                 return response.text, response.headers
-            raise TypeError('No data within message queue')
+            return response.status_code
         self._parse_http_status(response.status_code, response.reason)
         return response.json()
 
-    def _delete(self, path):
+    def _delete(self, path, is_c2d=False):
         """HTTP DELETE
         :param str path: Formatted Azure IOT Hub Path.
+        :param bool is_c2d: Cloud-to-device delete request.
         """
         response = self._wifi.delete(
             path,
             headers=self._azure_header)
-        print(response.status_code, response.reason)
         self._parse_http_status(response.status_code, response.reason)
+        if is_c2d: # check server response for complete message request
+            return response.status_code
         return response.json()
 
     def _patch(self, path, payload):
