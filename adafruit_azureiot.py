@@ -45,7 +45,7 @@ __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_AzureIoT.git"
 AZ_API_VER = "2018-06-30" # Azure URI API Version Identifier
 AZURE_HTTP_ERROR_CODES = [400, 401, 404, 403, 412, 429, 500] # Azure HTTP Status Codes
 
-class IOT_HUB:
+class IOT_Hub:
     """
     Provides access to a Microsoft Azure IoT Hub.
     https://docs.microsoft.com/en-us/rest/api/iothub/
