@@ -50,11 +50,12 @@ class IOT_Hub:
     Provides access to a Microsoft Azure IoT Hub.
     https://docs.microsoft.com/en-us/rest/api/iothub/
     """
-    def __init__(self, wifi_manager, iot_hub_name, sas_token):
+    def __init__(self, wifi_manager, iot_hub_name, sas_token, device_id):
         """ Creates an instance of an Azure IoT Hub Client.
         :param wifi_manager: WiFiManager object from ESPSPI_WiFiManager.
         :param str iot_hub_name: Name of your IoT Hub.
         :param str sas_token: Azure IoT Hub SAS Token Identifier.
+        :param str device_id: Unique Azure IoT Device Identifier.
         """
         _wifi_type = str(type(wifi_manager))
         if 'ESPSPI_WiFiManager' in _wifi_type:
@@ -63,6 +64,7 @@ class IOT_Hub:
             raise TypeError("This library requires a WiFiManager object.")
         self._iot_hub_url = "https://{0}.azure-devices.net".format(iot_hub_name)
         self._sas_token = sas_token
+        self._device_id = device_id
         self._azure_header = {"Authorization":self._sas_token}
 
     @staticmethod
@@ -76,27 +78,27 @@ class IOT_Hub:
                 raise TypeError("Error {0}: {1}".format(status_code, status_reason))
 
     # Cloud-to-Device Messaging
-    def get_hub_message(self, device_id):
+    def get_hub_message(self):
         """Returns a message from a Microsoft Azure IoT Hub (Cloud-to-Device), or -1
         if the message queue is empty.
         NOTE: HTTP Cloud-to-Device messages are throttled. Poll every 25+ minutes.
-        :param int device_id: Device identifier.
         """
         reject_message = True
         # get a device-bound notification
         path = "{0}/devices/{1}/messages/deviceBound?api-version={2}".format(self._iot_hub_url,
-                                                                             device_id, AZ_API_VER)
+                                                                             self._device_id,
+                                                                             AZ_API_VER)
         try:
             data = self._get(path, is_c2d=True)
         except RuntimeError:
-            raise RuntimeError('HTTP C2D Messages are HEAVILY throttled, poll every 25 min.')
+            raise RuntimeError('HTTP C2D messages are HEAVILY throttled - poll every 25 mins.')
         if data == 204: # device's message queue is empty
             return -1
         etag = data[1]['etag']
         if etag: # either complete or nack the message
             reject_message = False
             path_complete = "{0}/devices/{1}/messages/deviceBound/{2}?api-version={3}".format(
-                self._iot_hub_url, device_id, etag.strip('\'"'), AZ_API_VER)
+                self._iot_hub_url, self._device_id, etag.strip('\'"'), AZ_API_VER)
             if reject_message:
                 path_complete += '&reject'
             del_status = self._delete(path_complete)
@@ -105,61 +107,53 @@ class IOT_Hub:
         return -1
 
     # Device-to-Cloud Messaging
-    def send_device_message(self, device_id, message):
+    def send_device_message(self, message):
         """Sends a device-to-cloud message.
-        :param string device_id: Device Identifier.
-        :param string message: Message.
+        :param string message: Message to send to Azure IoT.
         """
         path = "{0}/devices/{1}/messages/events?api-version={2}".format(self._iot_hub_url,
-                                                                        device_id, AZ_API_VER)
+                                                                        self._device_id, AZ_API_VER)
         self._post(path, message, return_response=False)
 
     # Device Twin
-    def get_device_twin(self, device_id):
-        """Returns a device twin
-        :param str device_id: Device Identifier.
+    def get_device_twin(self):
+        """Returns the device's device twin information in JSON format.
         """
-        path = "{0}/twins/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZ_API_VER)
+        path = "{0}/twins/{1}?api-version={2}".format(self._iot_hub_url,
+                                                      self._device_id, AZ_API_VER)
         return self._get(path)
 
-    def update_device_twin(self, device_id, properties):
-        """Updates tags and desired properties of a device twin.
-        :param str device_id: Device Identifier.
+    def update_device_twin(self, properties):
+        """Updates tags and desired properties of the device's device twin.
         :param str properties: Device Twin Properties
         (https://docs.microsoft.com/en-us/rest/api/iothub/service/updatetwin#twinproperties)
         """
-        path = "{0}/twins/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZ_API_VER)
+        path = "{0}/twins/{1}?api-version={2}".format(self._iot_hub_url,
+                                                      self._device_id, AZ_API_VER)
         return self._patch(path, properties)
 
-    def replace_device_twin(self, device_id, properties):
+    def replace_device_twin(self, properties):
         """Replaces tags and desired properties of a device twin.
-        :param str device_id: Device Identifier.
         :param str properties: Device Twin Properties.
         """
-        path = "{0}/twins/{1}?api-version-{2}".format(self._iot_hub_url, device_id, AZ_API_VER)
+        path = "{0}/twins/{1}?api-version-{2}".format(self._iot_hub_url,
+                                                      self._device_id, AZ_API_VER)
         return self._put(path, properties)
 
     # IoT Hub Service
     def get_devices(self):
-        """Enumerate devices from the identity registry of your IoT Hub.
+        """Enumerate devices from the identity registry of the IoT Hub.
         """
         path = "{0}/devices/?api-version={1}".format(self._iot_hub_url, AZ_API_VER)
         return self._get(path)
 
-    def get_device(self, device_id):
-        """Gets device information from the identity registry of an IoT Hub.
-        :param str device_id: Device Identifier.
+    def get_device(self):
+        """Gets device information from the identity
+        registry of an IoT Hub.
         """
-        path = "{0}/devices/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZ_API_VER)
+        path = "{0}/devices/{1}?api-version={2}".format(self._iot_hub_url,
+                                                        self._device_id, AZ_API_VER)
         return self._get(path)
-
-    def delete_device(self, device_id, device_etag):
-        """Deletes a specified device from the identity register of an IoT Hub.
-        :param str device_id: Device Identifier.
-        :param str device_etag: Device Identity Tag.
-        """
-        path = "{0}/devices/{1}?api-version={2}".format(self._iot_hub_url, device_id, AZ_API_VER)
-        self._delete(path, etag=device_etag)
 
     # HTTP Helper Methods
     def _post(self, path, payload, return_response=True):
