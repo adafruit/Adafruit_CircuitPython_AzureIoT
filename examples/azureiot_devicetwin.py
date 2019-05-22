@@ -29,22 +29,19 @@ status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2) # Uncomment 
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
 
 # Create an instance of the Azure IoT Hub
-hub = IOT_Hub(wifi, secrets['azure_iot_hub'], secrets['azure_iot_sas'])
-
-# Set a device id (This name must match a device connected to your Azure IoT Hub)
-device_id = 'Blinka'
+hub = IOT_Hub(wifi, secrets['azure_iot_hub'], secrets['azure_iot_sas'], secrets['device_id'])
 
 # Get a Device Twin
-device_twin = hub.get_device_twin(device_id)
+device_twin = hub.get_device_twin()
 # Filter out the device's name from the twin's properties
 device_name = device_twin['properties']['desired']['deviceName']
 print(device_name)
 
 # Update a Device Twin's Properties
 data = {"properties":{"desired": {"deviceName": "{{BasementTemperatureLoggerFeather}}"}}}
-hub.update_device_twin(device_id, data)
+hub.update_device_twin(data)
 
 # And read the updated device twin information
-device_twin = hub.get_device_twin(device_id)
+device_twin = hub.get_device_twin()
 device_name = device_twin['properties']['desired']['deviceName']
 print(device_name)

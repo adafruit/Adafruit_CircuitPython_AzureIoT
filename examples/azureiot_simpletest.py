@@ -30,22 +30,19 @@ status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2) # Uncomment 
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
 
 # Create an instance of the Azure IoT Hub
-hub = IOT_Hub(wifi, secrets['azure_iot_hub'], secrets['azure_iot_sas'])
-
-# Set a device id (This name must match a device connected to your Azure IoT Hub)
-device_id = 'Blinka'
+hub = IOT_Hub(wifi, secrets['azure_iot_hub'], secrets['azure_iot_sas'], secrets['device_id'])
 
 # Send a Device-to-Cloud message
 print('Sending Data to Azure IoT Hub...')
 data = randint(0, 100)
-hub.send_device_message(device_id, str(data))
+hub.send_device_message(str(data))
 print('Data Sent!')
 
 # Receive a Cloud-to-Device message
 # NOTE: HTTP Cloud-to-Device messages are HEAVILY throttled over HTTP.
 # Microsoft suggests a polling interval of the below code for every 25 minutes.
 print('Receiving a message from an Azure IoT Hub...')
-message = hub.get_hub_message(device_id)
+message = hub.get_hub_message()
 if message == -1:
     print('IoT Hub Message Queue is empty!')
 else:

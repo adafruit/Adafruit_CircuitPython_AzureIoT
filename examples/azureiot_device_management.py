@@ -29,19 +29,12 @@ status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2) # Uncomment 
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
 
 # Create an instance of the Azure IoT Hub
-hub = IOT_Hub(wifi, secrets['azure_iot_hub'], secrets['azure_iot_sas'])
-
-device_id = 'CircuitPython'
+hub = IOT_Hub(wifi, secrets['azure_iot_hub'], secrets['azure_iot_sas'], secrets['device_id'])
 
 # Enumerate all devices on an Azure IoT Hub
 all_hub_devices = hub.get_devices()
 print(all_hub_devices)
 
 # Get a specified device on an Azure IoT Hub
-device_data = hub.get_device(device_id)
+device_data = hub.get_device()
 print(device_data)
-
-# Delete a device from an Azure IoT Hub
-# NOTE: This operation requires a device's ETag
-hub.delete_device(device_id, device_data['etag'])
-print('Device deleted from IoT Hub!')
