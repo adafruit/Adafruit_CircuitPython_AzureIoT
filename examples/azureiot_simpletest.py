@@ -42,6 +42,8 @@ hub.send_device_message(device_id, str(data))
 print('Data Sent!')
 
 # Receive a Cloud-to-Device message
+# NOTE: HTTP Cloud-to-Device messages are HEAVILY throttled over HTTP.
+# Microsoft suggests a polling interval of the below code for every 25 minutes.
 print('Receiving a message from an Azure IoT Hub...')
 message = hub.get_hub_message(device_id)
 if message == -1:

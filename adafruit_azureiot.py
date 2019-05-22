@@ -79,14 +79,17 @@ class IOT_Hub:
     def get_hub_message(self, device_id):
         """Returns a message from a Microsoft Azure IoT Hub (Cloud-to-Device), or -1
         if the message queue is empty.
-        NOTE: HTTP Cloud-to-Device messages are throttled. Poll every 25 minutes, or more.
+        NOTE: HTTP Cloud-to-Device messages are throttled. Poll every 25+ minutes.
         :param int device_id: Device identifier.
         """
         reject_message = True
         # get a device-bound notification
         path = "{0}/devices/{1}/messages/deviceBound?api-version={2}".format(self._iot_hub_url,
                                                                              device_id, AZ_API_VER)
-        data = self._get(path, is_c2d=True)
+        try:
+            data = self._get(path, is_c2d=True)
+        except RuntimeError:
+            raise RuntimeError('HTTP C2D Messages are HEAVILY throttled, poll every 25 min.')
         if data == 204: # device's message queue is empty
             return -1
         etag = data[1]['etag']
