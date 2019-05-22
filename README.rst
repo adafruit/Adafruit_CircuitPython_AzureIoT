@@ -33,49 +33,37 @@ Create an instance of an Azure IoT Hub (you'll need your SAS Token).
 
 .. code-block:: python
 
-    my_hub = IOT_HUB(wifi, 'Azure_IOT_Hub_Name', 'Azure_IOT_Hub_SAS_Token')
+    my_hub = IOT_HUB(wifi, 'Azure_IOT_Hub_Name', 'Azure_IOT_Hub_SAS_Token', 'Azure_Device_Identifier')
 
-Send a device-to-cloud message:  
+Send a device-to-cloud message
 
 .. code-block:: python
 
-    my_hub.send_device_message('deviceID', 'Hi Azure IoT!')
+    my_hub.send_device_message('Hello Azure IoT!')
 
-Enumerate all devices on an Azure IOT Hub:
+Enumerate all devices on an Azure IOT Hub
 
 .. code-block:: python
 
     hub_devices = my_hub.get_devices()
 
-Get a specified device on an Azure IoT Hub:
+Get information about the current device on an Azure IoT Hub
 
 .. code-block:: python
 
-    device_info = my_hub.get_device('deviceID')
+    device_info = my_hub.get_device()
 
-Create a new device on an Azure IoT Hub:
-
-.. code-block:: python
-
-    my_hub.create_device('deviceID')
-
-Delete a device from an Azure IoT Hub:
+Get information about the current device's device twin
 
 .. code-block:: python
 
-    my_hub.delete_device('deviceID')
+    twin_info = my_hub.get_device_twin()
 
-Get a device twin:
-
-.. code-block:: python
-
-    twin_info = my_hub.get_device_twin('deviceID')
-
-Update a device twin's properties:
+Update the current device's device twin properties
 
 .. code-block:: python
 
-    my_hub.update_device_twin('Blinka', device_properties)
+    my_hub.update_device_twin(device_properties)
 
 Contributing
 ============
