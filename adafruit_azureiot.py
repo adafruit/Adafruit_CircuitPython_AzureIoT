@@ -100,10 +100,7 @@ class IOT_Hub:
         path = "{0}/devices/{1}/messages/deviceBound?api-version={2}".format(self._iot_hub_url,
                                                                              self._device_id,
                                                                              AZ_API_VER)
-        try:
-            data = self._get(path, is_c2d=True)
-        except RuntimeError:
-            raise RuntimeError('HTTP C2D messages are HEAVILY throttled - poll every 25 mins.')
+        data = self._get(path, is_c2d=True)
         if data == 204: # device's message queue is empty
             return -1
         etag = data[1]['etag']
@@ -190,12 +187,18 @@ class IOT_Hub:
         response = self._wifi.get(
             path,
             headers=self._azure_header)
-        if is_c2d: # check status of azure message queue
-            if response.status_code == 200:
-                return response.text, response.headers
-            return response.status_code
-        self._parse_http_status(response.status_code, response.reason)
-        return response.json()
+        status_code = response.status_code
+        if is_c2d:
+            if status_code == 200:
+                data = response.text
+                headers = response.headers
+                response.close()
+                return data, headers
+            response.close()
+            return status_code
+        json = response.json()
+        response.close()
+        return json
 
     def _delete(self, path, etag=None):
         """HTTP DELETE
@@ -209,7 +212,9 @@ class IOT_Hub:
             path,
             headers=data_headers)
         self._parse_http_status(response.status_code, response.reason)
-        return response.status_code
+        status_code = response.status_code
+        response.close()
+        return status_code
 
     def _patch(self, path, payload):
         """HTTP PATCH
@@ -221,7 +226,9 @@ class IOT_Hub:
             json=payload,
             headers=self._azure_header)
         self._parse_http_status(response.status_code, response.reason)
-        return response.json()
+        json_data = response.json()
+        response.close()
+        return json_data
 
     def _put(self, path, payload=None):
         """HTTP PUT
@@ -233,4 +240,6 @@ class IOT_Hub:
             json=payload,
             headers=self._azure_header)
         self._parse_http_status(response.status_code, response.reason)
-        return response.json()
+        json_data = response.json()
+        response.close()
+        return json_data
