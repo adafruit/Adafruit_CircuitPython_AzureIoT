@@ -67,6 +67,18 @@ class IOT_Hub:
         self._device_id = device_id
         self._azure_header = {"Authorization":self._sas_token}
 
+    @property
+    def device_id(self):
+        """Returns the current device identifier"""
+        return self._device_id
+
+    @device_id.setter
+    def device_id(self, device_identifier):
+        """Sets the current device identifier
+        :param str device_identifier: Unique device identifier.
+        """
+        self._device_id = device_identifier
+
     @staticmethod
     def _parse_http_status(status_code, status_reason):
         """Parses status code, throws error based on Azure IoT Common Error Codes.
