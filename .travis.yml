@@ -11,6 +11,9 @@ python:
 cache:
   pip: true
 
+env:
+  - DEPLOY_PYPI="false"
+
 deploy:
   - provider: releases
     api_key: "$GITHUB_TOKEN"
@@ -20,8 +23,7 @@ deploy:
     overwrite: true
     on:
       tags: true
-  # TODO: Use 'travis encrypt --com -r adafruit/<repo slug>' to generate
-  #       the encrypted password for adafruit-travis. Paste result below.
+ 
   - provider: pypi
     user: adafruit-travis
     password:
