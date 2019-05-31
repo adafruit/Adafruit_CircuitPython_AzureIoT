@@ -91,8 +91,8 @@ class IOT_Hub:
 
     # Cloud-to-Device Messaging
     def get_hub_message(self):
-        """Returns a message from a Microsoft Azure IoT Hub (Cloud-to-Device), or -1
-        if the message queue is empty.
+        """Returns a message from a Microsoft Azure IoT Hub (Cloud-to-Device).
+        Returns None if the message queue is empty.
         NOTE: HTTP Cloud-to-Device messages are throttled. Poll every 25+ minutes.
         """
         reject_message = True
@@ -102,7 +102,7 @@ class IOT_Hub:
                                                                              AZ_API_VER)
         data = self._get(path, is_c2d=True)
         if data == 204: # device's message queue is empty
-            return -1
+            return None
         etag = data[1]['etag']
         if etag: # either complete or nack the message
             reject_message = False
@@ -113,7 +113,7 @@ class IOT_Hub:
             del_status = self._delete(path_complete)
         if del_status == 204:
             return data[0]
-        return -1
+        return None
 
     # Device-to-Cloud Messaging
     def send_device_message(self, message):
