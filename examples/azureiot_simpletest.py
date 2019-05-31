@@ -43,7 +43,7 @@ print('Data Sent!')
 # Microsoft suggests a polling interval of the below code for every 25 minutes.
 print('Receiving a message from an Azure IoT Hub...')
 message = hub.get_hub_message()
-if message == -1:
+if message == None:
     print('IoT Hub Message Queue is empty!')
 else:
     print(message)
