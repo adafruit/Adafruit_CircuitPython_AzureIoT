@@ -9,8 +9,8 @@ Adafruit_CircuitPython_AzureIoT
     :target: https://discord.gg/nBQh6qu
     :alt: Discord
 
-.. image:: https://travis-ci.com/adafruit/Adafruit_CircuitPython_AzureIoT.svg?branch=master
-    :target: https://travis-ci.com/adafruit/Adafruit_CircuitPython_AzureIoT
+.. image:: https://github.com/adafruit/Adafruit_CircuitPython_AzureIoT/workflows/Build%20CI/badge.svg
+    :target: https://github.com/adafruit/Adafruit_CircuitPython_AzureIoT/actions/
     :alt: Build Status
 
 Access to `Microsoft Azure IoT <https://azure.microsoft.com/en-us/overview/iot/>`_ from a CircuitPython device. This library can perform device
