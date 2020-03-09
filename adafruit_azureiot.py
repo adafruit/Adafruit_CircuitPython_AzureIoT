@@ -42,14 +42,16 @@ Implementation Notes
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_AzureIoT.git"
 
-AZ_API_VER = "2018-06-30" # Azure URI API Version Identifier
-AZURE_HTTP_ERROR_CODES = [400, 401, 404, 403, 412, 429, 500] # Azure HTTP Status Codes
+AZ_API_VER = "2018-06-30"  # Azure URI API Version Identifier
+AZURE_HTTP_ERROR_CODES = [400, 401, 404, 403, 412, 429, 500]  # Azure HTTP Status Codes
+
 
 class IOT_Hub:
     """
     Provides access to a Microsoft Azure IoT Hub.
     https://docs.microsoft.com/en-us/rest/api/iothub/
     """
+
     def __init__(self, wifi_manager, iot_hub_name, sas_token, device_id):
         """ Creates an instance of an Azure IoT Hub Client.
         :param wifi_manager: WiFiManager object from ESPSPI_WiFiManager.
@@ -58,14 +60,14 @@ class IOT_Hub:
         :param str device_id: Unique Azure IoT Device Identifier.
         """
         _wifi_type = str(type(wifi_manager))
-        if 'ESPSPI_WiFiManager' in _wifi_type:
+        if "ESPSPI_WiFiManager" in _wifi_type:
             self._wifi = wifi_manager
         else:
             raise TypeError("This library requires a WiFiManager object.")
         self._iot_hub_url = "https://{0}.azure-devices.net".format(iot_hub_name)
         self._sas_token = sas_token
         self._device_id = device_id
-        self._azure_header = {"Authorization":self._sas_token}
+        self._azure_header = {"Authorization": self._sas_token}
 
     @property
     def device_id(self):
@@ -97,19 +99,20 @@ class IOT_Hub:
         """
         reject_message = True
         # get a device-bound notification
-        path = "{0}/devices/{1}/messages/deviceBound?api-version={2}".format(self._iot_hub_url,
-                                                                             self._device_id,
-                                                                             AZ_API_VER)
+        path = "{0}/devices/{1}/messages/deviceBound?api-version={2}".format(
+            self._iot_hub_url, self._device_id, AZ_API_VER
+        )
         data = self._get(path, is_c2d=True)
-        if data == 204: # device's message queue is empty
+        if data == 204:  # device's message queue is empty
             return None
-        etag = data[1]['etag']
-        if etag: # either complete or nack the message
+        etag = data[1]["etag"]
+        if etag:  # either complete or nack the message
             reject_message = False
             path_complete = "{0}/devices/{1}/messages/deviceBound/{2}?api-version={3}".format(
-                self._iot_hub_url, self._device_id, etag.strip('\'"'), AZ_API_VER)
+                self._iot_hub_url, self._device_id, etag.strip("'\""), AZ_API_VER
+            )
             if reject_message:
-                path_complete += '&reject'
+                path_complete += "&reject"
             del_status = self._delete(path_complete)
         if del_status == 204:
             return data[0]
@@ -120,16 +123,18 @@ class IOT_Hub:
         """Sends a device-to-cloud message.
         :param string message: Message to send to Azure IoT.
         """
-        path = "{0}/devices/{1}/messages/events?api-version={2}".format(self._iot_hub_url,
-                                                                        self._device_id, AZ_API_VER)
+        path = "{0}/devices/{1}/messages/events?api-version={2}".format(
+            self._iot_hub_url, self._device_id, AZ_API_VER
+        )
         self._post(path, message, return_response=False)
 
     # Device Twin
     def get_device_twin(self):
         """Returns the device's device twin information in JSON format.
         """
-        path = "{0}/twins/{1}?api-version={2}".format(self._iot_hub_url,
-                                                      self._device_id, AZ_API_VER)
+        path = "{0}/twins/{1}?api-version={2}".format(
+            self._iot_hub_url, self._device_id, AZ_API_VER
+        )
         return self._get(path)
 
     def update_device_twin(self, properties):
@@ -137,16 +142,18 @@ class IOT_Hub:
         :param str properties: Device Twin Properties
         (https://docs.microsoft.com/en-us/rest/api/iothub/service/updatetwin#twinproperties)
         """
-        path = "{0}/twins/{1}?api-version={2}".format(self._iot_hub_url,
-                                                      self._device_id, AZ_API_VER)
+        path = "{0}/twins/{1}?api-version={2}".format(
+            self._iot_hub_url, self._device_id, AZ_API_VER
+        )
         return self._patch(path, properties)
 
     def replace_device_twin(self, properties):
         """Replaces tags and desired properties of a device twin.
         :param str properties: Device Twin Properties.
         """
-        path = "{0}/twins/{1}?api-version-{2}".format(self._iot_hub_url,
-                                                      self._device_id, AZ_API_VER)
+        path = "{0}/twins/{1}?api-version-{2}".format(
+            self._iot_hub_url, self._device_id, AZ_API_VER
+        )
         return self._put(path, properties)
 
     # IoT Hub Service
@@ -160,8 +167,9 @@ class IOT_Hub:
         """Gets device information from the identity
         registry of an IoT Hub.
         """
-        path = "{0}/devices/{1}?api-version={2}".format(self._iot_hub_url,
-                                                        self._device_id, AZ_API_VER)
+        path = "{0}/devices/{1}?api-version={2}".format(
+            self._iot_hub_url, self._device_id, AZ_API_VER
+        )
         return self._get(path)
 
     # HTTP Helper Methods
@@ -170,10 +178,7 @@ class IOT_Hub:
         :param str path: Formatted Azure IOT Hub Path.
         :param str payload: JSON-formatted Data Payload.
         """
-        response = self._wifi.post(
-            path,
-            json=payload,
-            headers=self._azure_header)
+        response = self._wifi.post(path, json=payload, headers=self._azure_header)
         self._parse_http_status(response.status_code, response.reason)
         if return_response:
             return response.json()
@@ -184,9 +189,7 @@ class IOT_Hub:
         :param str path: Formatted Azure IOT Hub Path.
         :param bool is_c2d: Cloud-to-device get request.
         """
-        response = self._wifi.get(
-            path,
-            headers=self._azure_header)
+        response = self._wifi.get(path, headers=self._azure_header)
         status_code = response.status_code
         if is_c2d:
             if status_code == 200:
@@ -205,12 +208,10 @@ class IOT_Hub:
         :param str path: Formatted Azure IOT Hub Path.
         """
         if etag:
-            data_headers = {"Authorization":self._sas_token, "If-Match":'"%s"'%etag}
+            data_headers = {"Authorization": self._sas_token, "If-Match": '"%s"' % etag}
         else:
             data_headers = self._azure_header
-        response = self._wifi.delete(
-            path,
-            headers=data_headers)
+        response = self._wifi.delete(path, headers=data_headers)
         self._parse_http_status(response.status_code, response.reason)
         status_code = response.status_code
         response.close()
@@ -221,10 +222,7 @@ class IOT_Hub:
         :param str path: Formatted Azure IOT Hub Path.
         :param str payload: JSON-formatted payload.
         """
-        response = self._wifi.patch(
-            path,
-            json=payload,
-            headers=self._azure_header)
+        response = self._wifi.patch(path, json=payload, headers=self._azure_header)
         self._parse_http_status(response.status_code, response.reason)
         json_data = response.json()
         response.close()
@@ -235,10 +233,7 @@ class IOT_Hub:
         :param str path: Formatted Azure IOT Hub Path.
         :param str payload: JSON-formatted payload.
         """
-        response = self._wifi.put(
-            path,
-            json=payload,
-            headers=self._azure_header)
+        response = self._wifi.put(path, json=payload, headers=self._azure_header)
         self._parse_http_status(response.status_code, response.reason)
         json_data = response.json()
         response.close()

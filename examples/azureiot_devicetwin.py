@@ -23,25 +23,31 @@ except AttributeError:
     esp32_reset = DigitalInOut(board.D5)
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
-status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2) # Uncomment for Most Boards
+status_light = neopixel.NeoPixel(
+    board.NEOPIXEL, 1, brightness=0.2
+)  # Uncomment for Most Boards
 """Uncomment below for ItsyBitsy M4"""
-#status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
+# status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
 
 # Create an instance of the Azure IoT Hub
-hub = IOT_Hub(wifi, secrets['azure_iot_hub'], secrets['azure_iot_sas'], secrets['device_id'])
+hub = IOT_Hub(
+    wifi, secrets["azure_iot_hub"], secrets["azure_iot_sas"], secrets["device_id"]
+)
 
 # Get a Device Twin
 device_twin = hub.get_device_twin()
 # Filter out the device's name from the twin's properties
-device_name = device_twin['properties']['desired']['deviceName']
+device_name = device_twin["properties"]["desired"]["deviceName"]
 print(device_name)
 
 # Update a Device Twin's Properties
-data = {"properties":{"desired": {"deviceName": "{{BasementTemperatureLoggerFeather}}"}}}
+data = {
+    "properties": {"desired": {"deviceName": "{{BasementTemperatureLoggerFeather}}"}}
+}
 hub.update_device_twin(data)
 
 # And read the updated device twin information
 device_twin = hub.get_device_twin()
-device_name = device_twin['properties']['desired']['deviceName']
+device_name = device_twin["properties"]["desired"]["deviceName"]
 print(device_name)
