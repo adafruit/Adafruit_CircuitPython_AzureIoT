@@ -24,26 +24,30 @@ except AttributeError:
     esp32_reset = DigitalInOut(board.D5)
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
-status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2) # Uncomment for Most Boards
+status_light = neopixel.NeoPixel(
+    board.NEOPIXEL, 1, brightness=0.2
+)  # Uncomment for Most Boards
 """Uncomment below for ItsyBitsy M4"""
-#status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
+# status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
 
 # Create an instance of the Azure IoT Hub
-hub = IOT_Hub(wifi, secrets['azure_iot_hub'], secrets['azure_iot_sas'], secrets['device_id'])
+hub = IOT_Hub(
+    wifi, secrets["azure_iot_hub"], secrets["azure_iot_sas"], secrets["device_id"]
+)
 
 # Send a Device-to-Cloud message
-print('Sending Data to Azure IoT Hub...')
+print("Sending Data to Azure IoT Hub...")
 data = randint(0, 100)
 hub.send_device_message(str(data))
-print('Data Sent!')
+print("Data Sent!")
 
 # Receive a Cloud-to-Device message
 # NOTE: HTTP Cloud-to-Device messages are HEAVILY throttled over HTTP.
 # Microsoft suggests a polling interval of the below code for every 25 minutes.
-print('Receiving a message from an Azure IoT Hub...')
+print("Receiving a message from an Azure IoT Hub...")
 message = hub.get_hub_message()
 if message is None:
-    print('IoT Hub Message Queue is empty!')
+    print("IoT Hub Message Queue is empty!")
 else:
     print(message)
