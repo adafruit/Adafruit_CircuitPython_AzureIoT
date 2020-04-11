@@ -29,7 +29,7 @@ setup(
     # Author details
     author="Adafruit Industries",
     author_email="circuitpython@adafruit.com",
-    install_requires=["Adafruit-Blinka", "Adafruit_CircuitPython_ESP32SPI"],
+    install_requires=["Adafruit-Blinka", "Adafruit_CircuitPython_ESP32SPI", "Adafruit-CircuitPython-miniMQTT", "CircuitPython-HMAC", "CircuitPython-Base64", "CircuitPython-Parse"],
     # Choose your license
     license="MIT",
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -44,7 +44,7 @@ setup(
         "Programming Language :: Python :: 3.5",
     ],
     # What does your project relate to?
-    keywords="adafruit blinka circuitpython micropython azureiot azure, iot, device, services",
+    keywords="adafruit blinka circuitpython micropython azureiot azure iot device services, iothub, iotcentral",
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
     # TODO: IF LIBRARY FILES ARE A PACKAGE FOLDER,
