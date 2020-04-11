@@ -24,17 +24,13 @@ except AttributeError:
     esp32_reset = DigitalInOut(board.D5)
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
-status_light = neopixel.NeoPixel(
-    board.NEOPIXEL, 1, brightness=0.2
-)  # Uncomment for Most Boards
+status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2)  # Uncomment for Most Boards
 """Uncomment below for ItsyBitsy M4"""
 # status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
 
 # Create an instance of the Azure IoT Hub
-hub = IOT_Hub(
-    wifi, secrets["azure_iot_hub"], secrets["azure_iot_sas"], secrets["device_id"]
-)
+hub = IOT_Hub(wifi, secrets["azure_iot_hub"], secrets["azure_iot_sas"], secrets["device_id"])
 
 # Send a Device-to-Cloud message
 print("Sending Data to Azure IoT Hub...")
