@@ -42,6 +42,7 @@ Implementation Notes
 * Community Parse library: https://github.com/jimbobbennett/CircuitPython_Parse
 """
 
+from .iot_error import IoTError
 from .iot_mqtt import IoTResponse
 from .iotcentral_device import IoTCentralDevice
 from .iothub_device import IoTHubDevice
@@ -49,4 +50,4 @@ from .iothub_device import IoTHubDevice
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_AzureIoT.git"
 
-__all__ = ["IoTHubDevice", "IoTCentralDevice", "IoTResponse"]
+__all__ = ["IoTHubDevice", "IoTCentralDevice", "IoTResponse", "IoTError"]
