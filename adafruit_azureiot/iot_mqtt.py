@@ -46,7 +46,7 @@ class IoTMQTTCallback:
         """
 
     # pylint: disable=W0613, R0201
-    def direct_method_called(self, method_name: str, data) -> IoTResponse:
+    def direct_method_called(self, method_name: str, payload) -> IoTResponse:
         """Called when a direct method is invoked
         """
         return IoTResponse("", "")

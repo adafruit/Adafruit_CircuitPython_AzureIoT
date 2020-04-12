@@ -22,12 +22,12 @@ class IoTCentralDevice(IoTMQTTCallback):
             self.on_connection_status_changed(connected)
 
     # pylint: disable=W0613, R0201
-    def direct_method_called(self, method_name: str, data) -> IoTResponse:
+    def direct_method_called(self, method_name: str, payload) -> IoTResponse:
         """Called when a direct method is invoked
         """
         if self.on_command_executed is not None:
             # pylint: disable=E1102
-            return self.on_command_executed(method_name, data)
+            return self.on_command_executed(method_name, payload)
 
         raise IoTError("on_command_executed not set")
 
