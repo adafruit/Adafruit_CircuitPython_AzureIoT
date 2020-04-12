@@ -52,7 +52,6 @@ class IoTCentralDevice(IoTMQTTCallback):
     def __init__(
         self, wifi_manager: ESPSPI_WiFiManager, id_scope: str, device_id: str, key: str, token_expires: int = 21600, logger: logging = None
     ):
-        super(IoTCentralDevice, self).__init__()
         self._wifi_manager = wifi_manager
         self._id_scope = id_scope
         self._device_id = device_id
@@ -73,7 +72,7 @@ class IoTCentralDevice(IoTMQTTCallback):
 
         token_expiry = int(time.time() + self._token_expires)
         hostname = self._device_registration.register_device(token_expiry)
-        self._mqtt = IoTMQTT(self, hostname, self._device_id, self._key, self._token_expires, self._logger)
+        self._mqtt = IoTMQTT(self, self._wifi_manager, hostname, self._device_id, self._key, self._token_expires, self._logger)
 
         self._mqtt.connect()
 
