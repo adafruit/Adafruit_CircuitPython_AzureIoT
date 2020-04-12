@@ -30,7 +30,7 @@ status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2)  # Uncomment
 # status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
 
-# You will need an Azure subscription to create an IoT Hub
+# You will need an Azure subscription to create an Azure IoT Hub resource
 #
 # If you don't have an Azure subscription:
 #
@@ -47,7 +47,7 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_lig
 # The free tier of IoT Hub allows up to 8,000 messages a day, so try not to send messages too often
 # if you are using the free tier
 #
-# Once you have a hub and a device, copy the device promary connection string.
+# Once you have a hub and a device, copy the device primary connection string.
 # Add it to the secrets.py file in an entry called DeviceConnectionString
 
 from adafruit_azureiot import IoTHubDevice
