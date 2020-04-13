@@ -1,10 +1,11 @@
 import json
 import random
+import time
 import board
 import busio
 from digitalio import DigitalInOut
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
-import neopixel
+from adafruit_ntp import NTP
 
 # Get wifi details and more from a secrets.py file
 try:
@@ -19,15 +20,22 @@ try:
     esp32_ready = DigitalInOut(board.ESP_BUSY)
     esp32_reset = DigitalInOut(board.ESP_RESET)
 except AttributeError:
-    esp32_cs = DigitalInOut(board.D9)
-    esp32_ready = DigitalInOut(board.D10)
-    esp32_reset = DigitalInOut(board.D5)
+    esp32_cs = DigitalInOut(board.D13)
+    esp32_ready = DigitalInOut(board.D11)
+    esp32_reset = DigitalInOut(board.D12)
+
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
-status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2)  # Uncomment for Most Boards
-"""Uncomment below for ItsyBitsy M4"""
-# status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
-wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
+
+wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets)
+wifi.connect()
+
+ntp = NTP(esp)
+while not ntp.valid_time:
+    ntp.set_time()
+
+    if not ntp.valid_time:
+        time.sleep(1)
 
 # To use Azure IoT Central, you will need to create an IoT Central app.
 # You can either create a free tier app that will live for 7 days without an Azure subscription,

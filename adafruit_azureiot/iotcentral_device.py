@@ -4,10 +4,10 @@
 import json
 import time
 from adafruit_esp32spi.adafruit_esp32spi_wifimanager import ESPSPI_WiFiManager
-from device_registration import DeviceRegistration
-from iot_error import IoTError
-from iot_mqtt import IoTMQTT, IoTMQTTCallback, IoTResponse
 import adafruit_logging as logging
+from .device_registration import DeviceRegistration
+from .iot_error import IoTError
+from .iot_mqtt import IoTMQTT, IoTMQTTCallback, IoTResponse
 
 
 class IoTCentralDevice(IoTMQTTCallback):

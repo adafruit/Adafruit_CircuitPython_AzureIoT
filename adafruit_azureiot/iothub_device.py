@@ -3,9 +3,9 @@
 
 import json
 from adafruit_esp32spi.adafruit_esp32spi_wifimanager import ESPSPI_WiFiManager
-from iot_error import IoTError
-from iot_mqtt import IoTMQTT, IoTMQTTCallback, IoTResponse
 import adafruit_logging as logging
+from .iot_error import IoTError
+from .iot_mqtt import IoTMQTT, IoTMQTTCallback, IoTResponse
 
 
 def _validate_keys(connection_string_parts):
@@ -58,12 +58,12 @@ class IoTHubDevice(IoTMQTTCallback):
             self.on_connection_status_changed(connected)
 
     # pylint: disable=W0613, R0201
-    def direct_method_called(self, method_name: str, data) -> IoTResponse:
+    def direct_method_called(self, method_name: str, payload) -> IoTResponse:
         """Called when a direct method is invoked
         """
         if self.on_direct_method_called is not None:
             # pylint: disable=E1102
-            return self.on_direct_method_called(method_name, data)
+            return self.on_direct_method_called(method_name, payload)
 
         raise IoTError("on_direct_method_called not set")
 

@@ -4,7 +4,7 @@ import board
 import busio
 from digitalio import DigitalInOut
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
-import neopixel
+from adafruit_ntp import NTP
 
 # Get wifi details and more from a secrets.py file
 try:
@@ -19,15 +19,22 @@ try:
     esp32_ready = DigitalInOut(board.ESP_BUSY)
     esp32_reset = DigitalInOut(board.ESP_RESET)
 except AttributeError:
-    esp32_cs = DigitalInOut(board.D9)
-    esp32_ready = DigitalInOut(board.D10)
-    esp32_reset = DigitalInOut(board.D5)
+    esp32_cs = DigitalInOut(board.D13)
+    esp32_ready = DigitalInOut(board.D11)
+    esp32_reset = DigitalInOut(board.D12)
+
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
-status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2)  # Uncomment for Most Boards
-"""Uncomment below for ItsyBitsy M4"""
-# status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
-wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
+
+wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets)
+wifi.connect()
+
+ntp = NTP(esp)
+while not ntp.valid_time:
+    ntp.set_time()
+
+    if not ntp.valid_time:
+        time.sleep(1)
 
 # You will need an Azure subscription to create an Azure IoT Hub resource
 #
@@ -47,12 +54,12 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_lig
 # if you are using the free tier
 #
 # Once you have a hub and a device, copy the device primary connection string.
-# Add it to the secrets.py file in an entry called DeviceConnectionString
+# Add it to the secrets.py file in an entry called device_connection_string
 
 from adafruit_azureiot import IoTHubDevice
 
 # Create an IoT Hub device client and connect
-device = IoTHubDevice(wifi, secrets["DeviceConnectionString"])
+device = IoTHubDevice(wifi, secrets["device_connection_string"])
 
 # Subscribe to device twin desired property updates
 # To see these changes, update the desired properties for the device either in code
@@ -66,18 +73,18 @@ device.on_device_twin_desired_updated = device_twin_desired_updated
 
 device.connect()
 
-message_counter = 0
+message_counter = 60
 
 while True:
-    if message_counter > 60:
+    if message_counter >= 60:
         # Send a reported property twin update every minute
         # You can see these in the portal by selecting the device in the IoT Hub blade, selecting
         # Device Twin then looking for the updates in the 'reported' section
         patch = {"Temperature": random.randint(0, 50)}
         device.update_twin(patch)
         message_counter = 0
-
-    message_counter = message_counter + 1
+    else:
+        message_counter = message_counter + 1
 
     # Poll every second for messages from the cloud
     device.loop()

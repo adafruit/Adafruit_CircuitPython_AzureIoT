@@ -9,8 +9,8 @@ from adafruit_esp32spi.adafruit_esp32spi_wifimanager import ESPSPI_WiFiManager
 import adafruit_minimqtt as minimqtt
 from adafruit_minimqtt import MQTT
 import circuitpython_parse as parse
-from device_registration import DeviceRegistration
 import adafruit_logging as logging
+from .device_registration import DeviceRegistration
 from . import constants
 
 
