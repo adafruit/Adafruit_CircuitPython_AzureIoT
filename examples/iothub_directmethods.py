@@ -67,6 +67,7 @@ device = IoTHubDevice(wifi, secrets["device_connection_string"])
 # successfully or not, returning an HTTP status code and message
 def direct_method_invoked(method_name: str, payload) -> IoTResponse:
     print("Received direct method", method_name, "with data", str(payload))
+    # return a status code and message to indicate if the direct method was handled correctly
     return IoTResponse(200, "OK")
 
 

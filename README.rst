@@ -92,6 +92,8 @@ To interact with Azure IoT Hub, you will need to create a hub, and a register a 
 
 .. code-block:: python
 
+    from adafruit_azureiot import IoTHubDevice
+
     device = IoTHubDevice(wifi, secrets["device_connection_string"])
     device.connect()
 
@@ -126,6 +128,7 @@ Once the device is connected, you will regularly need to run a ``loop`` to poll 
 
     def direct_method_invoked(method_name: str, payload) -> IoTResponse:
         print("Received direct method", method_name, "with data", str(payload))
+        # return a status code and message to indicate if the direct method was handled correctly
         return IoTResponse(200, "OK")
 
     # Subscribe to direct methods
@@ -149,11 +152,78 @@ Once the device is connected, you will regularly need to run a ``loop`` to poll 
     def device_twin_desired_updated(desired_property_name: str, desired_property_value, desired_version: int):
         print("Property", desired_property_name, "updated to", str(desired_property_value), "version", desired_version)
 
-    # SUbscribe to desired property changes
+    # Subscribe to desired property changes
     device.on_device_twin_desired_updated = device_twin_desired_updated
 
 Azure IoT Central
 -----------------
+
+To use Azure IoT Central, you will need to create an Azure IoT Central app, create a device template and register a device against the template.
+
+- Head to `Azure IoT Central <https://apps.azureiotcentral.com/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_ 
+- Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-deploy-iot-central?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_ to create an application. Every tier is free for up to 2 devices.
+- Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-create-simulated-device?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_ to create a device template.
+- Create a device based off the template, and select **Connect** to get the device connection details. Store the ID Scope, Device ID and Primary Key in your ``secrets.py`` file.
+
+**Connect your device to your Azure IoT Central app**
+
+.. code-block:: python
+
+    from adafruit_azureiot import IoTCentralDevice
+
+    device = IoTCentralDevice(wifi, secrets["id_scope"], secrets["device_id"], secrets["key"])
+    device.connect()
+
+Once the device is connected, you will regularly need to run a ``loop`` to poll for messages from the cloud.
+
+.. code-block:: python
+
+    while True:
+        device.loop()
+        time.sleep(1)
+
+**Send telemetry**
+
+.. code-block:: python
+
+    message = {"Temperature": temp}
+    device.send_telemetry(json.dumps(message))
+
+**Listen for commands**
+
+.. code-block:: python
+
+    def command_executed(command_name: str, payload) -> IoTResponse:
+        print("Command", command_name, "executed with payload", str(payload))
+        # return a status code and message to indicate if the command was handled correctly
+        return IoTResponse(200, "OK")
+
+    # Subscribe to commands
+    device.on_command_executed = command_executed
+
+**Update properties**
+
+.. code-block:: python
+
+    device.send_property("Desired_Temperature", temp)
+
+**Listen for property updates**
+
+.. code-block:: python
+
+    def property_changed(property_name, property_value, version):
+        print("Property", property_name, "updated to", str(property_value), "version", str(version))
+
+    # Subscribe to property updates
+    device.on_property_changed = property_changed
+
+Learning more about Azure IoT services
+--------------------------------------
+
+If you want to learn more about setting up or using Azure IoT Services, check out the following resources:
+
+-` Azure IoT documentation on Microsoft Docs <https://docs.microsoft.com/azure/iot-fundamentals/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_
+- `IoT learning paths and modules on Microsoft Learn <https://docs.microsoft.com/learn/browse/?term=iot&WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_ - Free, online, self-guided hands on learning with Azure IoT services
 
 Contributing
 ============

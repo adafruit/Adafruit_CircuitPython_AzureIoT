@@ -82,7 +82,7 @@ while True:
     # Send property values every minute
     # You can see the values in the devices dashboard
     if message_counter >= 60:
-        device.send_property("Temperature", random.randint(0, 50))
+        device.send_property("Desired_Temperature", random.randint(0, 50))
         message_counter = 0
     else:
         message_counter = message_counter + 1

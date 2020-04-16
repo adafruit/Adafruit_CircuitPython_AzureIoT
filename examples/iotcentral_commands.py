@@ -72,6 +72,7 @@ device = IoTCentralDevice(wifi, secrets["id_scope"], secrets["device_id"], secre
 # successfully or not, returning an HTTP status code and message
 def command_executed(command_name: str, payload) -> IoTResponse:
     print("Command", command_name, "executed with payload", str(payload))
+    # return a status code and message to indicate if the command was handled correctly
     return IoTResponse(200, "OK")
 
 
