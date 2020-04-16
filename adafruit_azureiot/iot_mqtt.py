@@ -36,7 +36,7 @@ class IoTMQTTCallback:
         """
 
     # pylint: disable=W0613, R0201
-    def direct_method_called(self, method_name: str, payload) -> IoTResponse:
+    def direct_method_invoked(self, method_name: str, payload) -> IoTResponse:
         """Called when a direct method is invoked
         """
         return IoTResponse("", "")
@@ -198,7 +198,7 @@ class IoTMQTT:
             len_temp = len(topic_template)
             method_name = topic[len_temp : topic.find("/", len_temp + 1)]
 
-        ret = self._callback.direct_method_called(method_name, msg)
+        ret = self._callback.direct_method_invoked(method_name, msg)
 
         ret_code = 200
         ret_message = "{}"

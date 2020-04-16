@@ -30,11 +30,10 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets)
 wifi.connect()
 
 ntp = NTP(esp)
+# Wait for a valid time to be received
 while not ntp.valid_time:
+    time.sleep(0.1)
     ntp.set_time()
-
-    if not ntp.valid_time:
-        time.sleep(1)
 
 # To use Azure IoT Central, you will need to create an IoT Central app.
 # You can either create a free tier app that will live for 7 days without an Azure subscription,

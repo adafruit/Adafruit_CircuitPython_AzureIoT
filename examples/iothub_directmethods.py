@@ -29,11 +29,10 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets)
 wifi.connect()
 
 ntp = NTP(esp)
+# Wait for a valid time to be received
 while not ntp.valid_time:
+    time.sleep(0.1)
     ntp.set_time()
-
-    if not ntp.valid_time:
-        time.sleep(1)
 
 # You will need an Azure subscription to create an Azure IoT Hub resource
 #
@@ -66,12 +65,12 @@ device = IoTHubDevice(wifi, secrets["device_connection_string"])
 # fill in the method name and payload, then select Invoke Method
 # Direct method handlers need to return a response to show if the method was handled
 # successfully or not, returning an HTTP status code and message
-def direct_method_called(method_name: str, payload) -> IoTResponse:
+def direct_method_invoked(method_name: str, payload) -> IoTResponse:
     print("Received direct method", method_name, "with data", str(payload))
     return IoTResponse(200, "OK")
 
 
-device.on_direct_method_called = direct_method_called
+device.on_direct_method_invoked = direct_method_invoked
 
 device.connect()
 

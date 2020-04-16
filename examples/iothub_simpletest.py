@@ -31,11 +31,10 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets)
 wifi.connect()
 
 ntp = NTP(esp)
+# Wait for a valid time to be received
 while not ntp.valid_time:
+    time.sleep(0.1)
     ntp.set_time()
-
-    if not ntp.valid_time:
-        time.sleep(1)
 
 # You will need an Azure subscription to create an Azure IoT Hub resource
 #

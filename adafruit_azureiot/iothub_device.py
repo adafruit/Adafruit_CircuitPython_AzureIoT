@@ -58,14 +58,14 @@ class IoTHubDevice(IoTMQTTCallback):
             self._on_connection_status_changed(connected)
 
     # pylint: disable=W0613, R0201
-    def direct_method_called(self, method_name: str, payload) -> IoTResponse:
+    def direct_method_invoked(self, method_name: str, payload) -> IoTResponse:
         """Called when a direct method is invoked
         """
-        if self._on_direct_method_called is not None:
+        if self._on_direct_method_invoked is not None:
             # pylint: disable=E1102
-            return self._on_direct_method_called(method_name, payload)
+            return self._on_direct_method_invoked(method_name, payload)
 
-        raise IoTError("on_direct_method_called not set")
+        raise IoTError("on_direct_method_invoked not set")
 
     # pylint: disable=C0103
     def cloud_to_device_message_received(self, body: str, properties: dict):
@@ -116,7 +116,7 @@ class IoTHubDevice(IoTMQTTCallback):
         self._logger.debug("Shared Access Key: " + self._shared_access_key)
 
         self._on_connection_status_changed = None
-        self._on_direct_method_called = None
+        self._on_direct_method_invoked = None
         self._on_cloud_to_device_message_received = None
         self._on_device_twin_desired_updated = None
         self._on_device_twin_reported_updated = None
@@ -136,16 +136,16 @@ class IoTHubDevice(IoTMQTTCallback):
         self._on_connection_status_changed = new_on_connection_status_changed
 
     @property
-    def on_direct_method_called(self):
+    def on_direct_method_invoked(self):
         """Event fired when a direct method is invoked
         """
-        return self._on_direct_method_called
+        return self._on_direct_method_invoked
 
-    @on_direct_method_called.setter
-    def on_direct_method_called(self, new_on_direct_method_called):
+    @on_direct_method_invoked.setter
+    def on_direct_method_invoked(self, new_on_direct_method_invoked):
         """Event fired when a direct method is invoked
         """
-        self._on_direct_method_called = new_on_direct_method_called
+        self._on_direct_method_invoked = new_on_direct_method_invoked
 
     @property
     def on_cloud_to_device_message_received(self):
