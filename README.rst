@@ -64,9 +64,9 @@ This library supports both `Azure IoT Hub <https://azure.microsoft.com/services/
 
 To create an Azure IoT Hub instance or an Azure IoT Central app, you will need an Azure subscription. If you don't have an Azure subscription, you can sign up for free:
 
-- If you are a student 18 or over, head to https://aka.ms/FreeStudentAzure and sign up, validating with your student email address. This will give you $100 of Azure credit and free tiers of a load of service, renewable each year you are a student. You will not need a credit card.
+- If you are a student 18 or over, head to `aka.ms/FreeStudentAzure <https://aka.ms/FreeStudentAzure>`_ and sign up, validating with your student email address. This will give you $100 of Azure credit and free tiers of a load of service, renewable each year you are a student. You will not need a credit card.
 
-- If you are not a student, head to https://aka.ms/FreeAz and sign up to get $200 of credit for 30 days, as well as free tiers of a load of services. You will need a credit card for validation only, your card will not be charged.
+- If you are not a student, head to `aka.ms/FreeAz <https://aka.ms/FreeAz>`_ and sign up to get $200 of credit for 30 days, as well as free tiers of a load of services. You will need a credit card for validation only, your card will not be charged.
 
 To use this library, you will need to create an ESP32_SPI WifiManager, connected to WiFi. You will also need to set the current time, as this is used to generate time-based authentication keys. One way to do this is via the `Adafruit CircuitPython NTP <https://github.com/adafruit/Adafruit_CircuitPython_NTP>`_ library with the following code:
 
@@ -222,7 +222,7 @@ Learning more about Azure IoT services
 
 If you want to learn more about setting up or using Azure IoT Services, check out the following resources:
 
--` Azure IoT documentation on Microsoft Docs <https://docs.microsoft.com/azure/iot-fundamentals/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_
+- `Azure IoT documentation on Microsoft Docs <https://docs.microsoft.com/azure/iot-fundamentals/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_
 - `IoT learning paths and modules on Microsoft Learn <https://docs.microsoft.com/learn/browse/?term=iot&WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_ - Free, online, self-guided hands on learning with Azure IoT services
 
 Contributing
