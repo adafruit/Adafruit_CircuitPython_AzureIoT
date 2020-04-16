@@ -75,6 +75,7 @@ class IoTCentralDevice(IoTMQTTCallback):
         self._mqtt = IoTMQTT(self, self._wifi_manager, hostname, self._device_id, self._key, self._token_expires, self._logger)
 
         self._mqtt.connect()
+        self._mqtt.subscribe_to_twins()
 
     def disconnect(self):
         """Disconnects from the MQTT broker

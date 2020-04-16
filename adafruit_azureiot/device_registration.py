@@ -88,11 +88,11 @@ class DeviceRegistration:
         self._logger.info("- iotc :: _loop_assign :: " + uri)
         target = parse.urlparse(uri)
 
-        response = self.__run_get_request_with_retry(target.geturl(), headers)
+        response = self._run_get_request_with_retry(target.geturl(), headers)
 
         try:
             data = response.json()
-        except Exception as error:
+        except ValueError as error:
             err = "ERROR: " + str(error) + " => " + str(response)
             self._logger.error(err)
             raise DeviceRegistrationError(err)
@@ -120,7 +120,7 @@ class DeviceRegistration:
         self._logger.error(err)
         raise DeviceRegistrationError(err)
 
-    def __run_put_request_with_retry(self, url, body, headers):
+    def _run_put_request_with_retry(self, url, body, headers):
         retry = 0
         response = None
 
@@ -145,7 +145,7 @@ class DeviceRegistration:
         gc.collect()
         return response
 
-    def __run_get_request_with_retry(self, url, headers):
+    def _run_get_request_with_retry(self, url, headers):
         retry = 0
         response = None
 
@@ -206,12 +206,12 @@ class DeviceRegistration:
         self._logger.info("body: " + json.dumps(body))
         print("headers: " + json.dumps(headers))
 
-        response = self.__run_put_request_with_retry(target.geturl(), body, headers)
+        response = self._run_put_request_with_retry(target.geturl(), body, headers)
 
         data = None
         try:
             data = response.json()
-        except Exception as e:
+        except ValueError as e:
             err = "ERROR: non JSON is received from " + self._dps_endpoint + " => " + str(response) + " .. message : " + str(e)
             self._logger.error(err)
             raise DeviceRegistrationError(err)

@@ -55,6 +55,9 @@ while not ntp.valid_time:
 #
 # Once you have a hub and a device, copy the device primary connection string.
 # Add it to the secrets.py file in an entry called device_connection_string
+#
+# To us twins, you will need either a free or standard tier IoT Hub. Basic tier doesn't
+# support twins
 
 from adafruit_azureiot import IoTHubDevice
 

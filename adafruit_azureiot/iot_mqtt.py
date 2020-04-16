@@ -13,24 +13,14 @@ import adafruit_logging as logging
 from .device_registration import DeviceRegistration
 from . import constants
 
-
+# pylint: disable=R0903
 class IoTResponse:
     """A response from a direct method call
     """
 
     def __init__(self, code, message):
-        self._code = code
-        self._message = message
-
-    def get_response_code(self):
-        """Gets the method response code
-        """
-        return self._code
-
-    def get_response_message(self):
-        """Gets the method response message
-        """
-        return self._message
+        self.response_code = code
+        self.response_message = message
 
 
 class IoTMQTTCallback:
@@ -162,7 +152,7 @@ class IoTMQTT:
 
         try:
             twin = json.loads(msg)
-        except Exception as e:
+        except json.JSONDecodeError as e:
             self._logger.error("ERROR: JSON parse for Device Twin message object has failed. => " + msg + " => " + str(e))
             return
 
@@ -212,10 +202,10 @@ class IoTMQTT:
 
         ret_code = 200
         ret_message = "{}"
-        if ret.get_response_code() is not None:
-            ret_code = ret.get_response_code()
-        if ret.get_response_message() is not None:
-            ret_message = ret.get_response_message()
+        if ret.response_code() is not None:
+            ret_code = ret.response_code()
+        if ret.response_message() is not None:
+            ret_message = ret.response_message()
 
             # ret message must be JSON
             if not ret_message.startswith("{") or not ret_message.endswith("}"):
@@ -279,6 +269,7 @@ class IoTMQTT:
             gc.collect()
             try:
                 self._logger.debug("Trying to send...")
+                data = parse.urlencode(data)
                 self._mqtts.publish(topic, data)
                 self._logger.debug("Data sent")
                 break
@@ -333,6 +324,7 @@ class IoTMQTT:
         self._username = "{}/{}/api-version={}".format(self._hostname, device_id, self._iotc_api_version)
         self._passwd = self._gen_sas_token()
         self._logger = logger if logger is not None else logging.getLogger("log")
+        self._is_subscribed_to_twins = False
 
     def connect(self):
         """Connects to the MQTT broker
@@ -354,16 +346,25 @@ class IoTMQTT:
 
         self._mqtts.subscribe("devices/{}/messages/events/#".format(self._device_id))
         self._mqtts.subscribe("devices/{}/messages/devicebound/#".format(self._device_id))
+        self._mqtts.subscribe("$iothub/methods/#")
+
+        return 0
+
+    def subscribe_to_twins(self):
+        """Subscribes to digital twin updates
+        Only call this if your tier of IoT Hub supports this
+        """
+        if self._is_subscribed_to_twins:
+            return
+
+        # do this separately as this is not supported in B1 hubs
         self._mqtts.subscribe("$iothub/twin/PATCH/properties/desired/#")  # twin desired property changes
         self._mqtts.subscribe("$iothub/twin/res/#")  # twin properties response
-        self._mqtts.subscribe("$iothub/methods/#")
 
         if self._get_device_settings() == 0:
             self._callback.settings_updated()
-        else:
-            return 1
 
-        return 0
+        self._is_subscribed_to_twins = True
 
     def disconnect(self):
         """Disconnects from the MQTT broker
@@ -389,7 +390,27 @@ class IoTMQTT:
         self._mqtts.loop()
 
     def _send_common(self, topic, data):
-        self._mqtts.publish(topic, data)
+        retry = 0
+
+        while True:
+            gc.collect()
+            try:
+                self._logger.debug("Trying to send message...")
+                self._mqtts.publish(topic, data)
+                self._logger.debug("Sent!")
+                break
+            except RuntimeError as runtime_error:
+                self._logger.info("Could not send message, retrying after 0.5 seconds: " + str(runtime_error))
+                retry = retry + 1
+
+                if retry >= 10:
+                    self._logger.error("Failed to send message")
+                    raise
+
+                time.sleep(0.5)
+                continue
+
+        gc.collect()
 
     def send_device_to_cloud_message(self, data, system_properties=None) -> None:
         """Send a device to cloud message from this device to Azure IoT Hub
