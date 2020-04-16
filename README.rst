@@ -60,7 +60,7 @@ and
 Usage Example
 =============
 
-This library supports both `Azure IoT Hub <https://azure.microsoft.com/services/iot-hub/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_ and `Azure IoT Central <https://azure.microsoft.com/services/iot-central/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_.
+This library supports both `Azure IoT Hub <https://azure.microsoft.com/services/iot-hub/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_ and `Azure IoT Central <https://azure.microsoft.com/services/iot-central/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__.
 
 To create an Azure IoT Hub instance or an Azure IoT Central app, you will need an Azure subscription. If you don't have an Azure subscription, you can sign up for free:
 
@@ -160,9 +160,9 @@ Azure IoT Central
 
 To use Azure IoT Central, you will need to create an Azure IoT Central app, create a device template and register a device against the template.
 
-- Head to `Azure IoT Central <https://apps.azureiotcentral.com/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_ 
-- Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-deploy-iot-central?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_ to create an application. Every tier is free for up to 2 devices.
-- Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-create-simulated-device?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_ to create a device template.
+- Head to `Azure IoT Central <https://apps.azureiotcentral.com/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__ 
+- Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-deploy-iot-central?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__ to create an application. Every tier is free for up to 2 devices.
+- Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-create-simulated-device?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__ to create a device template.
 - Create a device based off the template, and select **Connect** to get the device connection details. Store the ID Scope, Device ID and Primary Key in your ``secrets.py`` file.
 
 **Connect your device to your Azure IoT Central app**
