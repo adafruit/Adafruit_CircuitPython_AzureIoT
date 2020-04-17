@@ -291,7 +291,6 @@ class IoTMQTT:
             gc.collect()
             try:
                 self._logger.debug("Trying to send...")
-                data = parse.urlencode(data)
                 self._mqtts.publish(topic, data)
                 self._logger.debug("Data sent")
                 break
