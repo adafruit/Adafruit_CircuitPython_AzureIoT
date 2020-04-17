@@ -106,7 +106,7 @@ class IoTMQTT:
             log=True,
         )
 
-        self._mqtts.logger.setLevel(logging.INFO)
+        self._mqtts.logger.setLevel(self._logger.getEffectiveLevel())
 
         # set actions to take throughout connection lifecycle
         self._mqtts.on_connect = self._on_connect
