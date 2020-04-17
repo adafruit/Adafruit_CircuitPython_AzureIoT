@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 #
-# Copyright (c) 2019 Jim Bennett
+# Copyright (c) 2020 Jim Bennett, Elena Horton
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,6 @@ Connectivity to Azure IoT Hub
 """
 
 import json
-from adafruit_esp32spi.adafruit_esp32spi_wifimanager import ESPSPI_WiFiManager
 import adafruit_logging as logging
 from .iot_error import IoTError
 from .iot_mqtt import IoTMQTT, IoTMQTTCallback, IoTResponse
@@ -129,8 +128,16 @@ class IoTHubDevice(IoTMQTTCallback):
             # pylint: disable=E1102
             self._on_device_twin_reported_updated(reported_property_name, reported_property_value, reported_version)
 
-    def __init__(self, wifi_manager: ESPSPI_WiFiManager, device_connection_string: str, token_expires: int = 21600, logger: logging = None):
-        self._wifi_manager = wifi_manager
+    def __init__(self, socket, iface, device_connection_string: str, token_expires: int = 21600, logger: logging = None):
+        """Create the Azure IoT Central device client
+        :param socket: The network socket
+        :param iface: The network interface
+        :param str device_connection_string: The Iot Hub device connection string
+        :param int token_expires: The number of seconds till the token expires, defaults to 6 hours
+        :param adafruit_logging logger: The logger
+        """
+        self._socket = socket
+        self._iface = iface
         self._token_expires = token_expires
         self._logger = logger if logger is not None else logging.getLogger("log")
 
@@ -260,7 +267,7 @@ class IoTHubDevice(IoTMQTTCallback):
         :raises RuntimeError: if the internet connection is not responding or is unable to connect
         """
         self._mqtt = IoTMQTT(
-            self, self._wifi_manager, self._hostname, self._device_id, self._shared_access_key, self._token_expires, self._logger
+            self, self._socket, self._iface, self._hostname, self._device_id, self._shared_access_key, self._token_expires, self._logger
         )
         self._mqtt.connect()
 
@@ -275,6 +282,14 @@ class IoTHubDevice(IoTMQTTCallback):
             raise IoTError("You are not connected to IoT Central")
 
         self._mqtt.disconnect()
+
+    def reconnect(self) -> None:
+        """Reconnects to the MQTT broker
+        """
+        if self._mqtt is None:
+            raise IoTError("You are not connected to IoT Central")
+
+        self._mqtt.reconnect()
 
     def is_connected(self) -> bool:
         """Gets if there is an open connection to the MQTT broker

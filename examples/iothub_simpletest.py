@@ -4,7 +4,9 @@ import time
 import board
 import busio
 from digitalio import DigitalInOut
+import neopixel
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
+import adafruit_esp32spi.adafruit_esp32spi_socket as socket
 from adafruit_ntp import NTP
 
 # Get wifi details and more from a secrets.py file
@@ -27,14 +29,34 @@ except AttributeError:
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 
-wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets)
+"""Use below for Most Boards"""
+status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2)  # Uncomment for Most Boards
+"""Uncomment below for ItsyBitsy M4"""
+# status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
+# Uncomment below for an externally defined RGB LED
+# import adafruit_rgbled
+# from adafruit_esp32spi import PWMOut
+# RED_LED = PWMOut.PWMOut(esp, 26)
+# GREEN_LED = PWMOut.PWMOut(esp, 27)
+# BLUE_LED = PWMOut.PWMOut(esp, 25)
+# status_light = adafruit_rgbled.RGBLED(RED_LED, BLUE_LED, GREEN_LED)
+wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
+
+print("Connecting to WiFi...")
+
 wifi.connect()
+
+print("Connected to WiFi!")
+
+print("Getting the time...")
 
 ntp = NTP(esp)
 # Wait for a valid time to be received
 while not ntp.valid_time:
     time.sleep(5)
     ntp.set_time()
+
+print("Time:", str(time.time()))
 
 # You will need an Azure subscription to create an Azure IoT Hub resource
 #
@@ -59,23 +81,37 @@ while not ntp.valid_time:
 from adafruit_azureiot import IoTHubDevice
 
 # Create an IoT Hub device client and connect
-device = IoTHubDevice(wifi, secrets["device_connection_string"])
+device = IoTHubDevice(socket, esp, secrets["device_connection_string"])
+
+print("Connecting to Azure IoT Hub...")
+
+# Connect to IoT Central
 device.connect()
+
+print("Connected to Azure IoT Hub!")
 
 message_counter = 60
 
 while True:
-    # Send a device to cloud message every minute
-    # You can see the overview of messages sent from the device in the Overview tab
-    # of the IoT Hub in the Azure Portal
-    if message_counter >= 60:
-        message = {"Temperature": random.randint(0, 50)}
-        device.send_device_to_cloud_message(json.dumps(message))
-        message_counter = 0
-    else:
-        message_counter = message_counter + 1
+    try:
+        # Send a device to cloud message every minute
+        # You can see the overview of messages sent from the device in the Overview tab
+        # of the IoT Hub in the Azure Portal
+        if message_counter >= 60:
+            message = {"Temperature": random.randint(0, 50)}
+            device.send_device_to_cloud_message(json.dumps(message))
+            message_counter = 0
+        else:
+            message_counter = message_counter + 1
 
-    # Poll every second for messages from the cloud
-    device.loop()
+        # Poll every second for messages from the cloud
+        device.loop()
+    except (ValueError, RuntimeError) as e:
+        print("Connection error, reconnecting\n", str(e))
+        # If we lose connectivity, reset the wifi and reconnect
+        wifi.reset()
+        wifi.connect()
+        device.reconnect()
+        continue
 
     time.sleep(1)

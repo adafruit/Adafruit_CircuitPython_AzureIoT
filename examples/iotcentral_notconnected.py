@@ -4,7 +4,9 @@ import time
 import board
 import busio
 from digitalio import DigitalInOut
+import neopixel
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
+import adafruit_esp32spi.adafruit_esp32spi_socket as socket
 from adafruit_ntp import NTP
 
 # Get wifi details and more from a secrets.py file
@@ -27,14 +29,34 @@ except AttributeError:
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 
-wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets)
+"""Use below for Most Boards"""
+status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2)  # Uncomment for Most Boards
+"""Uncomment below for ItsyBitsy M4"""
+# status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
+# Uncomment below for an externally defined RGB LED
+# import adafruit_rgbled
+# from adafruit_esp32spi import PWMOut
+# RED_LED = PWMOut.PWMOut(esp, 26)
+# GREEN_LED = PWMOut.PWMOut(esp, 27)
+# BLUE_LED = PWMOut.PWMOut(esp, 25)
+# status_light = adafruit_rgbled.RGBLED(RED_LED, BLUE_LED, GREEN_LED)
+wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
+
+print("Connecting to WiFi...")
+
 wifi.connect()
+
+print("Connected to WiFi!")
+
+print("Getting the time...")
 
 ntp = NTP(esp)
 # Wait for a valid time to be received
 while not ntp.valid_time:
     time.sleep(5)
     ntp.set_time()
+
+print("Time:", str(time.time()))
 
 # To use Azure IoT Central, you will need to create an IoT Central app.
 # You can either create a free tier app that will live for 7 days without an Azure subscription,
@@ -64,7 +86,7 @@ while not ntp.valid_time:
 from adafruit_azureiot import IoTCentralDevice, IoTError
 
 # Create an IoT Hub device client and connect
-device = IoTCentralDevice(wifi, secrets["id_scope"], secrets["device_id"], secrets["key"])
+device = IoTCentralDevice(socket, esp, secrets["id_scope"], secrets["device_id"], secrets["key"])
 
 # don't connect
 # device.connect()

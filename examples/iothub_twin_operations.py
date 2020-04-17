@@ -3,7 +3,9 @@ import time
 import board
 import busio
 from digitalio import DigitalInOut
+import neopixel
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
+import adafruit_esp32spi.adafruit_esp32spi_socket as socket
 from adafruit_ntp import NTP
 
 # Get wifi details and more from a secrets.py file
@@ -26,14 +28,34 @@ except AttributeError:
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 
-wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets)
+"""Use below for Most Boards"""
+status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2)  # Uncomment for Most Boards
+"""Uncomment below for ItsyBitsy M4"""
+# status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
+# Uncomment below for an externally defined RGB LED
+# import adafruit_rgbled
+# from adafruit_esp32spi import PWMOut
+# RED_LED = PWMOut.PWMOut(esp, 26)
+# GREEN_LED = PWMOut.PWMOut(esp, 27)
+# BLUE_LED = PWMOut.PWMOut(esp, 25)
+# status_light = adafruit_rgbled.RGBLED(RED_LED, BLUE_LED, GREEN_LED)
+wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
+
+print("Connecting to WiFi...")
+
 wifi.connect()
+
+print("Connected to WiFi!")
+
+print("Getting the time...")
 
 ntp = NTP(esp)
 # Wait for a valid time to be received
 while not ntp.valid_time:
     time.sleep(5)
     ntp.set_time()
+
+print("Time:", str(time.time()))
 
 # You will need an Azure subscription to create an Azure IoT Hub resource
 #
@@ -61,7 +83,7 @@ while not ntp.valid_time:
 from adafruit_azureiot import IoTHubDevice
 
 # Create an IoT Hub device client and connect
-device = IoTHubDevice(wifi, secrets["device_connection_string"])
+device = IoTHubDevice(socket, esp, secrets["device_connection_string"])
 
 # Subscribe to device twin desired property updates
 # To see these changes, update the desired properties for the device either in code
@@ -71,24 +93,38 @@ def device_twin_desired_updated(desired_property_name: str, desired_property_val
     print("Property", desired_property_name, "updated to", str(desired_property_value), "version", desired_version)
 
 
+# Subscribe to the device twin desired property updated event
 device.on_device_twin_desired_updated = device_twin_desired_updated
 
+print("Connecting to Azure IoT Hub...")
+
+# Connect to IoT Central
 device.connect()
+
+print("Connected to Azure IoT Hub!")
 
 message_counter = 60
 
 while True:
-    if message_counter >= 60:
-        # Send a reported property twin update every minute
-        # You can see these in the portal by selecting the device in the IoT Hub blade, selecting
-        # Device Twin then looking for the updates in the 'reported' section
-        patch = {"Temperature": random.randint(0, 50)}
-        device.update_twin(patch)
-        message_counter = 0
-    else:
-        message_counter = message_counter + 1
+    try:
+        if message_counter >= 60:
+            # Send a reported property twin update every minute
+            # You can see these in the portal by selecting the device in the IoT Hub blade, selecting
+            # Device Twin then looking for the updates in the 'reported' section
+            patch = {"Temperature": random.randint(0, 50)}
+            device.update_twin(patch)
+            message_counter = 0
+        else:
+            message_counter = message_counter + 1
 
-    # Poll every second for messages from the cloud
-    device.loop()
+        # Poll every second for messages from the cloud
+        device.loop()
+    except (ValueError, RuntimeError) as e:
+        print("Connection error, reconnecting\n", str(e))
+        # If we lose connectivity, reset the wifi and reconnect
+        wifi.reset()
+        wifi.connect()
+        device.reconnect()
+        continue
 
     time.sleep(1)

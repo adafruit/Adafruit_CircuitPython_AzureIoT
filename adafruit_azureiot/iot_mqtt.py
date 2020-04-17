@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 #
-# Copyright (c) 2019 Jim Bennett
+# Copyright (c) 2020 Jim Bennett
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -31,8 +31,6 @@ An MQTT client for Azure IoT
 import gc
 import json
 import time
-import adafruit_esp32spi.adafruit_esp32spi_socket as socket
-from adafruit_esp32spi.adafruit_esp32spi_wifimanager import ESPSPI_WiFiManager
 import adafruit_minimqtt as minimqtt
 from adafruit_minimqtt import MQTT
 import circuitpython_parse as parse
@@ -118,7 +116,7 @@ class IoTMQTT:
 
     # Workaround for https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT/issues/25
     def _try_create_mqtt_client(self, hostname: str) -> None:
-        minimqtt.set_socket(socket, self._wifi_manager.esp)
+        minimqtt.set_socket(self._socket, self._iface)
 
         self._mqtts = MQTT(
             broker=hostname,
@@ -338,7 +336,8 @@ class IoTMQTT:
     def __init__(
         self,
         callback: IoTMQTTCallback,
-        wifi_manager: ESPSPI_WiFiManager,
+        socket,
+        iface,
         hostname: str,
         device_id: str,
         key: str,
@@ -346,8 +345,9 @@ class IoTMQTT:
         logger: logging = None,
     ):
         """Create the Azure IoT MQTT client
-        :param wifi_manager: The WiFi manager
         :param IoTMQTTCallback callback: A callback class
+        :param socket: The socket to communicate over
+        :param iface: The network interface to communicate over
         :param str hostname: The hostname of the MQTT broker to connect to, get this by registering the device
         :param str device_id: The device ID of the device to register
         :param str key: The primary or secondary key of the device to register
@@ -355,7 +355,8 @@ class IoTMQTT:
         :param adafruit_logging logger: The logger
         """
         self._callback = callback
-        self._wifi_manager = wifi_manager
+        self._socket = socket
+        self._iface = iface
         self._mqtt_connected = False
         self._auth_response_received = False
         self._mqtts = None
@@ -367,6 +368,15 @@ class IoTMQTT:
         self._passwd = self._gen_sas_token()
         self._logger = logger if logger is not None else logging.getLogger("log")
         self._is_subscribed_to_twins = False
+
+    def _subscribe_to_core_topics(self):
+        self._mqtts.subscribe("devices/{}/messages/events/#".format(self._device_id))
+        self._mqtts.subscribe("devices/{}/messages/devicebound/#".format(self._device_id))
+        self._mqtts.subscribe("$iothub/methods/#")
+
+    def _subscribe_to_twin_topics(self):
+        self._mqtts.subscribe("$iothub/twin/PATCH/properties/desired/#")  # twin desired property changes
+        self._mqtts.subscribe("$iothub/twin/res/#")  # twin properties response
 
     def connect(self) -> bool:
         """Connects to the MQTT broker
@@ -388,9 +398,7 @@ class IoTMQTT:
         self._mqtt_connected = True
         self._auth_response_received = True
 
-        self._mqtts.subscribe("devices/{}/messages/events/#".format(self._device_id))
-        self._mqtts.subscribe("devices/{}/messages/devicebound/#".format(self._device_id))
-        self._mqtts.subscribe("$iothub/methods/#")
+        self._subscribe_to_core_topics()
 
         return True
 
@@ -402,8 +410,7 @@ class IoTMQTT:
             return
 
         # do this separately as this is not supported in B1 hubs
-        self._mqtts.subscribe("$iothub/twin/PATCH/properties/desired/#")  # twin desired property changes
-        self._mqtts.subscribe("$iothub/twin/res/#")  # twin properties response
+        self._subscribe_to_twin_topics()
 
         self._get_device_settings()
 
@@ -418,6 +425,44 @@ class IoTMQTT:
         self._logger.info("- iot_mqtt :: disconnect :: ")
         self._mqtt_connected = False
         self._mqtts.disconnect()
+
+    # Workaround for https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT/issues/26
+    def _fix_broker_name(self, hostname):
+        try:  # set broker IP
+            self._mqtts.broker = self._iface.unpretty_ip(hostname)
+        except ValueError:  # set broker URL
+            self._mqtts.broker = hostname
+
+    def reconnect(self) -> None:
+        """Reconnects to the MQTT broker
+        """
+        self._logger.info("- iot_mqtt :: reconnect :: ")
+
+        self._auth_response_received = None
+
+        # Workaround for https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT/issues/25
+        # Workaround for https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT/issues/26
+        # Workaround for https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT/issues/28
+        try:
+            self._fix_broker_name(self._hostname)
+            self._mqtts.connect()
+        except ValueError:
+            self._fix_broker_name("https://" + self._hostname)
+            self._mqtts.connect()
+
+        self._logger.info("- iot_mqtt :: waiting for auth...")
+
+        while self._auth_response_received is None:
+            self.loop()
+
+        self._logger.info("- iot_mqtt :: authed, subscribing...")
+
+        # Resubscribe
+        self._subscribe_to_core_topics()
+        if self._is_subscribed_to_twins:
+            self._subscribe_to_twin_topics()
+
+        self._logger.info("- iot_mqtt :: resubscribed")
 
     def is_connected(self) -> bool:
         """Gets if there is an open connection to the MQTT broker

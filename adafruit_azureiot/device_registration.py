@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 #
-# Copyright (c) 2019 Jim Bennett
+# Copyright (c) 2020 Jim Bennett
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@ import time
 import circuitpython_base64 as base64
 import circuitpython_hmac as hmac
 import circuitpython_parse as parse
-from adafruit_esp32spi.adafruit_esp32spi_wifimanager import ESPSPI_WiFiManager
+import adafruit_requests as requests
 import adafruit_logging as logging
 from adafruit_logging import Logger
 import adafruit_hashlib as hashlib
@@ -74,24 +74,20 @@ class DeviceRegistration:
             if error == status_code:
                 raise DeviceRegistrationError("Error {0}: {1}".format(status_code, status_reason))
 
-    def __init__(self, wifi_manager: ESPSPI_WiFiManager, id_scope: str, device_id: str, key: str, logger: Logger = None):
+    def __init__(self, socket, id_scope: str, device_id: str, key: str, logger: Logger = None):
         """Creates an instance of the device registration service
-        :param wifi_manager: WiFiManager object from ESPSPI_WiFiManager.
+        :param socket: The network socket
         :param str id_scope: The ID scope of the device to register
         :param str device_id: The device ID of the device to register
         :param str key: The primary or secondary key of the device to register
         :param adafruit_logging.Logger logger: The logger to use to log messages
-        :raises TypeError: if the WiFi manager is not the right type
         """
-        wifi_type = str(type(wifi_manager))
-        if "ESPSPI_WiFiManager" not in wifi_type:
-            raise TypeError("This library requires a WiFiManager object.")
-
-        self._wifi_manager = wifi_manager
         self._id_scope = id_scope
         self._device_id = device_id
         self._key = key
         self._logger = logger if logger is not None else logging.getLogger("log")
+
+        requests.set_socket(socket)
 
     @staticmethod
     def compute_derived_symmetric_key(secret: str, msg: str) -> bytes:
@@ -155,7 +151,7 @@ class DeviceRegistration:
             gc.collect()
             try:
                 self._logger.debug("Trying to send...")
-                response = self._wifi_manager.put(url, json=body, headers=headers)
+                response = requests.put(url, json=body, headers=headers)
                 self._logger.debug("Sent!")
                 break
             except RuntimeError as runtime_error:
@@ -180,7 +176,7 @@ class DeviceRegistration:
             gc.collect()
             try:
                 self._logger.debug("Trying to send...")
-                response = self._wifi_manager.get(url, headers=headers)
+                response = requests.get(url, headers=headers)
                 self._logger.debug("Sent!")
                 break
             except RuntimeError as runtime_error:

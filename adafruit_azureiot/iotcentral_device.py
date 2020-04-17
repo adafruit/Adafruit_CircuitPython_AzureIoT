@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 #
-# Copyright (c) 2019 Jim Bennett
+# Copyright (c) 2020 Jim Bennett
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,6 @@ Connectivity to Azure IoT Central
 
 import json
 import time
-from adafruit_esp32spi.adafruit_esp32spi_wifimanager import ESPSPI_WiFiManager
 import adafruit_logging as logging
 from .device_registration import DeviceRegistration
 from .iot_error import IoTError
@@ -87,23 +86,23 @@ class IoTCentralDevice(IoTMQTTCallback):
             self.on_property_changed(reported_property_name, reported_property_value, reported_version)
 
     # pylint: disable=R0913
-    def __init__(
-        self, wifi_manager: ESPSPI_WiFiManager, id_scope: str, device_id: str, key: str, token_expires: int = 21600, logger: logging = None
-    ):
+    def __init__(self, socket, iface, id_scope: str, device_id: str, key: str, token_expires: int = 21600, logger: logging = None):
         """Create the Azure IoT Central device client
-        :param wifi_manager: The WiFi manager
+        :param socket: The network socket
+        :param iface: The network interface
         :param str id_scope: The ID Scope of the device in IoT Central
         :param str device_id: The device ID of the device in IoT Central
         :param str key: The primary or secondary key of the device in IoT Central
         :param int token_expires: The number of seconds till the token expires, defaults to 6 hours
         :param adafruit_logging logger: The logger
         """
-        self._wifi_manager = wifi_manager
+        self._socket = socket
+        self._iface = iface
         self._id_scope = id_scope
         self._device_id = device_id
         self._key = key
         self._token_expires = token_expires
-        self._logger = logger
+        self._logger = logger if logger is not None else logging.getLogger("log")
         self._device_registration = None
         self._mqtt = None
 
@@ -133,11 +132,11 @@ class IoTCentralDevice(IoTMQTTCallback):
         :raises DeviceRegistrationError: if the device cannot be registered successfully
         :raises RuntimeError: if the internet connection is not responding or is unable to connect
         """
-        self._device_registration = DeviceRegistration(self._wifi_manager, self._id_scope, self._device_id, self._key, self._logger)
+        self._device_registration = DeviceRegistration(self._socket, self._id_scope, self._device_id, self._key, self._logger)
 
         token_expiry = int(time.time() + self._token_expires)
         hostname = self._device_registration.register_device(token_expiry)
-        self._mqtt = IoTMQTT(self, self._wifi_manager, hostname, self._device_id, self._key, self._token_expires, self._logger)
+        self._mqtt = IoTMQTT(self, self._socket, self._iface, hostname, self._device_id, self._key, self._token_expires, self._logger)
 
         self._mqtt.connect()
         self._mqtt.subscribe_to_twins()
@@ -150,6 +149,14 @@ class IoTCentralDevice(IoTMQTTCallback):
             raise IoTError("You are not connected to IoT Central")
 
         self._mqtt.disconnect()
+
+    def reconnect(self) -> None:
+        """Reconnects to the MQTT broker
+        """
+        if self._mqtt is None:
+            raise IoTError("You are not connected to IoT Central")
+
+        self._mqtt.reconnect()
 
     def is_connected(self) -> bool:
         """Gets if there is an open connection to the MQTT broker
