@@ -18,8 +18,8 @@ from adafruit_logging import Logger
 import adafruit_hashlib as hashlib
 from . import constants
 
-
-AZURE_HTTP_ERROR_CODES = [400, 401, 404, 403, 412, 429, 500]  # Azure HTTP Status Codes
+# Azure HTTP error status codes
+AZURE_HTTP_ERROR_CODES = [400, 401, 404, 403, 412, 429, 500]
 
 
 class DeviceRegistrationError(Exception):
@@ -43,22 +43,24 @@ class DeviceRegistration:
     _loop_interval = 2
 
     @staticmethod
-    def _parse_http_status(status_code, status_reason):
+    def _parse_http_status(status_code: int, status_reason: str) -> None:
         """Parses status code, throws error based on Azure IoT Common Error Codes.
         :param int status_code: HTTP status code.
         :param str status_reason: Description of HTTP status.
+        :raises DeviceRegistrationError: if the status code is an error code
         """
         for error in AZURE_HTTP_ERROR_CODES:
             if error == status_code:
-                raise TypeError("Error {0}: {1}".format(status_code, status_reason))
+                raise DeviceRegistrationError("Error {0}: {1}".format(status_code, status_reason))
 
     def __init__(self, wifi_manager: ESPSPI_WiFiManager, id_scope: str, device_id: str, key: str, logger: Logger = None):
-        """Creates an instance of the device registration
+        """Creates an instance of the device registration service
         :param wifi_manager: WiFiManager object from ESPSPI_WiFiManager.
         :param str id_scope: The ID scope of the device to register
         :param str device_id: The device ID of the device to register
         :param str key: The primary or secondary key of the device to register
-        :param adafruit_logging.Logger key: The primary or secondary key of the device to register
+        :param adafruit_logging.Logger logger: The logger to use to log messages
+        :raises TypeError: if the WiFi manager is not the right type
         """
         wifi_type = str(type(wifi_manager))
         if "ESPSPI_WiFiManager" not in wifi_type:
@@ -71,11 +73,15 @@ class DeviceRegistration:
         self._logger = logger if logger is not None else logging.getLogger("log")
 
     @staticmethod
-    def compute_derived_symmetric_key(secret, reg_id):
+    def compute_derived_symmetric_key(secret: str, msg: str) -> bytes:
         """Computes a derived symmetric key from a secret and a message
+        :param str secret: The secret to use for the key
+        :param str msg: The message to use for the key
+        :returns: The derived symmetric key
+        :rtype: bytes
         """
         secret = base64.b64decode(secret)
-        return base64.b64encode(hmac.new(secret, msg=reg_id.encode("utf8"), digestmod=hashlib.sha256).digest())
+        return base64.b64encode(hmac.new(secret, msg=msg.encode("utf8"), digestmod=hashlib.sha256).digest())
 
     def _loop_assign(self, operation_id, headers) -> str:
         uri = "https://%s/%s/registrations/%s/operations/%s?api-version=%s" % (
@@ -174,7 +180,11 @@ class DeviceRegistration:
         """
         Registers the device with the IoT Central device registration service.
         Returns the hostname of the IoT hub to use over MQTT
-        :param str expiry: The expiry time
+        :param int expiry: The expiry time for the registration
+        :returns: The underlying IoT Hub that this device should connect to
+        :rtype: str
+        :raises DeviceRegistrationError: if the device cannot be registered successfully
+        :raises RuntimeError: if the internet connection is not responding or is unable to connect
         """
         # pylint: disable=c0103
         sr = self._id_scope + "%2Fregistrations%2F" + self._device_id
