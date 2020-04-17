@@ -237,7 +237,6 @@ class DeviceRegistration:
         self._logger.info("Connecting...")
         self._logger.info("URL: " + target.geturl())
         self._logger.info("body: " + json.dumps(body))
-        print("headers: " + json.dumps(headers))
 
         response = self._run_put_request_with_retry(target.geturl(), body, headers)
 

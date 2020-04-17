@@ -190,8 +190,6 @@ class IoTMQTT:
         twin = None
         desired = None
 
-        print(msg)
-
         try:
             twin = json.loads(msg)
         except json.JSONDecodeError as e:
@@ -273,7 +271,6 @@ class IoTMQTT:
         topic = ""
         msg = None
 
-        print("Topic: ", str(msg_topic))
         self._logger.info("- iot_mqtt :: _on_message :: payload(" + str(payload) + ")")
 
         if payload is not None:
@@ -332,7 +329,6 @@ class IoTMQTT:
                 time.sleep(0.5)
                 continue
 
-        print("finished _send_common")
         gc.collect()
 
     def _get_device_settings(self) -> None:
