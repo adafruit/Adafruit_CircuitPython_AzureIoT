@@ -76,7 +76,7 @@ To use this library, you will need to create an ESP32_SPI WifiManager, connected
 
     # Wait for a valid time to be received
     while not ntp.valid_time:
-        time.sleep(0.1)
+        time.sleep(5)
         ntp.set_time()
 
 Azure IoT Hub

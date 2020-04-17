@@ -33,7 +33,7 @@ wifi.connect()
 ntp = NTP(esp)
 # Wait for a valid time to be received
 while not ntp.valid_time:
-    time.sleep(0.1)
+    time.sleep(5)
     ntp.set_time()
 
 # You will need an Azure subscription to create an Azure IoT Hub resource

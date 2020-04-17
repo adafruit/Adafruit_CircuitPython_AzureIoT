@@ -106,8 +106,6 @@ class IoTMQTT:
     """MQTT client for Azure IoT
     """
 
-    _iotc_api_version = constants.IOTC_API_VERSION
-
     def _gen_sas_token(self) -> str:
         token_expiry = int(time.time() + self._token_expires)
         uri = self._hostname + "%2Fdevices%2F" + self._device_id
@@ -365,7 +363,7 @@ class IoTMQTT:
         self._hostname = hostname
         self._key = key
         self._token_expires = token_expires
-        self._username = "{}/{}/api-version={}".format(self._hostname, device_id, self._iotc_api_version)
+        self._username = "{}/{}/api-version={}".format(self._hostname, device_id, constants.IOTC_API_VERSION)
         self._passwd = self._gen_sas_token()
         self._logger = logger if logger is not None else logging.getLogger("log")
         self._is_subscribed_to_twins = False

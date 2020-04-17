@@ -32,7 +32,7 @@ wifi.connect()
 ntp = NTP(esp)
 # Wait for a valid time to be received
 while not ntp.valid_time:
-    time.sleep(0.1)
+    time.sleep(5)
     ntp.set_time()
 
 # To use Azure IoT Central, you will need to create an IoT Central app.

@@ -61,8 +61,6 @@ class DeviceRegistration:
     to IoT Central over MQTT
     """
 
-    _dps_endpoint = constants.DPS_END_POINT
-    _dps_api_version = constants.DPS_API_VERSION
     _loop_interval = 2
 
     @staticmethod
@@ -108,11 +106,11 @@ class DeviceRegistration:
 
     def _loop_assign(self, operation_id, headers) -> str:
         uri = "https://%s/%s/registrations/%s/operations/%s?api-version=%s" % (
-            self._dps_endpoint,
+            constants.DPS_END_POINT,
             self._id_scope,
             self._device_id,
             operation_id,
-            self._dps_api_version,
+            constants.DPS_API_VERSION,
         )
         self._logger.info("- iotc :: _loop_assign :: " + uri)
         target = parse.urlparse(uri)
@@ -227,10 +225,10 @@ class DeviceRegistration:
         body = {"registrationId": self._device_id}
 
         uri = "https://%s/%s/registrations/%s/register?api-version=%s" % (
-            self._dps_endpoint,
+            constants.DPS_END_POINT,
             self._id_scope,
             self._device_id,
-            self._dps_api_version,
+            constants.DPS_API_VERSION,
         )
         target = parse.urlparse(uri)
 
@@ -244,7 +242,7 @@ class DeviceRegistration:
         try:
             data = response.json()
         except ValueError as e:
-            err = "ERROR: non JSON is received from " + self._dps_endpoint + " => " + str(response) + " .. message : " + str(e)
+            err = "ERROR: non JSON is received from " + constants.DPS_END_POINT + " => " + str(response) + " .. message : " + str(e)
             self._logger.error(err)
             raise DeviceRegistrationError(err)
 
