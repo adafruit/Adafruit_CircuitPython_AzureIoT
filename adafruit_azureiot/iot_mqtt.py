@@ -426,43 +426,12 @@ class IoTMQTT:
         self._mqtt_connected = False
         self._mqtts.disconnect()
 
-    # Workaround for https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT/issues/26
-    def _fix_broker_name(self, hostname):
-        try:  # set broker IP
-            self._mqtts.broker = self._iface.unpretty_ip(hostname)
-        except ValueError:  # set broker URL
-            self._mqtts.broker = hostname
-
     def reconnect(self) -> None:
         """Reconnects to the MQTT broker
         """
         self._logger.info("- iot_mqtt :: reconnect :: ")
 
-        self._auth_response_received = None
-
-        # Workaround for https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT/issues/25
-        # Workaround for https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT/issues/26
-        # Workaround for https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT/issues/28
-        try:
-            self._fix_broker_name(self._hostname)
-            self._mqtts.connect()
-        except ValueError:
-            self._fix_broker_name("https://" + self._hostname)
-            self._mqtts.connect()
-
-        self._logger.info("- iot_mqtt :: waiting for auth...")
-
-        while self._auth_response_received is None:
-            self.loop()
-
-        self._logger.info("- iot_mqtt :: authed, subscribing...")
-
-        # Resubscribe
-        self._subscribe_to_core_topics()
-        if self._is_subscribed_to_twins:
-            self._subscribe_to_twin_topics()
-
-        self._logger.info("- iot_mqtt :: resubscribed")
+        self._mqtts.reconnect()
 
     def is_connected(self) -> bool:
         """Gets if there is an open connection to the MQTT broker
