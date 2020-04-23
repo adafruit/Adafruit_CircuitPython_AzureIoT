@@ -44,7 +44,6 @@ Dependencies
 This driver depends on:
 
 * `Adafruit CircuitPython <https://github.com/adafruit/circuitpython>`_
-* `Adafruit CircuitPython ESP32 SPI <https://github.com/adafruit/Adafruit_CircuitPython_ESP32SPI>`_
 * `Adafruit CircuitPython MiniMQTT <https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT>`_
 
 * `CircuitPython Base64 <https://github.com/jimbobbennett/CircuitPython_Base64>`_

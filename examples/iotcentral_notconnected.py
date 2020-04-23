@@ -82,7 +82,16 @@ print("Time:", str(time.time()))
 # 'id_scope' - the devices ID scope
 # 'device_id' - the devices device id
 # 'key' - the devices primary key
-
+#
+# The adafruit-circuitpython-azureiot library depends on the following libraries:
+#
+# From the Adafruit CircuitPython Bundle (https://github.com/adafruit/Adafruit_CircuitPython_Bundle):
+# * adafruit-circuitpython-minimqtt
+#
+# From the CircuitPython Community LIbrary and Driver Bundle (https://github.com/adafruit/CircuitPython_Community_Bundle):
+# * circuitpython-hmac
+# * circuitpython-base64
+# * circuitpython-parse
 from adafruit_azureiot import IoTCentralDevice, IoTError
 
 # Create an IoT Hub device client and connect

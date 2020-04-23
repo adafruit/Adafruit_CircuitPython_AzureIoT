@@ -77,7 +77,16 @@ print("Time:", str(time.time()))
 #
 # Once you have a hub and a device, copy the device primary connection string.
 # Add it to the secrets.py file in an entry called device_connection_string
-
+#
+# The adafruit-circuitpython-azureiot library depends on the following libraries:
+#
+# From the Adafruit CircuitPython Bundle (https://github.com/adafruit/Adafruit_CircuitPython_Bundle):
+# * adafruit-circuitpython-minimqtt
+#
+# From the CircuitPython Community LIbrary and Driver Bundle (https://github.com/adafruit/CircuitPython_Community_Bundle):
+# * circuitpython-hmac
+# * circuitpython-base64
+# * circuitpython-parse
 from adafruit_azureiot import IoTHubDevice
 
 # Create an IoT Hub device client and connect

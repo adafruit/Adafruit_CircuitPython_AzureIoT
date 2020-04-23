@@ -79,7 +79,16 @@ print("Time:", str(time.time()))
 #
 # To us twins, you will need either a free or standard tier IoT Hub. Basic tier doesn't
 # support twins
-
+#
+# The adafruit-circuitpython-azureiot library depends on the following libraries:
+#
+# From the Adafruit CircuitPython Bundle (https://github.com/adafruit/Adafruit_CircuitPython_Bundle):
+# * adafruit-circuitpython-minimqtt
+#
+# From the CircuitPython Community LIbrary and Driver Bundle (https://github.com/adafruit/CircuitPython_Community_Bundle):
+# * circuitpython-hmac
+# * circuitpython-base64
+# * circuitpython-parse
 from adafruit_azureiot import IoTHubDevice
 
 # Create an IoT Hub device client and connect
