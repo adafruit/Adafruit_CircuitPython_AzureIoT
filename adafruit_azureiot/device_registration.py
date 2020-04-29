@@ -203,7 +203,7 @@ class DeviceRegistration:
         :raises DeviceRegistrationError: if the device cannot be registered successfully
         :raises RuntimeError: if the internet connection is not responding or is unable to connect
         """
-        # pylint: disable=c0103
+        # pylint: disable=C0103
         sr = self._id_scope + "%2Fregistrations%2F" + self._device_id
         sig_no_encode = DeviceRegistration.compute_derived_symmetric_key(self._key, sr + "\n" + str(expiry))
         sig_encoded = parse.quote(sig_no_encode, "~()*!.'")
@@ -237,8 +237,8 @@ class DeviceRegistration:
         data = None
         try:
             data = response.json()
-        except ValueError as e:
-            err = "ERROR: non JSON is received from " + constants.DPS_END_POINT + " => " + str(response) + " .. message : " + str(e)
+        except ValueError as error:
+            err = "ERROR: non JSON is received from " + constants.DPS_END_POINT + " => " + str(response) + " .. message : " + str(error)
             self._logger.error(err)
             raise DeviceRegistrationError(err)
 
