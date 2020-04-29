@@ -85,7 +85,16 @@ To interact with Azure IoT Hub, you will need to create a hub, and a register a 
 
 - Open the `Azure Portal <https://aka.ms/AzurePortalHome>`_. 
 - Follow the instructions in `Microsoft Docs <https://aka.ms/CreateIoTHub>`_ to create an Azure IoT Hub and register a device.
-- Copy the devices Primary Key, and add this to your ``secrets.py`` file.
+- Copy the devices Primary or secondary connection string, and add this to your ``secrets.py`` file.
+
+You can find the device connection string by selecting the IoT Hub in the `Azure Portal <https://aka.ms/AzurePortalHome>`_, *selecting Explorer -> IoT devices*, then selecting your device.
+
+:: images/iot-hub-device.png
+   :alt: Locating the device in the IoT hub blade
+
+Then copy either the primary or secondary connection string using the copy button next to the value.
+
+:: images/iot-hub-device-keys.png
 
 **Connect your device to Azure IoT Hub**
 
@@ -162,7 +171,30 @@ To use Azure IoT Central, you will need to create an Azure IoT Central app, crea
 - Head to `Azure IoT Central <https://apps.azureiotcentral.com/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__ 
 - Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-deploy-iot-central?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__ to create an application. Every tier is free for up to 2 devices.
 - Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-create-simulated-device?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__ to create a device template.
-- Create a device based off the template, and select **Connect** to get the device connection details. Store the ID Scope, Device ID and Primary Key in your ``secrets.py`` file.
+- Create a device based off the template, and select **Connect** to get the device connection details. Store the ID Scope, Device ID and either the Primary or secondary Key in your ``secrets.py`` file.
+
+.. image:: images/iot-central-connect-button.png
+   :alt: The IoT Central connect button
+
+*The connect button*
+
+.. image:: images/iot-central-connect-dialog.png
+   :alt: The IoT Central connection details dialog
+
+*The connection details dialog*
+
+.. code-block:: python
+
+    secrets = {
+        # WiFi settings
+        "ssid": "",
+        "password": "",
+
+        # Azure IoT Central settings
+        "id_scope": "",
+        "device_id": "",
+        "key": ""
+    }
 
 **Connect your device to your Azure IoT Central app**
 
