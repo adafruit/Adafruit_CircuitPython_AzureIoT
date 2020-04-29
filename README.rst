@@ -89,14 +89,14 @@ To interact with Azure IoT Hub, you will need to create a hub, and a register a 
 
 You can find the device connection string by selecting the IoT Hub in the `Azure Portal <https://aka.ms/AzurePortalHome>`_, *selecting Explorer -> IoT devices*, then selecting your device.
 
-.. image:: images/iot-hub-device.png
+.. image:: iot-hub-device.png
    :alt: Locating the device in the IoT hub blade
 
 *Locating the device in the IoT hub blade*
 
 Then copy either the primary or secondary connection string using the copy button next to the value.
 
-.. image:: images/iot-hub-device-keys.png
+.. image:: iot-hub-device-keys.png
    :alt: Copy the primary connection string
 
 *Copy the primary connection string*
@@ -178,12 +178,12 @@ To use Azure IoT Central, you will need to create an Azure IoT Central app, crea
 - Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-create-simulated-device?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__ to create a device template.
 - Create a device based off the template, and select **Connect** to get the device connection details. Store the ID Scope, Device ID and either the Primary or secondary Key in your ``secrets.py`` file.
 
-.. image:: images/iot-central-connect-button.png
+.. image:: iot-central-connect-button.png
    :alt: The IoT Central connect button
 
 *The connect button*
 
-.. image:: images/iot-central-connect-dialog.png
+.. image:: iot-central-connect-dialog.png
    :alt: The IoT Central connection details dialog
 
 *The connection details dialog*
