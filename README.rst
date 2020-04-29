@@ -89,12 +89,17 @@ To interact with Azure IoT Hub, you will need to create a hub, and a register a 
 
 You can find the device connection string by selecting the IoT Hub in the `Azure Portal <https://aka.ms/AzurePortalHome>`_, *selecting Explorer -> IoT devices*, then selecting your device.
 
-:: images/iot-hub-device.png
+.. images/iot-hub-device.png
    :alt: Locating the device in the IoT hub blade
+
+*Locating the device in the IoT hub blade*
 
 Then copy either the primary or secondary connection string using the copy button next to the value.
 
-:: images/iot-hub-device-keys.png
+.. images/iot-hub-device-keys.png
+   :alt: Copy the primary connection string
+
+*Copy the primary connection string*
 
 **Connect your device to Azure IoT Hub**
 
