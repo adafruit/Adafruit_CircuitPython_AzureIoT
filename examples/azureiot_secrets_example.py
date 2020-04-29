@@ -15,7 +15,6 @@ secrets = {
     # WiFi settings
     "ssid": "",
     "password": "",
-
     # Azure IoT Central settings - if you are connecting to Azure IoT Central, fill in these three values
     # To get these values, select your device in Azure IoT Central,
     # then select the Connect button
@@ -26,7 +25,6 @@ secrets = {
     "id_scope": "",
     "device_id": "",
     "key": "",
-
     # Azure IoT Hub settings - if you are connecting to Azure IoT Hub, fill in this value
     # To get this value, from the Azure Portal (https://aka.ms/AzurePortalHome), select your IoT Hub,
     # then select Explorers -> IoT devices, select your device, then copy the entire primary or secondary
