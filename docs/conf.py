@@ -21,7 +21,7 @@ extensions = [
 # Uncomment the below if you use native CircuitPython modules such as
 # digitalio, micropython and busio. List the modules you use. Without it, the
 # autodoc module docs will fail to generate with a warning.
-# autodoc_mock_imports = ["digitalio", "busio"]
+autodoc_mock_imports = ["adafruit_logging", "adafruit_requests", "adafruit_hashlib", "adafruit_ntp"]
 
 
 intersphinx_mapping = {
@@ -39,8 +39,8 @@ master_doc = "index"
 
 # General information about the project.
 project = "Adafruit AzureIoT Library"
-copyright = "2019 Brent Rubell"
-author = "Brent Rubell"
+copyright = "2019 Brent Rubell, Jim Bennett, Elena Horton"
+author = "Brent Rubell, Jim Bennett, Elena Horton"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -137,28 +137,14 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (
-        master_doc,
-        "AdafruitAzureIoTLibrary.tex",
-        "AdafruitAzureIoT Library Documentation",
-        author,
-        "manual",
-    ),
+    (master_doc, "AdafruitAzureIoTLibrary.tex", "AdafruitAzureIoT Library Documentation", author, "manual",),
 ]
 
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (
-        master_doc,
-        "AdafruitAzureIoTlibrary",
-        "Adafruit AzureIoT Library Documentation",
-        [author],
-        1,
-    )
-]
+man_pages = [(master_doc, "AdafruitAzureIoTlibrary", "Adafruit AzureIoT Library Documentation", [author], 1,)]
 
 # -- Options for Texinfo output -------------------------------------------
 

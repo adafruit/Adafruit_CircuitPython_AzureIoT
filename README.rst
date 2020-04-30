@@ -13,8 +13,7 @@ Adafruit_CircuitPython_AzureIoT
     :target: https://github.com/adafruit/Adafruit_CircuitPython_AzureIoT/actions/
     :alt: Build Status
 
-Access to `Microsoft Azure IoT <https://azure.microsoft.com/en-us/overview/iot/>`_ from a CircuitPython device. This library can perform device
-messaging services (cloud-to-device, device-to-cloud), device services, and job services.
+A CircuitPython device library for `Microsoft Azure IoT Services <https://azure.microsoft.com/overview/iot/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_ from a CircuitPython device. This library only supports key-base authentication, it currently doesn't support X.509 certificates.
 
 Installing from PyPI
 =====================
@@ -45,49 +44,222 @@ Dependencies
 This driver depends on:
 
 * `Adafruit CircuitPython <https://github.com/adafruit/circuitpython>`_
+* `Adafruit CircuitPython MiniMQTT <https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT>`_
+
+* `CircuitPython Base64 <https://github.com/jimbobbennett/CircuitPython_Base64>`_
+* `CircuitPython HMAC <https://github.com/jimbobbennett/CircuitPython_HMAC>`_
+* `CircuitPython Parse <https://github.com/jimbobbennett/CircuitPython_Parse>`_
 
 Please ensure all dependencies are available on the CircuitPython filesystem.
 This is easily achieved by downloading
-`the Adafruit library and driver bundle <https://github.com/adafruit/Adafruit_CircuitPython_Bundle>`_.
+`the Adafruit library and driver bundle <https://github.com/adafruit/Adafruit_CircuitPython_Bundle>`_
+and
+`the CircuitPython community library and driver bundle <https://github.com/adafruit/CircuitPython_Community_Bundle>`_
 
 Usage Example
 =============
 
-Create an instance of an Azure IoT Hub (you'll need your SAS Token).
+This library supports both `Azure IoT Hub <https://azure.microsoft.com/services/iot-hub/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_ and `Azure IoT Central <https://azure.microsoft.com/services/iot-central/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__.
+
+To create an Azure IoT Hub instance or an Azure IoT Central app, you will need an Azure subscription. If you don't have an Azure subscription, you can sign up for free:
+
+- If you are a student 18 or over, head to `aka.ms/FreeStudentAzure <https://aka.ms/FreeStudentAzure>`_ and sign up, validating with your student email address. This will give you $100 of Azure credit and free tiers of a load of service, renewable each year you are a student. You will not need a credit card.
+
+- If you are not a student, head to `aka.ms/FreeAz <https://aka.ms/FreeAz>`_ and sign up to get $200 of credit for 30 days, as well as free tiers of a load of services. You will need a credit card for validation only, your card will not be charged.
+
+To use this library, you will need to create an ESP32_SPI WifiManager, connected to WiFi. You will also need to set the current time, as this is used to generate time-based authentication keys. One way to do this is via the `Adafruit CircuitPython NTP <https://github.com/adafruit/Adafruit_CircuitPython_NTP>`_ library with the following code:
 
 .. code-block:: python
 
-    my_hub = IOT_HUB(wifi, 'Azure_IOT_Hub_Name', 'Azure_IOT_Hub_SAS_Token', 'Azure_Device_Identifier')
+    ntp = NTP(esp)
 
-Send a device-to-cloud message
+    # Wait for a valid time to be received
+    while not ntp.valid_time:
+        time.sleep(5)
+        ntp.set_time()
+
+Azure IoT Hub
+-------------
+
+To interact with Azure IoT Hub, you will need to create a hub, and a register a device inside that hub. There is a free tier available, and this free tier allows up to 8,000 messages a day, so try not to send messages too often if you are using this tier.
+
+- Open the `Azure Portal <https://aka.ms/AzurePortalHome>`_. 
+- Follow the instructions in `Microsoft Docs <https://aka.ms/CreateIoTHub>`_ to create an Azure IoT Hub and register a device.
+- Copy the devices Primary or secondary connection string, and add this to your ``secrets.py`` file.
+
+You can find the device connection string by selecting the IoT Hub in the `Azure Portal <https://aka.ms/AzurePortalHome>`_, *selecting Explorer -> IoT devices*, then selecting your device.
+
+.. image:: iot-hub-device.png
+   :alt: Locating the device in the IoT hub blade
+
+*Locating the device in the IoT hub blade*
+
+Then copy either the primary or secondary connection string using the copy button next to the value.
+
+.. image:: iot-hub-device-keys.png
+   :alt: Copy the primary connection string
+
+*Copy the primary connection string*
+
+**Connect your device to Azure IoT Hub**
 
 .. code-block:: python
 
-    my_hub.send_device_message('Hello Azure IoT!')
+    from adafruit_azureiot import IoTHubDevice
 
-Enumerate all devices on an Azure IOT Hub
+    device = IoTHubDevice(wifi, secrets["device_connection_string"])
+    device.connect()
 
-.. code-block:: python
-
-    hub_devices = my_hub.get_devices()
-
-Get information about the current device on an Azure IoT Hub
+Once the device is connected, you will regularly need to run a ``loop`` to poll for messages from the cloud.
 
 .. code-block:: python
 
-    device_info = my_hub.get_device()
+    while True:
+        device.loop()
+        time.sleep(1)
 
-Get information about the current device's device twin
-
-.. code-block:: python
-
-    twin_info = my_hub.get_device_twin()
-
-Update the current device's device twin properties
+**Send a device to cloud message**
 
 .. code-block:: python
 
-    my_hub.update_device_twin(device_properties)
+    message = {"Temperature": temp}
+    device.send_device_to_cloud_message(json.dumps(message))
+
+**Receive device to cloud messages**
+
+.. code-block:: python
+
+    def cloud_to_device_message_received(body: str, properties: dict):
+        print("Received message with body", body, "and properties", json.dumps(properties))
+
+    # Subscribe to cloud to device messages
+    device.on_cloud_to_device_message_received = cloud_to_device_message_received
+
+**Receive direct methods**
+
+.. code-block:: python
+
+    def direct_method_invoked(method_name: str, payload) -> IoTResponse:
+        print("Received direct method", method_name, "with data", str(payload))
+        # return a status code and message to indicate if the direct method was handled correctly
+        return IoTResponse(200, "OK")
+
+    # Subscribe to direct methods
+    device.on_direct_method_invoked = direct_method_invoked
+
+**Update reported properties on the device twin**
+
+*This is not supported on Basic tier IoT Hubs, only on the free and standard tiers.*
+
+.. code-block:: python
+
+    patch = {"Temperature": temp}
+    device.update_twin(patch)
+
+**Subscribe to desired property changes on the device twin**
+
+*This is not supported on Basic tier IoT Hubs, only on the free and standard tiers.*
+
+.. code-block:: python
+
+    def device_twin_desired_updated(desired_property_name: str, desired_property_value, desired_version: int):
+        print("Property", desired_property_name, "updated to", str(desired_property_value), "version", desired_version)
+
+    # Subscribe to desired property changes
+    device.on_device_twin_desired_updated = device_twin_desired_updated
+
+Azure IoT Central
+-----------------
+
+To use Azure IoT Central, you will need to create an Azure IoT Central app, create a device template and register a device against the template.
+
+- Head to `Azure IoT Central <https://apps.azureiotcentral.com/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__ 
+- Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-deploy-iot-central?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__ to create an application. Every tier is free for up to 2 devices.
+- Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-create-simulated-device?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__ to create a device template.
+- Create a device based off the template, and select **Connect** to get the device connection details. Store the ID Scope, Device ID and either the Primary or secondary Key in your ``secrets.py`` file.
+
+.. image:: iot-central-connect-button.png
+   :alt: The IoT Central connect button
+
+*The connect button*
+
+.. image:: iot-central-connect-dialog.png
+   :alt: The IoT Central connection details dialog
+
+*The connection details dialog*
+
+.. code-block:: python
+
+    secrets = {
+        # WiFi settings
+        "ssid": "",
+        "password": "",
+
+        # Azure IoT Central settings
+        "id_scope": "",
+        "device_id": "",
+        "key": ""
+    }
+
+**Connect your device to your Azure IoT Central app**
+
+.. code-block:: python
+
+    from adafruit_azureiot import IoTCentralDevice
+
+    device = IoTCentralDevice(wifi, secrets["id_scope"], secrets["device_id"], secrets["key"])
+    device.connect()
+
+Once the device is connected, you will regularly need to run a ``loop`` to poll for messages from the cloud.
+
+.. code-block:: python
+
+    while True:
+        device.loop()
+        time.sleep(1)
+
+**Send telemetry**
+
+.. code-block:: python
+
+    message = {"Temperature": temp}
+    device.send_telemetry(json.dumps(message))
+
+**Listen for commands**
+
+.. code-block:: python
+
+    def command_executed(command_name: str, payload) -> IoTResponse:
+        print("Command", command_name, "executed with payload", str(payload))
+        # return a status code and message to indicate if the command was handled correctly
+        return IoTResponse(200, "OK")
+
+    # Subscribe to commands
+    device.on_command_executed = command_executed
+
+**Update properties**
+
+.. code-block:: python
+
+    device.send_property("Desired_Temperature", temp)
+
+**Listen for property updates**
+
+.. code-block:: python
+
+    def property_changed(property_name, property_value, version):
+        print("Property", property_name, "updated to", str(property_value), "version", str(version))
+
+    # Subscribe to property updates
+    device.on_property_changed = property_changed
+
+Learning more about Azure IoT services
+--------------------------------------
+
+If you want to learn more about setting up or using Azure IoT Services, check out the following resources:
+
+- `Azure IoT documentation on Microsoft Docs <https://docs.microsoft.com/azure/iot-fundamentals/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_
+- `IoT learning paths and modules on Microsoft Learn <https://docs.microsoft.com/learn/browse/?term=iot&WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_ - Free, online, self-guided hands on learning with Azure IoT services
 
 Contributing
 ============
