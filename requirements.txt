@@ -1,3 +1,4 @@
 Adafruit-Blinka
 Adafruit-CircuitPython-miniMQTT
 Adafruit-CircuitPython-Requests
+Adafruit-CircuitPython-Binascii

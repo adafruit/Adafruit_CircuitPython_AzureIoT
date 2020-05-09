@@ -29,7 +29,12 @@ setup(
     # Author details
     author="Adafruit Industries",
     author_email="circuitpython@adafruit.com",
-    install_requires=["Adafruit-Blinka", "Adafruit-CircuitPython-miniMQTT", "Adafruit-CircuitPython-Requests"],
+    install_requires=[
+        "Adafruit-Blinka",
+        "Adafruit-CircuitPython-miniMQTT",
+        "Adafruit-CircuitPython-Requests",
+        "Adafruit-CircuitPython-Binascii",
+    ],
     # Choose your license
     license="MIT",
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
