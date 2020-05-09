@@ -47,7 +47,6 @@ This driver depends on:
 * `Adafruit CircuitPython MiniMQTT <https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT>`_
 
 * `CircuitPython Base64 <https://github.com/jimbobbennett/CircuitPython_Base64>`_
-* `CircuitPython HMAC <https://github.com/jimbobbennett/CircuitPython_HMAC>`_
 * `CircuitPython Parse <https://github.com/jimbobbennett/CircuitPython_Parse>`_
 
 Please ensure all dependencies are available on the CircuitPython filesystem.

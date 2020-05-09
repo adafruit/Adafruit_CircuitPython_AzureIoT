@@ -32,14 +32,12 @@ to IoT Central over MQTT
 import gc
 import json
 import time
-import circuitpython_base64 as base64
-import circuitpython_hmac as hmac
 import circuitpython_parse as parse
 import adafruit_requests as requests
 import adafruit_logging as logging
 from adafruit_logging import Logger
-import adafruit_hashlib as hashlib
 from . import constants
+from .keys import compute_derived_symmetric_key
 
 # Azure HTTP error status codes
 AZURE_HTTP_ERROR_CODES = [400, 401, 404, 403, 412, 429, 500]
@@ -88,17 +86,6 @@ class DeviceRegistration:
         self._logger = logger if logger is not None else logging.getLogger("log")
 
         requests.set_socket(socket)
-
-    @staticmethod
-    def compute_derived_symmetric_key(secret: str, msg: str) -> bytes:
-        """Computes a derived symmetric key from a secret and a message
-        :param str secret: The secret to use for the key
-        :param str msg: The message to use for the key
-        :returns: The derived symmetric key
-        :rtype: bytes
-        """
-        secret = base64.b64decode(secret)
-        return base64.b64encode(hmac.new(secret, msg=msg.encode("utf8"), digestmod=hashlib.sha256).digest())
 
     def _loop_assign(self, operation_id, headers) -> str:
         uri = "https://%s/%s/registrations/%s/operations/%s?api-version=%s" % (
@@ -205,7 +192,7 @@ class DeviceRegistration:
         """
         # pylint: disable=C0103
         sr = self._id_scope + "%2Fregistrations%2F" + self._device_id
-        sig_no_encode = DeviceRegistration.compute_derived_symmetric_key(self._key, sr + "\n" + str(expiry))
+        sig_no_encode = compute_derived_symmetric_key(self._key, sr + "\n" + str(expiry))
         sig_encoded = parse.quote(sig_no_encode, "~()*!.'")
         auth_string = "SharedAccessSignature sr=" + sr + "&sig=" + sig_encoded + "&se=" + str(expiry) + "&skn=registration"
 

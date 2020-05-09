@@ -33,7 +33,6 @@ setup(
         "Adafruit-Blinka",
         "Adafruit_CircuitPython_ESP32SPI",
         "Adafruit-CircuitPython-miniMQTT",
-        "CircuitPython-HMAC",
         "CircuitPython-Base64",
         "CircuitPython-Parse",
     ],
