@@ -33,10 +33,10 @@ import json
 import time
 import adafruit_minimqtt as minimqtt
 from adafruit_minimqtt import MQTT
-import circuitpython_parse as parse
 import adafruit_logging as logging
 from .iot_error import IoTError
 from .keys import compute_derived_symmetric_key
+from .quote import quote
 from . import constants
 
 # pylint: disable=R0903
@@ -108,7 +108,7 @@ class IoTMQTT:
         token_expiry = int(time.time() + self._token_expires)
         uri = self._hostname + "%2Fdevices%2F" + self._device_id
         signed_hmac_sha256 = compute_derived_symmetric_key(self._key, uri + "\n" + str(token_expiry))
-        signature = parse.quote(signed_hmac_sha256, "~()*!.'")
+        signature = quote(signed_hmac_sha256, "~()*!.'")
         if signature.endswith("\n"):  # somewhere along the crypto chain a newline is inserted
             signature = signature[:-1]
         token = "SharedAccessSignature sr={}&sig={}&se={}".format(uri, signature, token_expiry)
@@ -447,6 +447,7 @@ class IoTMQTT:
             return
 
         self._mqtts.loop()
+        gc.collect()
 
     def send_device_to_cloud_message(self, message, system_properties: dict = None) -> None:
         """Send a device to cloud message from this device to Azure IoT Hub

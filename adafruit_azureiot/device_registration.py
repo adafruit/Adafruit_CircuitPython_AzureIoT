@@ -32,11 +32,11 @@ to IoT Central over MQTT
 import gc
 import json
 import time
-import circuitpython_parse as parse
 import adafruit_requests as requests
 import adafruit_logging as logging
 from adafruit_logging import Logger
 from . import constants
+from .quote import quote
 from .keys import compute_derived_symmetric_key
 
 # Azure HTTP error status codes
@@ -96,9 +96,8 @@ class DeviceRegistration:
             constants.DPS_API_VERSION,
         )
         self._logger.info("- iotc :: _loop_assign :: " + uri)
-        target = parse.urlparse(uri)
 
-        response = self._run_get_request_with_retry(target.geturl(), headers)
+        response = self._run_get_request_with_retry(uri, headers)
 
         try:
             data = response.json()
@@ -193,7 +192,7 @@ class DeviceRegistration:
         # pylint: disable=C0103
         sr = self._id_scope + "%2Fregistrations%2F" + self._device_id
         sig_no_encode = compute_derived_symmetric_key(self._key, sr + "\n" + str(expiry))
-        sig_encoded = parse.quote(sig_no_encode, "~()*!.'")
+        sig_encoded = quote(sig_no_encode, "~()*!.'")
         auth_string = "SharedAccessSignature sr=" + sr + "&sig=" + sig_encoded + "&se=" + str(expiry) + "&skn=registration"
 
         headers = {
@@ -213,13 +212,12 @@ class DeviceRegistration:
             self._device_id,
             constants.DPS_API_VERSION,
         )
-        target = parse.urlparse(uri)
 
         self._logger.info("Connecting...")
-        self._logger.info("URL: " + target.geturl())
+        self._logger.info("URL: " + uri)
         self._logger.info("body: " + json.dumps(body))
 
-        response = self._run_put_request_with_retry(target.geturl(), body, headers)
+        response = self._run_put_request_with_retry(uri, body, headers)
 
         data = None
         try:

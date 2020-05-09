@@ -87,11 +87,7 @@ print("Time:", str(time.time()))
 #
 # From the Adafruit CircuitPython Bundle (https://github.com/adafruit/Adafruit_CircuitPython_Bundle):
 # * adafruit-circuitpython-minimqtt
-#
-# From the CircuitPython Community LIbrary and Driver Bundle (https://github.com/adafruit/CircuitPython_Community_Bundle):
-# * circuitpython-hmac
-# * circuitpython-base64
-# * circuitpython-parse
+# * adafruit-circuitpython-requests
 from adafruit_azureiot import IoTCentralDevice
 
 # Create an IoT Hub device client and connect

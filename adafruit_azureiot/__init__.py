@@ -37,9 +37,6 @@ Implementation Notes
 
 * Adafruit's Bus Device library: https://github.com/adafruit/Adafruit_CircuitPython_BusDevice
 * Adafruit's ESP32SPI library: https://github.com/adafruit/Adafruit_CircuitPython_ESP32SPI
-* Community HMAC library: https://github.com/jimbobbennett/CircuitPython_HMAC
-* Community base64 library: https://github.com/jimbobbennett/CircuitPython_Base64
-* Community Parse library: https://github.com/jimbobbennett/CircuitPython_Parse
 """
 
 from .iot_error import IoTError

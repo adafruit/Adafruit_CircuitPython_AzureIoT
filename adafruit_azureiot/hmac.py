@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 """
-`circuitpython_hmac`
+`HMAC`
 ================================================================================
 
 HMAC (Keyed-Hashing for Message Authentication) Python module.

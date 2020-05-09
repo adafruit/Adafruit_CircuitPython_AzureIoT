@@ -31,10 +31,8 @@ setup(
     author_email="circuitpython@adafruit.com",
     install_requires=[
         "Adafruit-Blinka",
-        "Adafruit_CircuitPython_ESP32SPI",
         "Adafruit-CircuitPython-miniMQTT",
-        "CircuitPython-Base64",
-        "CircuitPython-Parse",
+        "Adafruit-CircuitPython-Requests"
     ],
     # Choose your license
     license="MIT",
