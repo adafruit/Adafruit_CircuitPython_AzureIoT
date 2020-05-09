@@ -235,6 +235,7 @@ class IoTMQTT:
             method_name = topic[len_temp : topic.find("/", len_temp + 1)]
 
         ret = self._callback.direct_method_invoked(method_name, msg)
+        gc.collect()
 
         ret_code = 200
         ret_message = "{}"
@@ -261,13 +262,14 @@ class IoTMQTT:
             properties[key_value[0]] = key_value[1]
 
         self._callback.cloud_to_device_message_received(msg, properties)
+        gc.collect()
 
     # pylint: disable=W0702, R0912
     def _on_message(self, client, msg_topic, payload) -> None:
         topic = ""
         msg = None
 
-        self._logger.info("- iot_mqtt :: _on_message :: payload(" + str(payload) + ")")
+        self._logger.info("- iot_mqtt :: _on_message")
 
         if payload is not None:
             try:
