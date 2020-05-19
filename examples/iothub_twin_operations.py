@@ -29,9 +29,7 @@ spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 
 """Use below for Most Boards"""
-status_light = neopixel.NeoPixel(
-    board.NEOPIXEL, 1, brightness=0.2
-)  # Uncomment for Most Boards
+status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2)  # Uncomment for Most Boards
 """Uncomment below for ItsyBitsy M4"""
 # status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
 # Uncomment below for an externally defined RGB LED
@@ -100,16 +98,9 @@ device = IoTHubDevice(socket, esp, secrets["device_connection_string"])
 # To see these changes, update the desired properties for the device either in code
 # or in the Azure portal by selecting the device in the IoT Hub blade, selecting
 # Device Twin then adding or amending an entry in the 'desired' section
-def device_twin_desired_updated(
-    desired_property_name: str, desired_property_value, desired_version: int
-):
+def device_twin_desired_updated(desired_property_name: str, desired_property_value, desired_version: int):
     print(
-        "Property",
-        desired_property_name,
-        "updated to",
-        str(desired_property_value),
-        "version",
-        desired_version,
+        "Property", desired_property_name, "updated to", str(desired_property_value), "version", desired_version,
     )
 
 

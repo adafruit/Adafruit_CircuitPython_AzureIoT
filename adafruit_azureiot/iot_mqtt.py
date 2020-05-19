@@ -84,21 +84,14 @@ class IoTMQTTCallback:
         :param dict properties: The propreties sent with the mesage
         """
 
-    def device_twin_desired_updated(
-        self, desired_property_name: str, desired_property_value, desired_version: int
-    ) -> None:
+    def device_twin_desired_updated(self, desired_property_name: str, desired_property_value, desired_version: int) -> None:
         """Called when the device twin desired properties are updated
         :param str desired_property_name: The name of the desired property that was updated
         :param desired_property_value: The value of the desired property that was updated
         :param int desired_version: The version of the desired property that was updated
         """
 
-    def device_twin_reported_updated(
-        self,
-        reported_property_name: str,
-        reported_property_value,
-        reported_version: int,
-    ) -> None:
+    def device_twin_reported_updated(self, reported_property_name: str, reported_property_value, reported_version: int,) -> None:
         """Called when the device twin reported values are updated
         :param str reported_property_name: The name of the reported property that was updated
         :param reported_property_value: The value of the reported property that was updated
@@ -114,17 +107,11 @@ class IoTMQTT:
     def _gen_sas_token(self) -> str:
         token_expiry = int(time.time() + self._token_expires)
         uri = self._hostname + "%2Fdevices%2F" + self._device_id
-        signed_hmac_sha256 = DeviceRegistration.compute_derived_symmetric_key(
-            self._key, uri + "\n" + str(token_expiry)
-        )
+        signed_hmac_sha256 = DeviceRegistration.compute_derived_symmetric_key(self._key, uri + "\n" + str(token_expiry))
         signature = parse.quote(signed_hmac_sha256, "~()*!.'")
-        if signature.endswith(
-            "\n"
-        ):  # somewhere along the crypto chain a newline is inserted
+        if signature.endswith("\n"):  # somewhere along the crypto chain a newline is inserted
             signature = signature[:-1]
-        token = "SharedAccessSignature sr={}&sig={}&se={}".format(
-            uri, signature, token_expiry
-        )
+        token = "SharedAccessSignature sr={}&sig={}&se={}".format(uri, signature, token_expiry)
         return token
 
     # Workaround for https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT/issues/25
@@ -160,12 +147,7 @@ class IoTMQTT:
 
     # pylint: disable=C0103, W0613
     def _on_connect(self, client, userdata, _, rc) -> None:
-        self._logger.info(
-            "- iot_mqtt :: _on_connect :: rc = "
-            + str(rc)
-            + ", userdata = "
-            + str(userdata)
-        )
+        self._logger.info("- iot_mqtt :: _on_connect :: rc = " + str(rc) + ", userdata = " + str(userdata))
         if rc == 0:
             self._mqtt_connected = True
         self._auth_response_received = True
@@ -192,9 +174,7 @@ class IoTMQTT:
             self._callback.connection_status_change(False)
 
     def _on_publish(self, client, data, topic, msg_id) -> None:
-        self._logger.info(
-            "- iot_mqtt :: _on_publish :: " + str(data) + " on topic " + str(topic)
-        )
+        self._logger.info("- iot_mqtt :: _on_publish :: " + str(data) + " on topic " + str(topic))
 
     # pylint: disable=W0703
     def _handle_device_twin_update(self, msg: str, topic: str) -> None:
@@ -205,12 +185,7 @@ class IoTMQTT:
         try:
             twin = json.loads(msg)
         except json.JSONDecodeError as e:
-            self._logger.error(
-                "ERROR: JSON parse for Device Twin message object has failed. => "
-                + msg
-                + " => "
-                + str(e)
-            )
+            self._logger.error("ERROR: JSON parse for Device Twin message object has failed. => " + msg + " => " + str(e))
             return
 
         if "reported" in twin:
@@ -220,15 +195,11 @@ class IoTMQTT:
                 reported_version = reported["$version"]
                 reported.pop("$version")
             else:
-                self._logger.error(
-                    "ERROR: Unexpected payload for reported twin update => " + msg
-                )
+                self._logger.error("ERROR: Unexpected payload for reported twin update => " + msg)
                 return
 
             for property_name, value in reported.items():
-                self._callback.device_twin_reported_updated(
-                    property_name, value, reported_version
-                )
+                self._callback.device_twin_reported_updated(property_name, value, reported_version)
 
         is_patch = "desired" not in twin
 
@@ -241,15 +212,11 @@ class IoTMQTT:
             desired_version = desired["$version"]
             desired.pop("$version")
         else:
-            self._logger.error(
-                "ERROR: Unexpected payload for desired twin update => " + msg
-            )
+            self._logger.error("ERROR: Unexpected payload for desired twin update => " + msg)
             return
 
         for property_name, value in desired.items():
-            self._callback.device_twin_desired_updated(
-                property_name, value, desired_version
-            )
+            self._callback.device_twin_desired_updated(property_name, value, desired_version)
 
     def _handle_direct_method(self, msg: str, topic: str) -> None:
         index = topic.find("$rid=")
@@ -278,14 +245,7 @@ class IoTMQTT:
                 ret_message = json.dumps(ret_json)
 
         next_topic = "$iothub/methods/res/{}/?$rid={}".format(ret_code, method_id)
-        self._logger.info(
-            "C2D: => "
-            + next_topic
-            + " with data "
-            + ret_message
-            + " and name => "
-            + method_name
-        )
+        self._logger.info("C2D: => " + next_topic + " with data " + ret_message + " and name => " + method_name)
         self._send_common(next_topic, ret_message)
 
     def _handle_cloud_to_device_message(self, msg: str, topic: str) -> None:
@@ -318,18 +278,14 @@ class IoTMQTT:
                 topic = str(msg_topic)
 
         if topic.startswith("$iothub/"):
-            if topic.startswith(
-                "$iothub/twin/PATCH/properties/desired/"
-            ) or topic.startswith("$iothub/twin/res/200/?$rid="):
+            if topic.startswith("$iothub/twin/PATCH/properties/desired/") or topic.startswith("$iothub/twin/res/200/?$rid="):
                 self._handle_device_twin_update(str(msg), topic)
             elif topic.startswith("$iothub/methods"):
                 self._handle_direct_method(str(msg), topic)
             else:
                 if not topic.startswith("$iothub/twin/res/"):  # not twin response
                     self._logger.error("ERROR: unknown twin! - {}".format(msg))
-        elif topic.startswith(
-            "devices/{}/messages/devicebound".format(self._device_id)
-        ):
+        elif topic.startswith("devices/{}/messages/devicebound".format(self._device_id)):
             self._handle_cloud_to_device_message(str(msg), topic)
         else:
             self._logger.error("ERROR: (unknown message) - {}".format(msg))
@@ -355,10 +311,7 @@ class IoTMQTT:
                 self._logger.debug("Data sent")
                 break
             except RuntimeError as runtime_error:
-                self._logger.info(
-                    "Could not send data, retrying after 0.5 seconds: "
-                    + str(runtime_error)
-                )
+                self._logger.info("Could not send data, retrying after 0.5 seconds: " + str(runtime_error))
                 retry = retry + 1
 
                 if retry >= 10:
@@ -407,24 +360,18 @@ class IoTMQTT:
         self._hostname = hostname
         self._key = key
         self._token_expires = token_expires
-        self._username = "{}/{}/api-version={}".format(
-            self._hostname, device_id, constants.IOTC_API_VERSION
-        )
+        self._username = "{}/{}/api-version={}".format(self._hostname, device_id, constants.IOTC_API_VERSION)
         self._passwd = self._gen_sas_token()
         self._logger = logger if logger is not None else logging.getLogger("log")
         self._is_subscribed_to_twins = False
 
     def _subscribe_to_core_topics(self):
         self._mqtts.subscribe("devices/{}/messages/events/#".format(self._device_id))
-        self._mqtts.subscribe(
-            "devices/{}/messages/devicebound/#".format(self._device_id)
-        )
+        self._mqtts.subscribe("devices/{}/messages/devicebound/#".format(self._device_id))
         self._mqtts.subscribe("$iothub/methods/#")
 
     def _subscribe_to_twin_topics(self):
-        self._mqtts.subscribe(
-            "$iothub/twin/PATCH/properties/desired/#"
-        )  # twin desired property changes
+        self._mqtts.subscribe("$iothub/twin/PATCH/properties/desired/#")  # twin desired property changes
         self._mqtts.subscribe("$iothub/twin/res/#")  # twin properties response
 
     def connect(self) -> bool:
@@ -440,10 +387,7 @@ class IoTMQTT:
         while self._auth_response_received is None:
             self.loop()
 
-        self._logger.info(
-            " - iot_mqtt :: connect :: on_connect must be fired. Connected ? "
-            + str(self.is_connected())
-        )
+        self._logger.info(" - iot_mqtt :: connect :: on_connect must be fired. Connected ? " + str(self.is_connected()))
         if not self.is_connected():
             return False
 
@@ -500,9 +444,7 @@ class IoTMQTT:
 
         self._mqtts.loop()
 
-    def send_device_to_cloud_message(
-        self, message, system_properties: dict = None
-    ) -> None:
+    def send_device_to_cloud_message(self, message, system_properties: dict = None) -> None:
         """Send a device to cloud message from this device to Azure IoT Hub
         :param message: The message data as a JSON string or a dictionary
         :param system_properties: System properties to send with the message
@@ -538,7 +480,5 @@ class IoTMQTT:
         :raises RuntimeError: if the internet connection is not responding or is unable to connect
         """
         self._logger.info("- iot_mqtt :: sendProperty :: " + str(patch))
-        topic = "$iothub/twin/PATCH/properties/reported/?$rid={}".format(
-            int(time.time())
-        )
+        topic = "$iothub/twin/PATCH/properties/reported/?$rid={}".format(int(time.time()))
         self._send_common(topic, patch)

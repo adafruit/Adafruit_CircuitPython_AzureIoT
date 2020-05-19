@@ -62,9 +62,7 @@ class IoTCentralDevice(IoTMQTTCallback):
 
         raise IoTError("on_command_executed not set")
 
-    def device_twin_desired_updated(
-        self, desired_property_name: str, desired_property_value, desired_version: int
-    ) -> None:
+    def device_twin_desired_updated(self, desired_property_name: str, desired_property_value, desired_version: int) -> None:
         """Called when the device twin desired properties are updated
         :param str desired_property_name: The name of the desired property that was updated
         :param desired_property_value: The value of the desired property that was updated
@@ -72,19 +70,12 @@ class IoTCentralDevice(IoTMQTTCallback):
         """
         if self.on_property_changed is not None:
             # pylint: disable=E1102
-            self.on_property_changed(
-                desired_property_name, desired_property_value, desired_version
-            )
+            self.on_property_changed(desired_property_name, desired_property_value, desired_version)
 
         # when a desired property changes, update the reported to match to keep them in sync
         self.send_property(desired_property_name, desired_property_value)
 
-    def device_twin_reported_updated(
-        self,
-        reported_property_name: str,
-        reported_property_value,
-        reported_version: int,
-    ) -> None:
+    def device_twin_reported_updated(self, reported_property_name: str, reported_property_value, reported_version: int,) -> None:
         """Called when the device twin reported values are updated
         :param str reported_property_name: The name of the reported property that was updated
         :param reported_property_value: The value of the reported property that was updated
@@ -92,20 +83,11 @@ class IoTCentralDevice(IoTMQTTCallback):
         """
         if self.on_property_changed is not None:
             # pylint: disable=E1102
-            self.on_property_changed(
-                reported_property_name, reported_property_value, reported_version
-            )
+            self.on_property_changed(reported_property_name, reported_property_value, reported_version)
 
     # pylint: disable=R0913
     def __init__(
-        self,
-        socket,
-        iface,
-        id_scope: str,
-        device_id: str,
-        key: str,
-        token_expires: int = 21600,
-        logger: logging = None,
+        self, socket, iface, id_scope: str, device_id: str, key: str, token_expires: int = 21600, logger: logging = None,
     ):
         """Create the Azure IoT Central device client
         :param socket: The network socket
@@ -152,22 +134,11 @@ class IoTCentralDevice(IoTMQTTCallback):
         :raises DeviceRegistrationError: if the device cannot be registered successfully
         :raises RuntimeError: if the internet connection is not responding or is unable to connect
         """
-        self._device_registration = DeviceRegistration(
-            self._socket, self._id_scope, self._device_id, self._key, self._logger
-        )
+        self._device_registration = DeviceRegistration(self._socket, self._id_scope, self._device_id, self._key, self._logger)
 
         token_expiry = int(time.time() + self._token_expires)
         hostname = self._device_registration.register_device(token_expiry)
-        self._mqtt = IoTMQTT(
-            self,
-            self._socket,
-            self._iface,
-            hostname,
-            self._device_id,
-            self._key,
-            self._token_expires,
-            self._logger,
-        )
+        self._mqtt = IoTMQTT(self, self._socket, self._iface, hostname, self._device_id, self._key, self._token_expires, self._logger,)
 
         self._mqtt.connect()
         self._mqtt.subscribe_to_twins()
