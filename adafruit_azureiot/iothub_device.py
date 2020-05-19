@@ -108,7 +108,9 @@ class IoTHubDevice(IoTMQTTCallback):
             # pylint: disable=E1102
             self._on_cloud_to_device_message_received(body, properties)
 
-    def device_twin_desired_updated(self, desired_property_name: str, desired_property_value, desired_version: int) -> None:
+    def device_twin_desired_updated(
+        self, desired_property_name: str, desired_property_value, desired_version: int
+    ) -> None:
         """Called when the device twin desired properties are updated
         :param str desired_property_name: The name of the desired property that was updated
         :param desired_property_value: The value of the desired property that was updated
@@ -116,9 +118,16 @@ class IoTHubDevice(IoTMQTTCallback):
         """
         if self._on_device_twin_desired_updated is not None:
             # pylint: disable=E1102
-            self._on_device_twin_desired_updated(desired_property_name, desired_property_value, desired_version)
+            self._on_device_twin_desired_updated(
+                desired_property_name, desired_property_value, desired_version
+            )
 
-    def device_twin_reported_updated(self, reported_property_name: str, reported_property_value, reported_version: int) -> None:
+    def device_twin_reported_updated(
+        self,
+        reported_property_name: str,
+        reported_property_value,
+        reported_version: int,
+    ) -> None:
         """Called when the device twin reported values are updated
         :param str reported_property_name: The name of the reported property that was updated
         :param reported_property_value: The value of the reported property that was updated
@@ -126,9 +135,18 @@ class IoTHubDevice(IoTMQTTCallback):
         """
         if self._on_device_twin_reported_updated is not None:
             # pylint: disable=E1102
-            self._on_device_twin_reported_updated(reported_property_name, reported_property_value, reported_version)
+            self._on_device_twin_reported_updated(
+                reported_property_name, reported_property_value, reported_version
+            )
 
-    def __init__(self, socket, iface, device_connection_string: str, token_expires: int = 21600, logger: logging = None):
+    def __init__(
+        self,
+        socket,
+        iface,
+        device_connection_string: str,
+        token_expires: int = 21600,
+        logger: logging = None,
+    ):
         """Create the Azure IoT Central device client
         :param socket: The network socket
         :param iface: The network interface
@@ -145,9 +163,13 @@ class IoTHubDevice(IoTMQTTCallback):
 
         try:
             cs_args = device_connection_string.split(DELIMITER)
-            connection_string_values = dict(arg.split(VALUE_SEPARATOR, 1) for arg in cs_args)
+            connection_string_values = dict(
+                arg.split(VALUE_SEPARATOR, 1) for arg in cs_args
+            )
         except (ValueError, AttributeError):
-            raise ValueError("Connection string is required and should not be empty or blank and must be supplied as a string")
+            raise ValueError(
+                "Connection string is required and should not be empty or blank and must be supplied as a string"
+            )
 
         if len(cs_args) != len(connection_string_values):
             raise ValueError("Invalid Connection String - Unable to parse")
@@ -218,11 +240,15 @@ class IoTHubDevice(IoTMQTTCallback):
         return self._on_cloud_to_device_message_received
 
     @on_cloud_to_device_message_received.setter
-    def on_cloud_to_device_message_received(self, new_on_cloud_to_device_message_received):
+    def on_cloud_to_device_message_received(
+        self, new_on_cloud_to_device_message_received
+    ):
         """A callback method that is called when a cloud to device message is received. This method should have the following signature:
         def cloud_to_device_message_received(body: str, properties: dict) -> None:
         """
-        self._on_cloud_to_device_message_received = new_on_cloud_to_device_message_received
+        self._on_cloud_to_device_message_received = (
+            new_on_cloud_to_device_message_received
+        )
 
     @property
     def on_device_twin_desired_updated(self):
@@ -267,11 +293,21 @@ class IoTHubDevice(IoTMQTTCallback):
         :raises RuntimeError: if the internet connection is not responding or is unable to connect
         """
         self._mqtt = IoTMQTT(
-            self, self._socket, self._iface, self._hostname, self._device_id, self._shared_access_key, self._token_expires, self._logger
+            self,
+            self._socket,
+            self._iface,
+            self._hostname,
+            self._device_id,
+            self._shared_access_key,
+            self._token_expires,
+            self._logger,
         )
         self._mqtt.connect()
 
-        if self._on_device_twin_desired_updated is not None or self._on_device_twin_reported_updated is not None:
+        if (
+            self._on_device_twin_desired_updated is not None
+            or self._on_device_twin_reported_updated is not None
+        ):
             self._mqtt.subscribe_to_twins()
 
     def disconnect(self) -> None:

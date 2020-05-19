@@ -72,9 +72,13 @@ class DeviceRegistration:
         """
         for error in AZURE_HTTP_ERROR_CODES:
             if error == status_code:
-                raise DeviceRegistrationError("Error {0}: {1}".format(status_code, status_reason))
+                raise DeviceRegistrationError(
+                    "Error {0}: {1}".format(status_code, status_reason)
+                )
 
-    def __init__(self, socket, id_scope: str, device_id: str, key: str, logger: Logger = None):
+    def __init__(
+        self, socket, id_scope: str, device_id: str, key: str, logger: Logger = None
+    ):
         """Creates an instance of the device registration service
         :param socket: The network socket
         :param str id_scope: The ID scope of the device to register
@@ -98,7 +102,9 @@ class DeviceRegistration:
         :rtype: bytes
         """
         secret = base64.b64decode(secret)
-        return base64.b64encode(hmac.new(secret, msg=msg.encode("utf8"), digestmod=hashlib.sha256).digest())
+        return base64.b64encode(
+            hmac.new(secret, msg=msg.encode("utf8"), digestmod=hashlib.sha256).digest()
+        )
 
     def _loop_assign(self, operation_id, headers) -> str:
         uri = "https://%s/%s/registrations/%s/operations/%s?api-version=%s" % (
@@ -155,7 +161,10 @@ class DeviceRegistration:
                 self._logger.debug("Sent!")
                 break
             except RuntimeError as runtime_error:
-                self._logger.info("Could not send data, retrying after 0.5 seconds: " + str(runtime_error))
+                self._logger.info(
+                    "Could not send data, retrying after 0.5 seconds: "
+                    + str(runtime_error)
+                )
                 retry = retry + 1
 
                 if retry >= 10:
@@ -180,7 +189,10 @@ class DeviceRegistration:
                 self._logger.debug("Sent!")
                 break
             except RuntimeError as runtime_error:
-                self._logger.info("Could not send data, retrying after 0.5 seconds: " + str(runtime_error))
+                self._logger.info(
+                    "Could not send data, retrying after 0.5 seconds: "
+                    + str(runtime_error)
+                )
                 retry = retry + 1
 
                 if retry >= 10:
@@ -205,9 +217,19 @@ class DeviceRegistration:
         """
         # pylint: disable=C0103
         sr = self._id_scope + "%2Fregistrations%2F" + self._device_id
-        sig_no_encode = DeviceRegistration.compute_derived_symmetric_key(self._key, sr + "\n" + str(expiry))
+        sig_no_encode = DeviceRegistration.compute_derived_symmetric_key(
+            self._key, sr + "\n" + str(expiry)
+        )
         sig_encoded = parse.quote(sig_no_encode, "~()*!.'")
-        auth_string = "SharedAccessSignature sr=" + sr + "&sig=" + sig_encoded + "&se=" + str(expiry) + "&skn=registration"
+        auth_string = (
+            "SharedAccessSignature sr="
+            + sr
+            + "&sig="
+            + sig_encoded
+            + "&se="
+            + str(expiry)
+            + "&skn=registration"
+        )
 
         headers = {
             "content-type": "application/json; charset=utf-8",
@@ -238,7 +260,14 @@ class DeviceRegistration:
         try:
             data = response.json()
         except ValueError as error:
-            err = "ERROR: non JSON is received from " + constants.DPS_END_POINT + " => " + str(response) + " .. message : " + str(error)
+            err = (
+                "ERROR: non JSON is received from "
+                + constants.DPS_END_POINT
+                + " => "
+                + str(response)
+                + " .. message : "
+                + str(error)
+            )
             self._logger.error(err)
             raise DeviceRegistrationError(err)
 

@@ -28,7 +28,9 @@ spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 
 """Use below for Most Boards"""
-status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2)  # Uncomment for Most Boards
+status_light = neopixel.NeoPixel(
+    board.NEOPIXEL, 1, brightness=0.2
+)  # Uncomment for Most Boards
 """Uncomment below for ItsyBitsy M4"""
 # status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
 # Uncomment below for an externally defined RGB LED
@@ -94,7 +96,9 @@ from adafruit_azureiot import IoTCentralDevice
 from adafruit_azureiot.iot_mqtt import IoTResponse
 
 # Create an IoT Hub device client and connect
-device = IoTCentralDevice(socket, esp, secrets["id_scope"], secrets["device_id"], secrets["key"])
+device = IoTCentralDevice(
+    socket, esp, secrets["id_scope"], secrets["device_id"], secrets["key"]
+)
 
 # Subscribe to commands
 # Commands can be sent from the devices Dashboard in IoT Central, assuming

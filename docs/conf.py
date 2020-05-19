@@ -21,7 +21,12 @@ extensions = [
 # Uncomment the below if you use native CircuitPython modules such as
 # digitalio, micropython and busio. List the modules you use. Without it, the
 # autodoc module docs will fail to generate with a warning.
-autodoc_mock_imports = ["adafruit_logging", "adafruit_requests", "adafruit_hashlib", "adafruit_ntp"]
+autodoc_mock_imports = [
+    "adafruit_logging",
+    "adafruit_requests",
+    "adafruit_hashlib",
+    "adafruit_ntp",
+]
 
 
 intersphinx_mapping = {
@@ -137,14 +142,28 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "AdafruitAzureIoTLibrary.tex", "AdafruitAzureIoT Library Documentation", author, "manual",),
+    (
+        master_doc,
+        "AdafruitAzureIoTLibrary.tex",
+        "AdafruitAzureIoT Library Documentation",
+        author,
+        "manual",
+    ),
 ]
 
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "AdafruitAzureIoTlibrary", "Adafruit AzureIoT Library Documentation", [author], 1,)]
+man_pages = [
+    (
+        master_doc,
+        "AdafruitAzureIoTlibrary",
+        "Adafruit AzureIoT Library Documentation",
+        [author],
+        1,
+    )
+]
 
 # -- Options for Texinfo output -------------------------------------------
 
