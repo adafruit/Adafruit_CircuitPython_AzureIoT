@@ -91,7 +91,7 @@ class IoTMQTTCallback:
         :param int desired_version: The version of the desired property that was updated
         """
 
-    def device_twin_reported_updated(self, reported_property_name: str, reported_property_value, reported_version: int,) -> None:
+    def device_twin_reported_updated(self, reported_property_name: str, reported_property_value, reported_version: int) -> None:
         """Called when the device twin reported values are updated
         :param str reported_property_name: The name of the reported property that was updated
         :param reported_property_value: The value of the reported property that was updated
@@ -114,12 +114,11 @@ class IoTMQTT:
         token = "SharedAccessSignature sr={}&sig={}&se={}".format(uri, signature, token_expiry)
         return token
 
-    # Workaround for https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT/issues/25
-    def _try_create_mqtt_client(self, hostname: str) -> None:
+    def _create_mqtt_client(self) -> None:
         minimqtt.set_socket(self._socket, self._iface)
 
         self._mqtts = MQTT(
-            broker=hostname,
+            broker=self._hostname,
             username=self._username,
             password=self._passwd,
             port=8883,
@@ -141,9 +140,6 @@ class IoTMQTT:
         # initiate the connection using the adafruit_minimqtt library
         self._mqtts.last_will()
         self._mqtts.connect()
-
-    def _create_mqtt_client(self) -> None:
-        self._try_create_mqtt_client(self._hostname)
 
     # pylint: disable=C0103, W0613
     def _on_connect(self, client, userdata, _, rc) -> None:
