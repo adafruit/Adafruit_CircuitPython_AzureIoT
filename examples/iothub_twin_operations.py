@@ -99,9 +99,7 @@ device = IoTHubDevice(socket, esp, secrets["device_connection_string"])
 # or in the Azure portal by selecting the device in the IoT Hub blade, selecting
 # Device Twin then adding or amending an entry in the 'desired' section
 def device_twin_desired_updated(desired_property_name: str, desired_property_value, desired_version: int):
-    print(
-        "Property", desired_property_name, "updated to", str(desired_property_value), "version", desired_version,
-    )
+    print("Property", desired_property_name, "updated to", str(desired_property_value), "version", desired_version)
 
 
 # Subscribe to the device twin desired property updated event

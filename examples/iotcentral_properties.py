@@ -100,9 +100,7 @@ device = IoTCentralDevice(socket, esp, secrets["id_scope"], secrets["device_id"]
 # Properties can be updated either in code, or by adding a form to the view
 # in the device template, and setting the value on the dashboard for the device
 def property_changed(property_name, property_value, version):
-    print(
-        "Property", property_name, "updated to", str(property_value), "version", str(version),
-    )
+    print("Property", property_name, "updated to", str(property_value), "version", str(version))
 
 
 # Subscribe to the property changed event

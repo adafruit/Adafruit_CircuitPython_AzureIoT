@@ -118,7 +118,7 @@ class IoTHubDevice(IoTMQTTCallback):
             # pylint: disable=E1102
             self._on_device_twin_desired_updated(desired_property_name, desired_property_value, desired_version)
 
-    def device_twin_reported_updated(self, reported_property_name: str, reported_property_value, reported_version: int,) -> None:
+    def device_twin_reported_updated(self, reported_property_name: str, reported_property_value, reported_version: int) -> None:
         """Called when the device twin reported values are updated
         :param str reported_property_name: The name of the reported property that was updated
         :param reported_property_value: The value of the reported property that was updated
@@ -128,9 +128,7 @@ class IoTHubDevice(IoTMQTTCallback):
             # pylint: disable=E1102
             self._on_device_twin_reported_updated(reported_property_name, reported_property_value, reported_version)
 
-    def __init__(
-        self, socket, iface, device_connection_string: str, token_expires: int = 21600, logger: logging = None,
-    ):
+    def __init__(self, socket, iface, device_connection_string: str, token_expires: int = 21600, logger: logging = None):
         """Create the Azure IoT Central device client
         :param socket: The network socket
         :param iface: The network interface
@@ -269,7 +267,7 @@ class IoTHubDevice(IoTMQTTCallback):
         :raises RuntimeError: if the internet connection is not responding or is unable to connect
         """
         self._mqtt = IoTMQTT(
-            self, self._socket, self._iface, self._hostname, self._device_id, self._shared_access_key, self._token_expires, self._logger,
+            self, self._socket, self._iface, self._hostname, self._device_id, self._shared_access_key, self._token_expires, self._logger
         )
         self._mqtt.connect()
 

@@ -75,7 +75,7 @@ class IoTCentralDevice(IoTMQTTCallback):
         # when a desired property changes, update the reported to match to keep them in sync
         self.send_property(desired_property_name, desired_property_value)
 
-    def device_twin_reported_updated(self, reported_property_name: str, reported_property_value, reported_version: int,) -> None:
+    def device_twin_reported_updated(self, reported_property_name: str, reported_property_value, reported_version: int) -> None:
         """Called when the device twin reported values are updated
         :param str reported_property_name: The name of the reported property that was updated
         :param reported_property_value: The value of the reported property that was updated
@@ -86,9 +86,7 @@ class IoTCentralDevice(IoTMQTTCallback):
             self.on_property_changed(reported_property_name, reported_property_value, reported_version)
 
     # pylint: disable=R0913
-    def __init__(
-        self, socket, iface, id_scope: str, device_id: str, key: str, token_expires: int = 21600, logger: logging = None,
-    ):
+    def __init__(self, socket, iface, id_scope: str, device_id: str, key: str, token_expires: int = 21600, logger: logging = None):
         """Create the Azure IoT Central device client
         :param socket: The network socket
         :param iface: The network interface
@@ -138,7 +136,7 @@ class IoTCentralDevice(IoTMQTTCallback):
 
         token_expiry = int(time.time() + self._token_expires)
         hostname = self._device_registration.register_device(token_expiry)
-        self._mqtt = IoTMQTT(self, self._socket, self._iface, hostname, self._device_id, self._key, self._token_expires, self._logger,)
+        self._mqtt = IoTMQTT(self, self._socket, self._iface, hostname, self._device_id, self._key, self._token_expires, self._logger)
 
         self._mqtt.connect()
         self._mqtt.subscribe_to_twins()
