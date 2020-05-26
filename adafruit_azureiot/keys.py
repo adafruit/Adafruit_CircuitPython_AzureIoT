@@ -19,32 +19,22 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""
-`adafruit_azureiot`
-================================================================================
-
-Microsoft Azure IoT for CircuitPython
-
-* Author(s): Jim Bennett, Elena Horton
-
-Implementation Notes
---------------------
-
-**Software and Dependencies:**
-
-* Adafruit CircuitPython firmware for the supported boards:
-  https://github.com/adafruit/circuitpython/releases
-
-* Adafruit's Bus Device library: https://github.com/adafruit/Adafruit_CircuitPython_BusDevice
-* Adafruit's ESP32SPI library: https://github.com/adafruit/Adafruit_CircuitPython_ESP32SPI
+"""Computes a derived symmetric key from a secret and a message
+:param str secret: The secret to use for the key
+:param str msg: The message to use for the key
+:returns: The derived symmetric key
+:rtype: bytes
 """
 
-from .iot_error import IoTError
-from .iot_mqtt import IoTResponse
-from .iotcentral_device import IoTCentralDevice
-from .iothub_device import IoTHubDevice
+from .base64 import b64decode, b64encode
+from .hmac import new_hmac
 
-__version__ = "0.0.0-auto.0"
-__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_AzureIoT.git"
 
-__all__ = ["IoTHubDevice", "IoTCentralDevice", "IoTResponse", "IoTError"]
+def compute_derived_symmetric_key(secret: str, msg: str) -> bytes:
+    """Computes a derived symmetric key from a secret and a message
+    :param str secret: The secret to use for the key
+    :param str msg: The message to use for the key
+    :returns: The derived symmetric key
+    :rtype: bytes
+    """
+    return b64encode(new_hmac(b64decode(secret), msg=msg.encode("utf8")).digest())

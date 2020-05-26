@@ -45,16 +45,12 @@ This driver depends on:
 
 * `Adafruit CircuitPython <https://github.com/adafruit/circuitpython>`_
 * `Adafruit CircuitPython MiniMQTT <https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT>`_
-
-* `CircuitPython Base64 <https://github.com/jimbobbennett/CircuitPython_Base64>`_
-* `CircuitPython HMAC <https://github.com/jimbobbennett/CircuitPython_HMAC>`_
-* `CircuitPython Parse <https://github.com/jimbobbennett/CircuitPython_Parse>`_
+* `Adafruit CircuitPython Requests <https://github.com/adafruit/Adafruit_CircuitPython_Requests>`_
+* `Adafruit CircuitPython BinASCII <https://github.com/adafruit/Adafruit_CircuitPython_Binascii>`_
 
 Please ensure all dependencies are available on the CircuitPython filesystem.
 This is easily achieved by downloading
-`the Adafruit library and driver bundle <https://github.com/adafruit/Adafruit_CircuitPython_Bundle>`_
-and
-`the CircuitPython community library and driver bundle <https://github.com/adafruit/CircuitPython_Community_Bundle>`_
+`the Adafruit library and driver bundle <https://github.com/adafruit/Adafruit_CircuitPython_Bundle>`_.
 
 Usage Example
 =============

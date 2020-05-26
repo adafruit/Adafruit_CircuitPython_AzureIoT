@@ -32,14 +32,12 @@ to IoT Central over MQTT
 import gc
 import json
 import time
-import circuitpython_base64 as base64
-import circuitpython_hmac as hmac
-import circuitpython_parse as parse
 import adafruit_requests as requests
 import adafruit_logging as logging
 from adafruit_logging import Logger
-import adafruit_hashlib as hashlib
 from . import constants
+from .quote import quote
+from .keys import compute_derived_symmetric_key
 
 # Azure HTTP error status codes
 AZURE_HTTP_ERROR_CODES = [400, 401, 404, 403, 412, 429, 500]
@@ -89,17 +87,6 @@ class DeviceRegistration:
 
         requests.set_socket(socket)
 
-    @staticmethod
-    def compute_derived_symmetric_key(secret: str, msg: str) -> bytes:
-        """Computes a derived symmetric key from a secret and a message
-        :param str secret: The secret to use for the key
-        :param str msg: The message to use for the key
-        :returns: The derived symmetric key
-        :rtype: bytes
-        """
-        secret = base64.b64decode(secret)
-        return base64.b64encode(hmac.new(secret, msg=msg.encode("utf8"), digestmod=hashlib.sha256).digest())
-
     def _loop_assign(self, operation_id, headers) -> str:
         uri = "https://%s/%s/registrations/%s/operations/%s?api-version=%s" % (
             constants.DPS_END_POINT,
@@ -109,9 +96,8 @@ class DeviceRegistration:
             constants.DPS_API_VERSION,
         )
         self._logger.info("- iotc :: _loop_assign :: " + uri)
-        target = parse.urlparse(uri)
 
-        response = self._run_get_request_with_retry(target.geturl(), headers)
+        response = self._run_get_request_with_retry(uri, headers)
 
         try:
             data = response.json()
@@ -205,8 +191,8 @@ class DeviceRegistration:
         """
         # pylint: disable=C0103
         sr = self._id_scope + "%2Fregistrations%2F" + self._device_id
-        sig_no_encode = DeviceRegistration.compute_derived_symmetric_key(self._key, sr + "\n" + str(expiry))
-        sig_encoded = parse.quote(sig_no_encode, "~()*!.'")
+        sig_no_encode = compute_derived_symmetric_key(self._key, sr + "\n" + str(expiry))
+        sig_encoded = quote(sig_no_encode, "~()*!.'")
         auth_string = "SharedAccessSignature sr=" + sr + "&sig=" + sig_encoded + "&se=" + str(expiry) + "&skn=registration"
 
         headers = {
@@ -226,13 +212,12 @@ class DeviceRegistration:
             self._device_id,
             constants.DPS_API_VERSION,
         )
-        target = parse.urlparse(uri)
 
         self._logger.info("Connecting...")
-        self._logger.info("URL: " + target.geturl())
+        self._logger.info("URL: " + uri)
         self._logger.info("body: " + json.dumps(body))
 
-        response = self._run_put_request_with_retry(target.geturl(), body, headers)
+        response = self._run_put_request_with_retry(uri, body, headers)
 
         data = None
         try:
