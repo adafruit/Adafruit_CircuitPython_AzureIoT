@@ -213,7 +213,7 @@ class IoTMQTT:
         for property_name, value in desired.items():
             self._callback.device_twin_desired_updated(property_name, value, desired_version)
 
-    def _handle_direct_method(self, msg: str, topic: str) -> None:
+    def _handle_direct_method(self, client, topic: str, msg: str) -> None:
         index = topic.find("$rid=")
         method_id = 1
         method_name = "None"
@@ -278,7 +278,8 @@ class IoTMQTT:
             if topic.startswith("$iothub/twin/PATCH/properties/desired/") or topic.startswith("$iothub/twin/res/200/?$rid="):
                 self._handle_device_twin_update(str(msg), topic)
             elif topic.startswith("$iothub/methods"):
-                self._handle_direct_method(str(msg), topic)
+                pass
+                # self._handle_direct_method(str(msg), topic)
             else:
                 if not topic.startswith("$iothub/twin/res/"):  # not twin response
                     self._logger.error("ERROR: unknown twin! - {}".format(msg))
@@ -365,7 +366,9 @@ class IoTMQTT:
     def _subscribe_to_core_topics(self):
         self._mqtts.subscribe("devices/{}/messages/events/#".format(self._device_id))
         self._mqtts.subscribe("devices/{}/messages/devicebound/#".format(self._device_id))
-        self._mqtts.subscribe("$iothub/methods/#")
+
+        self._mqtts.add_topic_callback("$iothub/methods/#", self._handle_direct_method)
+        # self._mqtts.subscribe("$iothub/methods/#")
 
     def _subscribe_to_twin_topics(self):
         self._mqtts.subscribe("$iothub/twin/PATCH/properties/desired/#")  # twin desired property changes
