@@ -132,7 +132,6 @@ class IoTMQTT:
 
         # set actions to take throughout connection lifecycle
         self._mqtts.on_connect = self._on_connect
-        self._mqtts.on_message = self._on_message
         self._mqtts.on_log = self._on_log
         self._mqtts.on_publish = self._on_publish
         self._mqtts.on_disconnect = self._on_disconnect
@@ -254,27 +253,6 @@ class IoTMQTT:
 
         self._callback.cloud_to_device_message_received(msg, properties)
         gc.collect()
-
-    # pylint: disable=W0702, R0912
-    def _on_message(self, client, msg_topic, payload) -> None:
-        topic = ""
-        msg = None
-
-        self._logger.info("- iot_mqtt :: _on_message")
-
-        if payload is not None:
-            try:
-                msg = payload.decode("utf-8")
-            except:
-                msg = str(payload)
-
-        if msg_topic is not None:
-            try:
-                topic = msg_topic.decode("utf-8")
-            except:
-                topic = str(msg_topic)
-
-        self._logger.error("ERROR: (unknown message) - {} on topic {}".format(msg, topic))
 
     def _send_common(self, topic: str, data) -> None:
         # Convert data to a string
