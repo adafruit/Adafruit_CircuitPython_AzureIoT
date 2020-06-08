@@ -138,7 +138,6 @@ class IoTMQTT:
         self._mqtts.on_disconnect = self._on_disconnect
 
         # initiate the connection using the adafruit_minimqtt library
-        self._mqtts.last_will()
         self._mqtts.connect()
 
     # pylint: disable=C0103, W0613
