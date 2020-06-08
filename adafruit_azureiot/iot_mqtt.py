@@ -172,7 +172,7 @@ class IoTMQTT:
         self._logger.info("- iot_mqtt :: _on_publish :: " + str(data) + " on topic " + str(topic))
 
     # pylint: disable=W0703
-    def _handle_device_twin_update(self, msg: str, topic: str) -> None:
+    def _handle_device_twin_update(self, client, topic: str, msg: str) -> None:
         self._logger.debug("- iot_mqtt :: _echo_desired :: " + topic)
         twin = None
         desired = None
@@ -244,7 +244,7 @@ class IoTMQTT:
         self._logger.info("C2D: => " + next_topic + " with data " + ret_message + " and name => " + method_name)
         self._send_common(next_topic, ret_message)
 
-    def _handle_cloud_to_device_message(self, msg: str, topic: str) -> None:
+    def _handle_cloud_to_device_message(self, client, topic: str, msg: str) -> None:
         parts = topic.split("&")[1:]
 
         properties = {}
@@ -274,19 +274,7 @@ class IoTMQTT:
             except:
                 topic = str(msg_topic)
 
-        if topic.startswith("$iothub/"):
-            if topic.startswith("$iothub/twin/PATCH/properties/desired/") or topic.startswith("$iothub/twin/res/200/?$rid="):
-                self._handle_device_twin_update(str(msg), topic)
-            elif topic.startswith("$iothub/methods"):
-                pass
-                # self._handle_direct_method(str(msg), topic)
-            else:
-                if not topic.startswith("$iothub/twin/res/"):  # not twin response
-                    self._logger.error("ERROR: unknown twin! - {}".format(msg))
-        elif topic.startswith("devices/{}/messages/devicebound".format(self._device_id)):
-            self._handle_cloud_to_device_message(str(msg), topic)
-        else:
-            self._logger.error("ERROR: (unknown message) - {}".format(msg))
+        self._logger.error("ERROR: (unknown message) - {} on topic {}".format(msg, topic))
 
     def _send_common(self, topic: str, data) -> None:
         # Convert data to a string
@@ -364,15 +352,19 @@ class IoTMQTT:
         self._is_subscribed_to_twins = False
 
     def _subscribe_to_core_topics(self):
-        self._mqtts.subscribe("devices/{}/messages/events/#".format(self._device_id))
-        self._mqtts.subscribe("devices/{}/messages/devicebound/#".format(self._device_id))
+        device_bound_topic = "devices/{}/messages/devicebound/#".format(self._device_id)
+        self._mqtts.add_topic_callback(device_bound_topic, self._handle_cloud_to_device_message)
+        self._mqtts.subscribe(device_bound_topic)
 
         self._mqtts.add_topic_callback("$iothub/methods/#", self._handle_direct_method)
-        # self._mqtts.subscribe("$iothub/methods/#")
+        self._mqtts.subscribe("$iothub/methods/#")
 
     def _subscribe_to_twin_topics(self):
+        self._mqtts.add_topic_callback("$iothub/twin/PATCH/properties/desired/#", self._handle_device_twin_update)
         self._mqtts.subscribe("$iothub/twin/PATCH/properties/desired/#")  # twin desired property changes
-        self._mqtts.subscribe("$iothub/twin/res/#")  # twin properties response
+
+        self._mqtts.add_topic_callback("$iothub/twin/res/200/#", self._handle_device_twin_update)
+        self._mqtts.subscribe("$iothub/twin/res/200/#")  # twin properties response
 
     def connect(self) -> bool:
         """Connects to the MQTT broker
