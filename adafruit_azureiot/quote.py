@@ -128,7 +128,7 @@ class Quoter(defaultdict):
     # of cached keys don't call Python code at all).
     def __init__(self, safe):
         """safe: bytes object."""
-        super(Quoter, self).__init__()
+        super().__init__()
         self.safe = _ALWAYS_SAFE.union(safe)
 
     def __missing__(self, b):

@@ -38,5 +38,5 @@ class IoTError(Exception):
         """Create the IoT Error
         :param str message: The error message
         """
-        super(IoTError, self).__init__(message)
+        super().__init__(message)
         self.message = message
