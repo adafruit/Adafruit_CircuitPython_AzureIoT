@@ -104,7 +104,7 @@ class DeviceRegistration:
         except ValueError as error:
             err = "ERROR: " + str(error) + " => " + str(response)
             self._logger.error(err)
-            raise DeviceRegistrationError(err)
+            raise DeviceRegistrationError(err) from error
 
         loop_try = 0
 
@@ -225,7 +225,7 @@ class DeviceRegistration:
         except ValueError as error:
             err = "ERROR: non JSON is received from " + constants.DPS_END_POINT + " => " + str(response) + " .. message : " + str(error)
             self._logger.error(err)
-            raise DeviceRegistrationError(err)
+            raise DeviceRegistrationError(err) from error
 
         if "errorCode" in data:
             err = "DPS => " + str(data)
