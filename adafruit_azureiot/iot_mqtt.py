@@ -31,8 +31,8 @@ An MQTT client for Azure IoT
 import gc
 import json
 import time
-import adafruit_minimqtt as minimqtt
-from adafruit_minimqtt import MQTT
+import adafruit_minimqtt.adafruit_minimqtt as minimqtt
+from adafruit_minimqtt.adafruit_minimqtt import MQTT
 import adafruit_logging as logging
 from .iot_error import IoTError
 from .keys import compute_derived_symmetric_key
