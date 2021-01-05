@@ -46,8 +46,8 @@ __all__ = ["b64encode", "b64decode"]
 def _bytes_from_decode_data(data: str):
     try:
         return data.encode("ascii")
-    except:
-        raise ValueError("string argument should contain only ASCII characters")
+    except Exception as exc:
+        raise ValueError("string argument should contain only ASCII characters") from exc
 
 
 def b64encode(toencode: bytes) -> bytes:

@@ -146,8 +146,8 @@ class IoTHubDevice(IoTMQTTCallback):
         try:
             cs_args = device_connection_string.split(DELIMITER)
             connection_string_values = dict(arg.split(VALUE_SEPARATOR, 1) for arg in cs_args)
-        except (ValueError, AttributeError):
-            raise ValueError("Connection string is required and should not be empty or blank and must be supplied as a string")
+        except (ValueError, AttributeError) as e:
+            raise ValueError("Connection string is required and should not be empty or blank and must be supplied as a string") from e
 
         if len(cs_args) != len(connection_string_values):
             raise ValueError("Invalid Connection String - Unable to parse")
