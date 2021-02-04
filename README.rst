@@ -79,7 +79,7 @@ Azure IoT Hub
 
 To interact with Azure IoT Hub, you will need to create a hub, and a register a device inside that hub. There is a free tier available, and this free tier allows up to 8,000 messages a day, so try not to send messages too often if you are using this tier.
 
-- Open the `Azure Portal <https://aka.ms/AzurePortalHome>`_. 
+- Open the `Azure Portal <https://aka.ms/AzurePortalHome>`_.
 - Follow the instructions in `Microsoft Docs <https://aka.ms/CreateIoTHub>`_ to create an Azure IoT Hub and register a device.
 - Copy the devices Primary or secondary connection string, and add this to your ``secrets.py`` file.
 
@@ -169,7 +169,7 @@ Azure IoT Central
 
 To use Azure IoT Central, you will need to create an Azure IoT Central app, create a device template and register a device against the template.
 
-- Head to `Azure IoT Central <https://apps.azureiotcentral.com/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__ 
+- Head to `Azure IoT Central <https://apps.azureiotcentral.com/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__
 - Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-deploy-iot-central?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__ to create an application. Every tier is free for up to 2 devices.
 - Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-create-simulated-device?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__ to create a device template.
 - Create a device based off the template, and select **Connect** to get the device connection details. Store the ID Scope, Device ID and either the Primary or secondary Key in your ``secrets.py`` file.

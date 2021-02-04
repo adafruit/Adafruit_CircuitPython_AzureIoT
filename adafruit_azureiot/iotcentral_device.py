@@ -1,24 +1,7 @@
-# The MIT License (MIT)
+# SPDX-FileCopyrightText: 2020 Jim Bennet for Adafruit Industries
 #
-# Copyright (c) 2020 Jim Bennett
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
+# SPDX-License-Identifier: MIT
+
 """
 `iotcentral_device`
 =====================
@@ -37,8 +20,7 @@ from .iot_mqtt import IoTMQTT, IoTMQTTCallback, IoTResponse
 
 
 class IoTCentralDevice(IoTMQTTCallback):
-    """A device client for the Azure IoT Central service
-    """
+    """A device client for the Azure IoT Central service"""
 
     def connection_status_change(self, connected: bool) -> None:
         """Called when the connection status changes
@@ -62,7 +44,9 @@ class IoTCentralDevice(IoTMQTTCallback):
 
         raise IoTError("on_command_executed not set")
 
-    def device_twin_desired_updated(self, desired_property_name: str, desired_property_value, desired_version: int) -> None:
+    def device_twin_desired_updated(
+        self, desired_property_name: str, desired_property_value, desired_version: int
+    ) -> None:
         """Called when the device twin desired properties are updated
         :param str desired_property_name: The name of the desired property that was updated
         :param desired_property_value: The value of the desired property that was updated
@@ -70,12 +54,19 @@ class IoTCentralDevice(IoTMQTTCallback):
         """
         if self.on_property_changed is not None:
             # pylint: disable=E1102
-            self.on_property_changed(desired_property_name, desired_property_value, desired_version)
+            self.on_property_changed(
+                desired_property_name, desired_property_value, desired_version
+            )
 
         # when a desired property changes, update the reported to match to keep them in sync
         self.send_property(desired_property_name, desired_property_value)
 
-    def device_twin_reported_updated(self, reported_property_name: str, reported_property_value, reported_version: int) -> None:
+    def device_twin_reported_updated(
+        self,
+        reported_property_name: str,
+        reported_property_value,
+        reported_version: int,
+    ) -> None:
         """Called when the device twin reported values are updated
         :param str reported_property_name: The name of the reported property that was updated
         :param reported_property_value: The value of the reported property that was updated
@@ -83,10 +74,21 @@ class IoTCentralDevice(IoTMQTTCallback):
         """
         if self.on_property_changed is not None:
             # pylint: disable=E1102
-            self.on_property_changed(reported_property_name, reported_property_value, reported_version)
+            self.on_property_changed(
+                reported_property_name, reported_property_value, reported_version
+            )
 
     # pylint: disable=R0913
-    def __init__(self, socket, iface, id_scope: str, device_id: str, key: str, token_expires: int = 21600, logger: logging = None):
+    def __init__(
+        self,
+        socket,
+        iface,
+        id_scope: str,
+        device_id: str,
+        key: str,
+        token_expires: int = 21600,
+        logger: logging = None,
+    ):
         """Create the Azure IoT Central device client
         :param socket: The network socket
         :param iface: The network interface
@@ -132,11 +134,22 @@ class IoTCentralDevice(IoTMQTTCallback):
         :raises DeviceRegistrationError: if the device cannot be registered successfully
         :raises RuntimeError: if the internet connection is not responding or is unable to connect
         """
-        self._device_registration = DeviceRegistration(self._socket, self._id_scope, self._device_id, self._key, self._logger)
+        self._device_registration = DeviceRegistration(
+            self._socket, self._id_scope, self._device_id, self._key, self._logger
+        )
 
         token_expiry = int(time.time() + self._token_expires)
         hostname = self._device_registration.register_device(token_expiry)
-        self._mqtt = IoTMQTT(self, self._socket, self._iface, hostname, self._device_id, self._key, self._token_expires, self._logger)
+        self._mqtt = IoTMQTT(
+            self,
+            self._socket,
+            self._iface,
+            hostname,
+            self._device_id,
+            self._key,
+            self._token_expires,
+            self._logger,
+        )
 
         self._mqtt.connect()
         self._mqtt.subscribe_to_twins()
@@ -151,8 +164,7 @@ class IoTCentralDevice(IoTMQTTCallback):
         self._mqtt.disconnect()
 
     def reconnect(self) -> None:
-        """Reconnects to the MQTT broker
-        """
+        """Reconnects to the MQTT broker"""
         if self._mqtt is None:
             raise IoTError("You are not connected to IoT Central")
 
