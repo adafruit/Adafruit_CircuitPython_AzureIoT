@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2020 Jim Bennet for Adafruit Industries
+# SPDX-FileCopyrightText: 2020 Elena Horton for Adafruit Industries
 #
 # SPDX-License-Identifier: MIT
 
