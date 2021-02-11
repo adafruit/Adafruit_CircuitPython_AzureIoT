@@ -1,24 +1,8 @@
-# The MIT License (MIT)
+# SPDX-FileCopyrightText: 2020 Jim Bennet for Adafruit Industries
+# SPDX-FileCopyrightText: 2020 Elena Horton for Adafruit Industries
 #
-# Copyright (c) 2020 Jim Bennett
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
+# SPDX-License-Identifier: MIT
+
 """
 `device_registration`
 =====================
@@ -70,9 +54,13 @@ class DeviceRegistration:
         """
         for error in AZURE_HTTP_ERROR_CODES:
             if error == status_code:
-                raise DeviceRegistrationError("Error {0}: {1}".format(status_code, status_reason))
+                raise DeviceRegistrationError(
+                    "Error {0}: {1}".format(status_code, status_reason)
+                )
 
-    def __init__(self, socket, id_scope: str, device_id: str, key: str, logger: Logger = None):
+    def __init__(
+        self, socket, id_scope: str, device_id: str, key: str, logger: Logger = None
+    ):
         """Creates an instance of the device registration service
         :param socket: The network socket
         :param str id_scope: The ID scope of the device to register
@@ -141,7 +129,10 @@ class DeviceRegistration:
                 self._logger.debug("Sent!")
                 break
             except RuntimeError as runtime_error:
-                self._logger.info("Could not send data, retrying after 0.5 seconds: " + str(runtime_error))
+                self._logger.info(
+                    "Could not send data, retrying after 0.5 seconds: "
+                    + str(runtime_error)
+                )
                 retry = retry + 1
 
                 if retry >= 10:
@@ -166,7 +157,10 @@ class DeviceRegistration:
                 self._logger.debug("Sent!")
                 break
             except RuntimeError as runtime_error:
-                self._logger.info("Could not send data, retrying after 0.5 seconds: " + str(runtime_error))
+                self._logger.info(
+                    "Could not send data, retrying after 0.5 seconds: "
+                    + str(runtime_error)
+                )
                 retry = retry + 1
 
                 if retry >= 10:
@@ -191,9 +185,19 @@ class DeviceRegistration:
         """
         # pylint: disable=C0103
         sr = self._id_scope + "%2Fregistrations%2F" + self._device_id
-        sig_no_encode = compute_derived_symmetric_key(self._key, sr + "\n" + str(expiry))
+        sig_no_encode = compute_derived_symmetric_key(
+            self._key, sr + "\n" + str(expiry)
+        )
         sig_encoded = quote(sig_no_encode, "~()*!.'")
-        auth_string = "SharedAccessSignature sr=" + sr + "&sig=" + sig_encoded + "&se=" + str(expiry) + "&skn=registration"
+        auth_string = (
+            "SharedAccessSignature sr="
+            + sr
+            + "&sig="
+            + sig_encoded
+            + "&se="
+            + str(expiry)
+            + "&skn=registration"
+        )
 
         headers = {
             "content-type": "application/json; charset=utf-8",
@@ -223,7 +227,14 @@ class DeviceRegistration:
         try:
             data = response.json()
         except ValueError as error:
-            err = "ERROR: non JSON is received from " + constants.DPS_END_POINT + " => " + str(response) + " .. message : " + str(error)
+            err = (
+                "ERROR: non JSON is received from "
+                + constants.DPS_END_POINT
+                + " => "
+                + str(response)
+                + " .. message : "
+                + str(error)
+            )
             self._logger.error(err)
             raise DeviceRegistrationError(err) from error
 

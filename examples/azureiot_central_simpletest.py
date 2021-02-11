@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+# SPDX-License-Identifier: MIT
+
 import json
 import random
 import time
@@ -30,7 +33,9 @@ spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 
 """Use below for Most Boards"""
-status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2)  # Uncomment for Most Boards
+status_light = neopixel.NeoPixel(
+    board.NEOPIXEL, 1, brightness=0.2
+)  # Uncomment for Most Boards
 """Uncomment below for ItsyBitsy M4"""
 # status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
 # Uncomment below for an externally defined RGB LED
@@ -88,10 +93,12 @@ print("Time:", str(time.time()))
 # From the Adafruit CircuitPython Bundle (https://github.com/adafruit/Adafruit_CircuitPython_Bundle):
 # * adafruit-circuitpython-minimqtt
 # * adafruit-circuitpython-requests
-from adafruit_azureiot import IoTCentralDevice
+from adafruit_azureiot import IoTCentralDevice  # pylint: disable=wrong-import-position
 
 # Create an IoT Hub device client and connect
-device = IoTCentralDevice(socket, esp, secrets["id_scope"], secrets["device_id"], secrets["key"])
+device = IoTCentralDevice(
+    socket, esp, secrets["id_scope"], secrets["device_id"], secrets["key"]
+)
 
 print("Connecting to Azure IoT Central...")
 

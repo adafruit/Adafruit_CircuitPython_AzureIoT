@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+#
+# SPDX-License-Identifier: MIT
+
 import os
 import sys
 
@@ -144,14 +148,28 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "AdafruitAzureIoTLibrary.tex", "AdafruitAzureIoT Library Documentation", author, "manual",),
+    (
+        master_doc,
+        "AdafruitAzureIoTLibrary.tex",
+        "AdafruitAzureIoT Library Documentation",
+        author,
+        "manual",
+    ),
 ]
 
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "AdafruitAzureIoTlibrary", "Adafruit AzureIoT Library Documentation", [author], 1,)]
+man_pages = [
+    (
+        master_doc,
+        "AdafruitAzureIoTlibrary",
+        "Adafruit AzureIoT Library Documentation",
+        [author],
+        1,
+    )
+]
 
 # -- Options for Texinfo output -------------------------------------------
 

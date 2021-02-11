@@ -1,24 +1,8 @@
-# The MIT License (MIT)
+# SPDX-FileCopyrightText: 2020 Jim Bennet for Adafruit Industries
+# SPDX-FileCopyrightText: 2020 Elena Horton for Adafruit Industries
 #
-# Copyright (c) 2020 Jim Bennett, Elena Horton
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
+# SPDX-License-Identifier: MIT
+
 """
 `iothub_device`
 =====================
@@ -35,8 +19,7 @@ from .iot_mqtt import IoTMQTT, IoTMQTTCallback, IoTResponse
 
 
 def _validate_keys(connection_string_parts):
-    """Raise ValueError if incorrect combination of keys
-    """
+    """Raise ValueError if incorrect combination of keys"""
     host_name = connection_string_parts.get(HOST_NAME)
     shared_access_key_name = connection_string_parts.get(SHARED_ACCESS_KEY_NAME)
     shared_access_key = connection_string_parts.get(SHARED_ACCESS_KEY)
@@ -73,8 +56,7 @@ VALID_KEYS = [
 
 
 class IoTHubDevice(IoTMQTTCallback):
-    """A device client for the Azure IoT Hub service
-    """
+    """A device client for the Azure IoT Hub service"""
 
     def connection_status_change(self, connected: bool) -> None:
         """Called when the connection status changes
@@ -108,7 +90,9 @@ class IoTHubDevice(IoTMQTTCallback):
             # pylint: disable=E1102
             self._on_cloud_to_device_message_received(body, properties)
 
-    def device_twin_desired_updated(self, desired_property_name: str, desired_property_value, desired_version: int) -> None:
+    def device_twin_desired_updated(
+        self, desired_property_name: str, desired_property_value, desired_version: int
+    ) -> None:
         """Called when the device twin desired properties are updated
         :param str desired_property_name: The name of the desired property that was updated
         :param desired_property_value: The value of the desired property that was updated
@@ -116,9 +100,16 @@ class IoTHubDevice(IoTMQTTCallback):
         """
         if self._on_device_twin_desired_updated is not None:
             # pylint: disable=E1102
-            self._on_device_twin_desired_updated(desired_property_name, desired_property_value, desired_version)
+            self._on_device_twin_desired_updated(
+                desired_property_name, desired_property_value, desired_version
+            )
 
-    def device_twin_reported_updated(self, reported_property_name: str, reported_property_value, reported_version: int) -> None:
+    def device_twin_reported_updated(
+        self,
+        reported_property_name: str,
+        reported_property_value,
+        reported_version: int,
+    ) -> None:
         """Called when the device twin reported values are updated
         :param str reported_property_name: The name of the reported property that was updated
         :param reported_property_value: The value of the reported property that was updated
@@ -126,9 +117,18 @@ class IoTHubDevice(IoTMQTTCallback):
         """
         if self._on_device_twin_reported_updated is not None:
             # pylint: disable=E1102
-            self._on_device_twin_reported_updated(reported_property_name, reported_property_value, reported_version)
+            self._on_device_twin_reported_updated(
+                reported_property_name, reported_property_value, reported_version
+            )
 
-    def __init__(self, socket, iface, device_connection_string: str, token_expires: int = 21600, logger: logging = None):
+    def __init__(
+        self,
+        socket,
+        iface,
+        device_connection_string: str,
+        token_expires: int = 21600,
+        logger: logging = None,
+    ):
         """Create the Azure IoT Central device client
         :param socket: The network socket
         :param iface: The network interface
@@ -145,9 +145,13 @@ class IoTHubDevice(IoTMQTTCallback):
 
         try:
             cs_args = device_connection_string.split(DELIMITER)
-            connection_string_values = dict(arg.split(VALUE_SEPARATOR, 1) for arg in cs_args)
+            connection_string_values = dict(
+                arg.split(VALUE_SEPARATOR, 1) for arg in cs_args
+            )
         except (ValueError, AttributeError) as e:
-            raise ValueError("Connection string is required and should not be empty or blank and must be supplied as a string") from e
+            raise ValueError(
+                "Connection string is required and should not be empty or blank and must be supplied as a string"
+            ) from e
 
         if len(cs_args) != len(connection_string_values):
             raise ValueError("Invalid Connection String - Unable to parse")
@@ -218,11 +222,15 @@ class IoTHubDevice(IoTMQTTCallback):
         return self._on_cloud_to_device_message_received
 
     @on_cloud_to_device_message_received.setter
-    def on_cloud_to_device_message_received(self, new_on_cloud_to_device_message_received):
+    def on_cloud_to_device_message_received(
+        self, new_on_cloud_to_device_message_received
+    ):
         """A callback method that is called when a cloud to device message is received. This method should have the following signature:
         def cloud_to_device_message_received(body: str, properties: dict) -> None:
         """
-        self._on_cloud_to_device_message_received = new_on_cloud_to_device_message_received
+        self._on_cloud_to_device_message_received = (
+            new_on_cloud_to_device_message_received
+        )
 
     @property
     def on_device_twin_desired_updated(self):
@@ -267,11 +275,21 @@ class IoTHubDevice(IoTMQTTCallback):
         :raises RuntimeError: if the internet connection is not responding or is unable to connect
         """
         self._mqtt = IoTMQTT(
-            self, self._socket, self._iface, self._hostname, self._device_id, self._shared_access_key, self._token_expires, self._logger
+            self,
+            self._socket,
+            self._iface,
+            self._hostname,
+            self._device_id,
+            self._shared_access_key,
+            self._token_expires,
+            self._logger,
         )
         self._mqtt.connect()
 
-        if self._on_device_twin_desired_updated is not None or self._on_device_twin_reported_updated is not None:
+        if (
+            self._on_device_twin_desired_updated is not None
+            or self._on_device_twin_reported_updated is not None
+        ):
             self._mqtt.subscribe_to_twins()
 
     def disconnect(self) -> None:
@@ -284,8 +302,7 @@ class IoTHubDevice(IoTMQTTCallback):
         self._mqtt.disconnect()
 
     def reconnect(self) -> None:
-        """Reconnects to the MQTT broker
-        """
+        """Reconnects to the MQTT broker"""
         if self._mqtt is None:
             raise IoTError("You are not connected to IoT Central")
 
