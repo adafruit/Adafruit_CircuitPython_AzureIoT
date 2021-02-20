@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Unlicense
 
 Adafruit-Blinka
+Adafruit-CircuitPython-Binascii
+Adafruit-CircuitPython-Logging
 Adafruit-CircuitPython-miniMQTT
 Adafruit-CircuitPython-Requests
-Adafruit-CircuitPython-Binascii
