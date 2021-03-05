@@ -16,7 +16,7 @@ to IoT Central over MQTT
 import gc
 import json
 import time
-import adafruit_requests as requests
+import adafruit_requests
 import adafruit_logging as logging
 from adafruit_logging import Logger
 from . import constants
@@ -59,7 +59,13 @@ class DeviceRegistration:
                 )
 
     def __init__(
-        self, socket, id_scope: str, device_id: str, key: str, logger: Logger = None
+        self,
+        socket_pool,
+        ssl_context,
+        id_scope: str,
+        device_id: str,
+        key: str,
+        logger: Logger = None,
     ):
         """Creates an instance of the device registration service
         :param socket: The network socket
@@ -68,12 +74,15 @@ class DeviceRegistration:
         :param str key: The primary or secondary key of the device to register
         :param adafruit_logging.Logger logger: The logger to use to log messages
         """
+        self._socket_pool = socket_pool
+        self._ssl_context = ssl_context
         self._id_scope = id_scope
         self._device_id = device_id
         self._key = key
         self._logger = logger if logger is not None else logging.getLogger("log")
 
-        requests.set_socket(socket)
+        # requests.set_socket(socket)
+        self._requests = adafruit_requests.Session(self._socket_pool, self._ssl_context)
 
     def _loop_assign(self, operation_id, headers) -> str:
         uri = "https://%s/%s/registrations/%s/operations/%s?api-version=%s" % (
@@ -125,7 +134,7 @@ class DeviceRegistration:
             gc.collect()
             try:
                 self._logger.debug("Trying to send...")
-                response = requests.put(url, json=body, headers=headers)
+                response = self._requests.put(url, json=body, headers=headers)
                 self._logger.debug("Sent!")
                 break
             except RuntimeError as runtime_error:
@@ -153,7 +162,7 @@ class DeviceRegistration:
             gc.collect()
             try:
                 self._logger.debug("Trying to send...")
-                response = requests.get(url, headers=headers)
+                response = self._requests.get(url, headers=headers)
                 self._logger.debug("Sent!")
                 break
             except RuntimeError as runtime_error:

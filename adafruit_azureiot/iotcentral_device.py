@@ -82,15 +82,17 @@ class IoTCentralDevice(IoTMQTTCallback):
     # pylint: disable=R0913
     def __init__(
         self,
-        socket,
-        iface,
+        socket_pool,
+        ssl_context,
         id_scope: str,
         device_id: str,
         key: str,
         token_expires: int = 21600,
         logger: logging = None,
     ):
-        """Create the Azure IoT Central device client
+        """
+        TODO: Update this definition
+        Create the Azure IoT Central device client
         :param socket: The network socket
         :param iface: The network interface
         :param str id_scope: The ID Scope of the device in IoT Central
@@ -99,8 +101,8 @@ class IoTCentralDevice(IoTMQTTCallback):
         :param int token_expires: The number of seconds till the token expires, defaults to 6 hours
         :param adafruit_logging logger: The logger
         """
-        self._socket = socket
-        self._iface = iface
+        self._socket_pool = socket_pool
+        self._ssl_context = ssl_context
         self._id_scope = id_scope
         self._device_id = device_id
         self._key = key
@@ -136,20 +138,25 @@ class IoTCentralDevice(IoTMQTTCallback):
         :raises RuntimeError: if the internet connection is not responding or is unable to connect
         """
         self._device_registration = DeviceRegistration(
-            self._socket, self._id_scope, self._device_id, self._key, self._logger
+            socket_pool=self._socket_pool,
+            ssl_context=self._ssl_context,
+            id_scope=self._id_scope,
+            device_id=self._device_id,
+            key=self._key,
+            logger=self._logger,
         )
 
         token_expiry = int(time.time() + self._token_expires)
         hostname = self._device_registration.register_device(token_expiry)
         self._mqtt = IoTMQTT(
             self,
-            self._socket,
-            self._iface,
-            hostname,
-            self._device_id,
-            self._key,
-            self._token_expires,
-            self._logger,
+            socket_pool=self._socket_pool,
+            ssl_context=self._ssl_context,
+            hostname=hostname,
+            device_id=self._device_id,
+            key=self._key,
+            token_expires=self._token_expires,
+            logger=self._logger,
         )
 
         self._mqtt.connect()

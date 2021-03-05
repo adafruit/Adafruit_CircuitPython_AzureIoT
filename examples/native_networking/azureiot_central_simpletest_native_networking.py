@@ -74,19 +74,18 @@ if response:
 #     socket, esp, secrets["id_scope"], secrets["device_id"], secrets["key"]
 # )
 
+print("Initializing IoT Central Device...")
+
 device = IoTCentralDevice(
-    pool,
-    ssl.create_default_context(),
-    secrets["id_scope"],
-    secrets["device_id"],
-    secrets["key"],
+    socket_pool=pool,
+    ssl_context=ssl.create_default_context(),
+    id_scope=secrets["id_scope"],
+    device_id=secrets["device_id"],
+    key=secrets["key"],
 )
 
 print("Connecting to Azure IoT Central...")
-
-# Connect to IoT Central
 device.connect()
-
 print("Connected to Azure IoT Central!")
 
 message_counter = 60
@@ -107,8 +106,7 @@ while True:
     except (ValueError, RuntimeError) as e:
         print("Connection error, reconnecting\n", str(e))
         # If we lose connectivity, reset the wifi and reconnect
-        wifi.reset()
-        wifi.connect()
+        wifi.radio.connect(secrets["ssid"], secrets["password"])
         device.reconnect()
         continue
 

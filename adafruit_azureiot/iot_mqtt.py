@@ -109,7 +109,8 @@ class IoTMQTT:
         return token
 
     def _create_mqtt_client(self) -> None:
-        minimqtt.set_socket(self._socket, self._iface)
+        # TODO: I thnk this goes away
+        # minimqtt.set_socket(self._socket, self._iface)
 
         self._mqtts = MQTT(
             broker=self._hostname,
@@ -118,11 +119,18 @@ class IoTMQTT:
             port=8883,
             keep_alive=120,
             is_ssl=True,
+            socket_pool=self._socket_pool,
+            ssl_context=self._ssl_context,
             client_id=self._device_id,
-            log=True,
+            # log=True, #TODO: Looks like this is no longer a paramter
         )
 
-        self._mqtts.logger.setLevel(self._logger.getEffectiveLevel())
+        # TODO: Disabling to test because of error
+        # AttributeError: 'NoneType' object has no attribute 'setLevel'
+        # self._mqtts.logger.setLevel(self._logger.getEffectiveLevel())
+        # Probably should use this now
+        # https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT/blob/master/adafruit_minimqtt/adafruit_minimqtt.py#L953
+        self._mqtts.enable_logger(logging)
 
         # set actions to take throughout connection lifecycle
         self._mqtts.on_connect = self._on_connect
@@ -320,8 +328,8 @@ class IoTMQTT:
     def __init__(
         self,
         callback: IoTMQTTCallback,
-        socket,
-        iface,
+        socket_pool,
+        ssl_context,
         hostname: str,
         device_id: str,
         key: str,
@@ -329,6 +337,7 @@ class IoTMQTT:
         logger: logging = None,
     ):
         """Create the Azure IoT MQTT client
+        TODO: Update this definition
         :param IoTMQTTCallback callback: A callback class
         :param socket: The socket to communicate over
         :param iface: The network interface to communicate over
@@ -339,8 +348,8 @@ class IoTMQTT:
         :param adafruit_logging logger: The logger
         """
         self._callback = callback
-        self._socket = socket
-        self._iface = iface
+        self._socket_pool = socket_pool
+        self._ssl_context = ssl_context
         self._mqtt_connected = False
         self._auth_response_received = False
         self._mqtts = None
