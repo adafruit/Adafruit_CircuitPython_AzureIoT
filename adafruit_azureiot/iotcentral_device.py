@@ -136,7 +136,12 @@ class IoTCentralDevice(IoTMQTTCallback):
         :raises RuntimeError: if the internet connection is not responding or is unable to connect
         """
         self._device_registration = DeviceRegistration(
-            self._socket, self._id_scope, self._device_id, self._key, self._logger
+            self._socket,
+            self._iface,
+            self._id_scope,
+            self._device_id,
+            self._key,
+            self._logger,
         )
 
         token_expiry = int(time.time() + self._token_expires)
