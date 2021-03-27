@@ -13,10 +13,10 @@ This file is for maintaining Microsoft Azure IoT constants that could be changed
 """
 
 # The version of the IoT Central MQTT API this code is built against
-IOTC_API_VERSION = "2016-11-14"
+IOTC_API_VERSION = "2018-06-30"
 
 # The version of the Azure Device Provisioning Service this code is built against
-DPS_API_VERSION = "2018-11-01"
+DPS_API_VERSION = "2019-03-31"
 
 # The Azure Device Provisioning service endpoint that this library uses to provision IoT Central devices
 DPS_END_POINT = "global.azure-devices-provisioning.net"
