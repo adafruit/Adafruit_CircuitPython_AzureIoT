@@ -292,6 +292,15 @@ class IoTHubDevice(IoTMQTTCallback):
         ):
             self._mqtt.subscribe_to_twins()
 
+    def loop(self) -> None:
+        """Listens for MQTT messages
+        :raises IoTError: if there is no open connection to the MQTT broker
+        """
+        if self._mqtt is None:
+            raise IoTError("You are not connected to IoT Central")
+
+        self._mqtt.loop()
+
     def disconnect(self) -> None:
         """Disconnects from the MQTT broker
         :raises IoTError: if there is no open connection to the MQTT broker
@@ -317,15 +326,6 @@ class IoTHubDevice(IoTMQTTCallback):
             return self._mqtt.is_connected()
 
         return False
-
-    def loop(self) -> None:
-        """Listens for MQTT messages
-        :raises IoTError: if there is no open connection to the MQTT broker
-        """
-        if self._mqtt is None:
-            raise IoTError("You are not connected to IoT Central")
-
-        self._mqtt.loop()
 
     def send_device_to_cloud_message(self, message, system_properties=None) -> None:
         """Send a device to cloud message from this device to Azure IoT Hub
