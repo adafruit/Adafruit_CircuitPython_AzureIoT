@@ -59,10 +59,11 @@ class DeviceRegistration:
                 )
 
     def __init__(
-        self, socket, id_scope: str, device_id: str, key: str, logger: Logger = None
+        self, socket, iface, id_scope: str, device_id: str, key: str, logger: Logger = None
     ):
         """Creates an instance of the device registration service
         :param socket: The network socket
+        :param iface: The network interface
         :param str id_scope: The ID scope of the device to register
         :param str device_id: The device ID of the device to register
         :param str key: The primary or secondary key of the device to register
@@ -73,7 +74,8 @@ class DeviceRegistration:
         self._key = key
         self._logger = logger if logger is not None else logging.getLogger("log")
 
-        requests.set_socket(socket)
+        socket.set_interface(iface)
+        requests.set_socket(socket, iface)
 
     def _loop_assign(self, operation_id, headers) -> str:
         uri = "https://%s/%s/registrations/%s/operations/%s?api-version=%s" % (

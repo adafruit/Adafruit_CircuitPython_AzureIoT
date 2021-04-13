@@ -118,10 +118,10 @@ class IoTMQTT:
             port=8883,
             keep_alive=120,
             is_ssl=True,
-            client_id=self._device_id,
-            log=True,
+            client_id=self._device_id
         )
 
+        self._mqtts.logger = self._logger
         self._mqtts.logger.setLevel(self._logger.getEffectiveLevel())
 
         # set actions to take throughout connection lifecycle
