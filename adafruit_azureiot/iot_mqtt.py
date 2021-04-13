@@ -111,7 +111,13 @@ class IoTMQTT:
     def _create_mqtt_client(self) -> None:
         minimqtt.set_socket(self._socket, self._iface)
 
-        self._logger.debug(str.replace(f'- iot_mqtt :: _on_connect :: username = {self._username}, password = {self._passwd}', '%', '%%'))
+        self._logger.debug(
+            str.replace(
+                f"- iot_mqtt :: _on_connect :: username = {self._username}, password = {self._passwd}",
+                "%",
+                "%%",
+            )
+        )
 
         self._mqtts = MQTT(
             broker=self._hostname,
