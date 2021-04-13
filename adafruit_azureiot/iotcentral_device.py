@@ -141,7 +141,7 @@ class IoTCentralDevice(IoTMQTTCallback):
             self._id_scope,
             self._device_id,
             self._key,
-            self._logger
+            self._logger,
         )
 
         token_expiry = int(time.time() + self._token_expires)

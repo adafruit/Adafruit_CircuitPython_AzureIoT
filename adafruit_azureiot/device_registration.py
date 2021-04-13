@@ -59,7 +59,13 @@ class DeviceRegistration:
                 )
 
     def __init__(
-        self, socket, iface, id_scope: str, device_id: str, key: str, logger: Logger = None
+        self,
+        socket,
+        iface,
+        id_scope: str,
+        device_id: str,
+        key: str,
+        logger: Logger = None,
     ):
         """Creates an instance of the device registration service
         :param socket: The network socket

@@ -118,7 +118,7 @@ class IoTMQTT:
             port=8883,
             keep_alive=120,
             is_ssl=True,
-            client_id=self._device_id
+            client_id=self._device_id,
         )
 
         self._mqtts.logger = self._logger
