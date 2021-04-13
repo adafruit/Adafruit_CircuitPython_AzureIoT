@@ -111,6 +111,8 @@ class IoTMQTT:
     def _create_mqtt_client(self) -> None:
         minimqtt.set_socket(self._socket, self._iface)
 
+        self._logger.debug(str.replace(f'- iot_mqtt :: _on_connect :: username = {self._username}, password = {self._passwd}', '%', '%%'))
+
         self._mqtts = MQTT(
             broker=self._hostname,
             username=self._username,
@@ -121,12 +123,10 @@ class IoTMQTT:
             client_id=self._device_id,
         )
 
-        self._mqtts.logger = self._logger
-        self._mqtts.logger.setLevel(self._logger.getEffectiveLevel())
+        self._mqtts.enable_logger(logging, self._logger.getEffectiveLevel())
 
         # set actions to take throughout connection lifecycle
         self._mqtts.on_connect = self._on_connect
-        self._mqtts.on_log = self._on_log
         self._mqtts.on_publish = self._on_publish
         self._mqtts.on_disconnect = self._on_disconnect
 
@@ -145,12 +145,6 @@ class IoTMQTT:
             self._mqtt_connected = True
         self._auth_response_received = True
         self._callback.connection_status_change(True)
-
-    # pylint: disable=C0103, W0613
-    def _on_log(self, client, userdata, level, buf) -> None:
-        self._logger.info("mqtt-log : " + buf)
-        if level <= 8:
-            self._logger.error("mqtt-log : " + buf)
 
     def _on_disconnect(self, client, userdata, rc) -> None:
         self._logger.info("- iot_mqtt :: _on_disconnect :: rc = " + str(rc))
@@ -348,7 +342,7 @@ class IoTMQTT:
         self._hostname = hostname
         self._key = key
         self._token_expires = token_expires
-        self._username = "{}/{}/api-version={}".format(
+        self._username = "{}/{}/?api-version={}".format(
             self._hostname, device_id, constants.IOTC_API_VERSION
         )
         self._passwd = self._gen_sas_token()
