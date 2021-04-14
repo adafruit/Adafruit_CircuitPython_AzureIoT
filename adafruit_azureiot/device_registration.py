@@ -58,6 +58,7 @@ class DeviceRegistration:
                     "Error {0}: {1}".format(status_code, status_reason)
                 )
 
+    # pylint: disable=R0913
     def __init__(
         self,
         socket,
