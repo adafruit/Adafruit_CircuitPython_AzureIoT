@@ -13,18 +13,15 @@ to IoT Central over MQTT
 * Author(s): Jim Bennett, Elena Horton
 """
 
-import gc
 import json
 import time
-import adafruit_requests as requests
 import adafruit_logging as logging
 from adafruit_logging import Logger
+import adafruit_minimqtt.adafruit_minimqtt as minimqtt
+from adafruit_minimqtt.adafruit_minimqtt import MQTT
 from . import constants
 from .quote import quote
 from .keys import compute_derived_symmetric_key
-
-# Azure HTTP error status codes
-AZURE_HTTP_ERROR_CODES = [400, 401, 404, 403, 412, 429, 500]
 
 
 class DeviceRegistrationError(Exception):
@@ -43,21 +40,6 @@ class DeviceRegistration:
     to IoT Central over MQTT
     """
 
-    _loop_interval = 2
-
-    @staticmethod
-    def _parse_http_status(status_code: int, status_reason: str) -> None:
-        """Parses status code, throws error based on Azure IoT Common Error Codes.
-        :param int status_code: HTTP status code.
-        :param str status_reason: Description of HTTP status.
-        :raises DeviceRegistrationError: if the status code is an error code
-        """
-        for error in AZURE_HTTP_ERROR_CODES:
-            if error == status_code:
-                raise DeviceRegistrationError(
-                    "Error {0}: {1}".format(status_code, status_reason)
-                )
-
     # pylint: disable=R0913
     def __init__(
         self,
@@ -70,7 +52,6 @@ class DeviceRegistration:
     ):
         """Creates an instance of the device registration service
         :param socket: The network socket
-        :param iface: The network interface
         :param str id_scope: The ID scope of the device to register
         :param str device_id: The device ID of the device to register
         :param str key: The primary or secondary key of the device to register
@@ -81,106 +62,95 @@ class DeviceRegistration:
         self._key = key
         self._logger = logger if logger is not None else logging.getLogger("log")
 
-        socket.set_interface(iface)
-        requests.set_socket(socket, iface)
+        self._mqtt_connected = False
+        self._mqtt = None
+        self._auth_response_received = False
+        self._operation_id = None
+        self._hostname = None
 
-    def _loop_assign(self, operation_id, headers) -> str:
-        uri = "https://%s/%s/registrations/%s/operations/%s?api-version=%s" % (
-            constants.DPS_END_POINT,
-            self._id_scope,
-            self._device_id,
-            operation_id,
-            constants.DPS_API_VERSION,
+        self._socket = socket
+        self._iface = iface
+
+    # pylint: disable=W0613
+    # pylint: disable=C0103
+    def _on_connect(self, client, userdata, _, rc) -> None:
+        self._logger.info(
+            f"- device_registration :: _on_connect :: rc = {str(rc)}, userdata = {str(userdata)}"
         )
-        self._logger.info("- iotc :: _loop_assign :: " + uri)
+        if rc == 0:
+            self._mqtt_connected = True
+        self._auth_response_received = True
 
-        response = self._run_get_request_with_retry(uri, headers)
+    # pylint: disable=W0613
+    def _handle_dps_update(self, client, topic: str, msg: str) -> None:
+        self._logger.info(f"Received registration results on topic {topic} - {msg}")
+        message = json.loads(msg)
 
-        try:
-            data = response.json()
-        except ValueError as error:
-            err = "ERROR: " + str(error) + " => " + str(response)
-            self._logger.error(err)
-            raise DeviceRegistrationError(err) from error
+        if topic.startswith("$dps/registrations/res/202"):
+            self._operation_id = message["operationId"]
+        elif topic.startswith("$dps/registrations/res/200"):
+            self._hostname = message["registrationState"]["assignedHub"]
 
-        loop_try = 0
+    def _connect_to_mqtt(self) -> None:
+        self._mqtt.on_connect = self._on_connect
 
-        if data is not None and "status" in data:
-            if data["status"] == "assigning":
-                time.sleep(self._loop_interval)
-                if loop_try < 20:
-                    loop_try = loop_try + 1
-                    return self._loop_assign(operation_id, headers)
+        self._mqtt.connect()
 
-                err = "ERROR: Unable to provision the device."
-                self._logger.error(err)
-                raise DeviceRegistrationError(err)
+        self._logger.info(
+            " - device_registration :: connect :: created mqtt client. connecting.."
+        )
+        while not self._auth_response_received:
+            self._mqtt.loop()
 
-            if data["status"] == "assigned":
-                state = data["registrationState"]
-                return state["assignedHub"]
-        else:
-            data = str(data)
+        self._logger.info(
+            f" - device_registration :: connect :: on_connect must be fired. Connected ? {str(self._mqtt_connected)}"
+        )
 
-        err = "DPS L => " + str(data)
-        self._logger.error(err)
-        raise DeviceRegistrationError(err)
+        if not self._mqtt_connected:
+            raise DeviceRegistrationError("Cannot connect to MQTT")
 
-    def _run_put_request_with_retry(self, url, body, headers):
+    def _start_registration(self) -> None:
+        self._mqtt.add_topic_callback(
+            "$dps/registrations/res/#", self._handle_dps_update
+        )
+        self._mqtt.subscribe("$dps/registrations/res/#")
+
+        message = json.dumps({"registrationId": self._device_id})
+
+        self._mqtt.publish(
+            f"$dps/registrations/PUT/iotdps-register/?$rid={self._device_id}", message
+        )
+
         retry = 0
-        response = None
 
-        while True:
-            gc.collect()
-            try:
-                self._logger.debug("Trying to send...")
-                response = requests.put(url, json=body, headers=headers)
-                self._logger.debug("Sent!")
-                break
-            except RuntimeError as runtime_error:
-                self._logger.info(
-                    "Could not send data, retrying after 0.5 seconds: "
-                    + str(runtime_error)
-                )
-                retry = retry + 1
+        while self._operation_id is None and retry < 10:
+            time.sleep(1)
+            retry = retry + 1
+            self._mqtt.loop()
 
-                if retry >= 10:
-                    self._logger.error("Failed to send data")
-                    raise
+        if self._operation_id is None:
+            raise DeviceRegistrationError(
+                "Cannot register device - no response from broker for registration result"
+            )
 
-                time.sleep(0.5)
-                continue
+    def _wait_for_operation(self) -> None:
+        message = json.dumps({"operationId": self._operation_id})
+        self._mqtt.publish(
+            f"$dps/registrations/GET/iotdps-get-operationstatus/?$rid={self._device_id}&operationId={self._operation_id}",
+            message,
+        )
 
-        gc.collect()
-        return response
-
-    def _run_get_request_with_retry(self, url, headers):
         retry = 0
-        response = None
 
-        while True:
-            gc.collect()
-            try:
-                self._logger.debug("Trying to send...")
-                response = requests.get(url, headers=headers)
-                self._logger.debug("Sent!")
-                break
-            except RuntimeError as runtime_error:
-                self._logger.info(
-                    "Could not send data, retrying after 0.5 seconds: "
-                    + str(runtime_error)
-                )
-                retry = retry + 1
+        while self._hostname is None and retry < 10:
+            time.sleep(1)
+            retry = retry + 1
+            self._mqtt.loop()
 
-                if retry >= 10:
-                    self._logger.error("Failed to send data")
-                    raise
-
-                time.sleep(0.5)
-                continue
-
-        gc.collect()
-        return response
+        if self._hostname is None:
+            raise DeviceRegistrationError(
+                "Cannot register device - no response from broker for operation status"
+            )
 
     def register_device(self, expiry: int) -> str:
         """
@@ -192,65 +162,35 @@ class DeviceRegistration:
         :raises DeviceRegistrationError: if the device cannot be registered successfully
         :raises RuntimeError: if the internet connection is not responding or is unable to connect
         """
+
+        username = f"{self._id_scope}/registrations/{self._device_id}/api-version={constants.DPS_API_VERSION}"
+
         # pylint: disable=C0103
         sr = self._id_scope + "%2Fregistrations%2F" + self._device_id
         sig_no_encode = compute_derived_symmetric_key(
             self._key, sr + "\n" + str(expiry)
         )
         sig_encoded = quote(sig_no_encode, "~()*!.'")
-        auth_string = (
-            "SharedAccessSignature sr="
-            + sr
-            + "&sig="
-            + sig_encoded
-            + "&se="
-            + str(expiry)
-            + "&skn=registration"
+        auth_string = f"SharedAccessSignature sr={sr}&sig={sig_encoded}&se={str(expiry)}&skn=registration"
+
+        minimqtt.set_socket(self._socket, self._iface)
+
+        self._mqtt = MQTT(
+            broker=constants.DPS_END_POINT,
+            username=username,
+            password=auth_string,
+            port=8883,
+            keep_alive=120,
+            is_ssl=True,
+            client_id=self._device_id,
         )
 
-        headers = {
-            "content-type": "application/json; charset=utf-8",
-            "user-agent": "iot-central-client/1.0",
-            "Accept": "*/*",
-        }
+        self._mqtt.enable_logger(logging, self._logger.getEffectiveLevel())
 
-        if auth_string is not None:
-            headers["authorization"] = auth_string
+        self._connect_to_mqtt()
+        self._start_registration()
+        self._wait_for_operation()
 
-        body = {"registrationId": self._device_id}
+        self._mqtt.disconnect()
 
-        uri = "https://%s/%s/registrations/%s/register?api-version=%s" % (
-            constants.DPS_END_POINT,
-            self._id_scope,
-            self._device_id,
-            constants.DPS_API_VERSION,
-        )
-
-        self._logger.info("Connecting...")
-        self._logger.info("URL: " + uri)
-        self._logger.info("body: " + json.dumps(body))
-
-        response = self._run_put_request_with_retry(uri, body, headers)
-
-        data = None
-        try:
-            data = response.json()
-        except ValueError as error:
-            err = (
-                "ERROR: non JSON is received from "
-                + constants.DPS_END_POINT
-                + " => "
-                + str(response)
-                + " .. message : "
-                + str(error)
-            )
-            self._logger.error(err)
-            raise DeviceRegistrationError(err) from error
-
-        if "errorCode" in data:
-            err = "DPS => " + str(data)
-            self._logger.error(err)
-            raise DeviceRegistrationError(err)
-
-        time.sleep(1)
-        return self._loop_assign(data["operationId"], headers)
+        return str(self._hostname)
