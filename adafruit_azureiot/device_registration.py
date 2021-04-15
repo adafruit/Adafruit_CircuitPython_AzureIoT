@@ -87,6 +87,13 @@ class DeviceRegistration:
         message = json.loads(msg)
 
         if topic.startswith("$dps/registrations/res/202"):
+            # Get the retry after and wait for that before responding
+            parts = str.split(topic, "retry-after=")
+            waittime = int(parts[1])
+
+            self._logger.debug(f"Retrying after {waittime}s")
+
+            time.sleep(waittime)
             self._operation_id = message["operationId"]
         elif topic.startswith("$dps/registrations/res/200"):
             self._hostname = message["registrationState"]["assignedHub"]
