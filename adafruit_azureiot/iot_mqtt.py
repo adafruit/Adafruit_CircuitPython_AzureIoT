@@ -16,7 +16,6 @@ import gc
 import json
 import time
 import adafruit_minimqtt.adafruit_minimqtt as minimqtt
-from adafruit_minimqtt.adafruit_minimqtt import MQTT
 import adafruit_logging as logging
 from .iot_error import IoTError
 from .keys import compute_derived_symmetric_key
@@ -119,7 +118,7 @@ class IoTMQTT:
             )
         )
 
-        self._mqtts = MQTT(
+        self._mqtts = minimqtt.MQTT(
             broker=self._hostname,
             username=self._username,
             password=self._passwd,

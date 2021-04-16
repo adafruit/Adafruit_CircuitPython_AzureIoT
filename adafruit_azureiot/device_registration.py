@@ -18,7 +18,6 @@ import time
 import adafruit_logging as logging
 from adafruit_logging import Logger
 import adafruit_minimqtt.adafruit_minimqtt as minimqtt
-from adafruit_minimqtt.adafruit_minimqtt import MQTT
 from . import constants
 from .quote import quote
 from .keys import compute_derived_symmetric_key
@@ -182,7 +181,7 @@ class DeviceRegistration:
 
         minimqtt.set_socket(self._socket, self._iface)
 
-        self._mqtt = MQTT(
+        self._mqtt = minimqtt.MQTT(
             broker=constants.DPS_END_POINT,
             username=username,
             password=auth_string,
