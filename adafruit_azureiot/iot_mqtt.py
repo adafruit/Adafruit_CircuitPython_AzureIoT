@@ -146,7 +146,7 @@ class IoTMQTT:
             + ", userdata = "
             + str(userdata)
         )
-        
+
         self._auth_response_received = True
         self._callback.connection_status_change(True)
 
