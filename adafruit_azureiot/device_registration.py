@@ -61,7 +61,6 @@ class DeviceRegistration:
         self._key = key
         self._logger = logger if logger is not None else logging.getLogger("log")
 
-        self._mqtt_connected = False
         self._mqtt = None
         self._auth_response_received = False
         self._operation_id = None
@@ -76,8 +75,7 @@ class DeviceRegistration:
         self._logger.info(
             f"- device_registration :: _on_connect :: rc = {str(rc)}, userdata = {str(userdata)}"
         )
-        if rc == 0:
-            self._mqtt_connected = True
+
         self._auth_response_received = True
 
     # pylint: disable=W0613
@@ -109,10 +107,10 @@ class DeviceRegistration:
             self._mqtt.loop()
 
         self._logger.info(
-            f" - device_registration :: connect :: on_connect must be fired. Connected ? {str(self._mqtt_connected)}"
+            f" - device_registration :: connect :: on_connect must be fired. Connected ? {str(self._mqtt.is_connected())}"
         )
 
-        if not self._mqtt_connected:
+        if not self._mqtt.is_connected():
             raise DeviceRegistrationError("Cannot connect to MQTT")
 
     def _start_registration(self) -> None:

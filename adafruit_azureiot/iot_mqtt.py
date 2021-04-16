@@ -146,8 +146,7 @@ class IoTMQTT:
             + ", userdata = "
             + str(userdata)
         )
-        if rc == 0:
-            self._mqtt_connected = True
+        
         self._auth_response_received = True
         self._callback.connection_status_change(True)
 
@@ -158,9 +157,6 @@ class IoTMQTT:
         if rc == 5:
             self._logger.error("on(disconnect) : Not authorized")
             self.disconnect()
-
-        if rc == 1:
-            self._mqtt_connected = False
 
         if rc != 5:
             self._callback.connection_status_change(False)
@@ -340,7 +336,6 @@ class IoTMQTT:
         self._callback = callback
         self._socket = socket
         self._iface = iface
-        self._mqtt_connected = False
         self._auth_response_received = False
         self._mqtts = None
         self._device_id = device_id
@@ -397,7 +392,6 @@ class IoTMQTT:
         if not self.is_connected():
             return False
 
-        self._mqtt_connected = True
         self._auth_response_received = True
 
         self._subscribe_to_core_topics()
@@ -424,7 +418,6 @@ class IoTMQTT:
             return
 
         self._logger.info("- iot_mqtt :: disconnect :: ")
-        self._mqtt_connected = False
         self._mqtts.disconnect()
 
     def reconnect(self) -> None:
@@ -438,7 +431,7 @@ class IoTMQTT:
         :returns: True if there is an open connection, False if not
         :rtype: bool
         """
-        return self._mqtt_connected
+        return self._mqtts.is_connected()
 
     def loop(self) -> None:
         """Listens for MQTT messages"""
