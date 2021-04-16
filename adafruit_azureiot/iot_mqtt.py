@@ -16,7 +16,6 @@ import gc
 import json
 import time
 import adafruit_minimqtt.adafruit_minimqtt as minimqtt
-from adafruit_minimqtt.adafruit_minimqtt import MQTT
 import adafruit_logging as logging
 from .iot_error import IoTError
 from .keys import compute_derived_symmetric_key
@@ -111,7 +110,15 @@ class IoTMQTT:
     def _create_mqtt_client(self) -> None:
         minimqtt.set_socket(self._socket, self._iface)
 
-        self._mqtts = MQTT(
+        self._logger.debug(
+            str.replace(
+                f"- iot_mqtt :: _on_connect :: username = {self._username}, password = {self._passwd}",
+                "%",
+                "%%",
+            )
+        )
+
+        self._mqtts = minimqtt.MQTT(
             broker=self._hostname,
             username=self._username,
             password=self._passwd,
@@ -119,14 +126,12 @@ class IoTMQTT:
             keep_alive=120,
             is_ssl=True,
             client_id=self._device_id,
-            log=True,
         )
 
-        self._mqtts.logger.setLevel(self._logger.getEffectiveLevel())
+        self._mqtts.enable_logger(logging, self._logger.getEffectiveLevel())
 
         # set actions to take throughout connection lifecycle
         self._mqtts.on_connect = self._on_connect
-        self._mqtts.on_log = self._on_log
         self._mqtts.on_publish = self._on_publish
         self._mqtts.on_disconnect = self._on_disconnect
 
@@ -141,16 +146,9 @@ class IoTMQTT:
             + ", userdata = "
             + str(userdata)
         )
-        if rc == 0:
-            self._mqtt_connected = True
+
         self._auth_response_received = True
         self._callback.connection_status_change(True)
-
-    # pylint: disable=C0103, W0613
-    def _on_log(self, client, userdata, level, buf) -> None:
-        self._logger.info("mqtt-log : " + buf)
-        if level <= 8:
-            self._logger.error("mqtt-log : " + buf)
 
     def _on_disconnect(self, client, userdata, rc) -> None:
         self._logger.info("- iot_mqtt :: _on_disconnect :: rc = " + str(rc))
@@ -159,9 +157,6 @@ class IoTMQTT:
         if rc == 5:
             self._logger.error("on(disconnect) : Not authorized")
             self.disconnect()
-
-        if rc == 1:
-            self._mqtt_connected = False
 
         if rc != 5:
             self._callback.connection_status_change(False)
@@ -341,14 +336,13 @@ class IoTMQTT:
         self._callback = callback
         self._socket = socket
         self._iface = iface
-        self._mqtt_connected = False
         self._auth_response_received = False
         self._mqtts = None
         self._device_id = device_id
         self._hostname = hostname
         self._key = key
         self._token_expires = token_expires
-        self._username = "{}/{}/api-version={}".format(
+        self._username = "{}/{}/?api-version={}".format(
             self._hostname, device_id, constants.IOTC_API_VERSION
         )
         self._passwd = self._gen_sas_token()
@@ -398,7 +392,6 @@ class IoTMQTT:
         if not self.is_connected():
             return False
 
-        self._mqtt_connected = True
         self._auth_response_received = True
 
         self._subscribe_to_core_topics()
@@ -425,7 +418,6 @@ class IoTMQTT:
             return
 
         self._logger.info("- iot_mqtt :: disconnect :: ")
-        self._mqtt_connected = False
         self._mqtts.disconnect()
 
     def reconnect(self) -> None:
@@ -439,7 +431,7 @@ class IoTMQTT:
         :returns: True if there is an open connection, False if not
         :rtype: bool
         """
-        return self._mqtt_connected
+        return self._mqtts.is_connected()
 
     def loop(self) -> None:
         """Listens for MQTT messages"""

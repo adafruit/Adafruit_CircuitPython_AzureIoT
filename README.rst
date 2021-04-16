@@ -13,7 +13,7 @@ Adafruit_CircuitPython_AzureIoT
     :target: https://github.com/adafruit/Adafruit_CircuitPython_AzureIoT/actions/
     :alt: Build Status
 
-A CircuitPython device library for `Microsoft Azure IoT Services <https://azure.microsoft.com/overview/iot/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_ from a CircuitPython device. This library only supports key-base authentication, it currently doesn't support X.509 certificates.
+A CircuitPython device library for `Microsoft Azure IoT Services <https://azure.microsoft.com/overview/iot/?WT.mc_id=academic-3168-jabenn>`_ from a CircuitPython device. This library only supports key-base authentication, it currently doesn't support X.509 certificates.
 
 Installing from PyPI
 =====================
@@ -55,7 +55,7 @@ This is easily achieved by downloading
 Usage Example
 =============
 
-This library supports both `Azure IoT Hub <https://azure.microsoft.com/services/iot-hub/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_ and `Azure IoT Central <https://azure.microsoft.com/services/iot-central/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__.
+This library supports both `Azure IoT Hub <https://azure.microsoft.com/services/iot-hub/?WT.mc_id=academic-3168-jabenn>`_ and `Azure IoT Central <https://azure.microsoft.com/services/iot-central/?WT.mc_id=academic-3168-jabenn>`__.
 
 To create an Azure IoT Hub instance or an Azure IoT Central app, you will need an Azure subscription. If you don't have an Azure subscription, you can sign up for free:
 
@@ -169,9 +169,9 @@ Azure IoT Central
 
 To use Azure IoT Central, you will need to create an Azure IoT Central app, create a device template and register a device against the template.
 
-- Head to `Azure IoT Central <https://apps.azureiotcentral.com/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__
-- Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-deploy-iot-central?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__ to create an application. Every tier is free for up to 2 devices.
-- Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-create-simulated-device?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`__ to create a device template.
+- Head to `Azure IoT Central <https://apps.azureiotcentral.com/?WT.mc_id=academic-3168-jabenn>`__
+- Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-deploy-iot-central?WT.mc_id=academic-3168-jabenn>`__ to create an application. Every tier is free for up to 2 devices.
+- Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-create-simulated-device?WT.mc_id=academic-3168-jabenn>`__ to create a device template.
 - Create a device based off the template, and select **Connect** to get the device connection details. Store the ID Scope, Device ID and either the Primary or secondary Key in your ``secrets.py`` file.
 
 .. image:: iot-central-connect-button.png
@@ -254,8 +254,8 @@ Learning more about Azure IoT services
 
 If you want to learn more about setting up or using Azure IoT Services, check out the following resources:
 
-- `Azure IoT documentation on Microsoft Docs <https://docs.microsoft.com/azure/iot-fundamentals/?WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_
-- `IoT learning paths and modules on Microsoft Learn <https://docs.microsoft.com/learn/browse/?term=iot&WT.mc_id=AdafruitCircuitPythonAzureIoT-github-jabenn>`_ - Free, online, self-guided hands on learning with Azure IoT services
+- `Azure IoT documentation on Microsoft Docs <https://docs.microsoft.com/azure/iot-fundamentals/?WT.mc_id=academic-3168-jabenn>`_
+- `IoT learning paths and modules on Microsoft Learn <https://docs.microsoft.com/learn/browse/?term=iot&WT.mc_id=academic-3168-jabenn>`_ - Free, online, self-guided hands on learning with Azure IoT services
 
 Contributing
 ============
