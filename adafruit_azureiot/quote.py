@@ -11,14 +11,22 @@ unreserved chars ("always safe") nor the additional chars set via the
 safe arg.
 
 """
+
+from __future__ import annotations
+
+try:
+    from typing import Any, Union
+except ImportError:
+    pass
+
 _ALWAYS_SAFE = frozenset(
     b"ABCDEFGHIJKLMNOPQRSTUVWXYZ" b"abcdefghijklmnopqrstuvwxyz" b"0123456789" b"_.-~"
 )
 _ALWAYS_SAFE_BYTES = bytes(_ALWAYS_SAFE)
-SAFE_QUOTERS = {}
+SAFE_QUOTERS: dict = {}
 
 
-def quote(bytes_val: bytes, safe="/"):
+def quote(bytes_val: bytes, safe: Union[str, bytes, bytearray] = "/") -> str:
     """The quote function %-escapes all characters that are neither in the
     unreserved chars ("always safe") nor the additional chars set via the
     safe arg.
@@ -69,17 +77,17 @@ class defaultdict:
 
     @staticmethod
     # pylint: disable=W0613
-    def __new__(cls, default_factory=None, **kwargs):
+    def __new__(cls, default_factory: Any = None, **kwargs: Any) -> defaultdict:
         self = super(defaultdict, cls).__new__(cls)
         # pylint: disable=C0103
         self.d = {}
         return self
 
-    def __init__(self, default_factory=None, **kwargs):
+    def __init__(self, default_factory: Any = None, **kwargs: Any):
         self.d = kwargs
         self.default_factory = default_factory
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: Any) -> Any:
         try:
             return self.d[key]
         except KeyError:
@@ -87,16 +95,16 @@ class defaultdict:
             self.d[key] = val
             return val
 
-    def __setitem__(self, key, val):
+    def __setitem__(self, key: Any, val: Any) -> None:
         self.d[key] = val
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: Any) -> None:
         del self.d[key]
 
-    def __contains__(self, key):
+    def __contains__(self, key: Any) -> bool:
         return key in self.d
 
-    def __missing__(self, key):
+    def __missing__(self, key: Any) -> Any:
         if self.default_factory is None:
             raise KeyError(key)
         return self.default_factory()
@@ -111,12 +119,12 @@ class Quoter(defaultdict):
 
     # Keeps a cache internally, using defaultdict, for efficiency (lookups
     # of cached keys don't call Python code at all).
-    def __init__(self, safe):
+    def __init__(self, safe: Union[bytes, bytearray]):
         """safe: bytes object."""
         super().__init__()
         self.safe = _ALWAYS_SAFE.union(safe)
 
-    def __missing__(self, b):
+    def __missing__(self, b: int) -> str:
         # Handle a cache miss. Store quoted string in cache and return.
         res = chr(b) if b in self.safe else "%{:02X}".format(b)
         self[b] = res
