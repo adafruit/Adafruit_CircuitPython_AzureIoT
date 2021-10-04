@@ -16,8 +16,15 @@ as we only need sha256, so just having the code we need saves 19k of RAM
 
 # pylint: disable=C0103, W0108, R0915, C0116, C0115
 
+from __future__ import annotations
 
-def __translate(key, translation):
+try:
+    from typing import Union
+except ImportError:
+    pass
+
+
+def __translate(key: Union[bytes, bytearray], translation: bytes) -> bytes:
     return bytes(translation[x] for x in key)
 
 
@@ -28,7 +35,7 @@ SHA_BLOCKSIZE = 64
 SHA_DIGESTSIZE = 32
 
 
-def new_shaobject():
+def new_shaobject() -> dict:
     """Struct. for storing SHA information."""
     return {
         "digest": [0] * 8,
@@ -40,7 +47,7 @@ def new_shaobject():
     }
 
 
-def sha_init():
+def sha_init() -> dict:
     """Initialize the SHA digest."""
     sha_info = new_shaobject()
     sha_info["digest"] = [
@@ -73,7 +80,7 @@ Gamma0 = lambda x: (S(x, 7) ^ S(x, 18) ^ R(x, 3))
 Gamma1 = lambda x: (S(x, 17) ^ S(x, 19) ^ R(x, 10))
 
 
-def sha_transform(sha_info):
+def sha_transform(sha_info: dict) -> None:
     W = []
 
     d = sha_info["data"]
@@ -90,7 +97,7 @@ def sha_transform(sha_info):
     ss = sha_info["digest"][:]
 
     # pylint: disable=too-many-arguments, line-too-long
-    def RND(a, b, c, d, e, f, g, h, i, ki):
+    def RND(a, b, c, d, e, f, g, h, i, ki):  # type: ignore[no-untyped-def]
         """Compress"""
         t0 = h + Sigma1(e) + Ch(e, f, g) + ki + W[i]
         t1 = Sigma0(a) + Maj(a, b, c)
@@ -298,7 +305,7 @@ def sha_transform(sha_info):
     sha_info["digest"] = dig
 
 
-def sha_update(sha_info, buffer):
+def sha_update(sha_info: dict, buffer: Union[bytes, bytearray]) -> None:
     """Update the SHA digest.
     :param dict sha_info: SHA Digest.
     :param str buffer: SHA buffer size.
@@ -346,13 +353,13 @@ def sha_update(sha_info, buffer):
     sha_info["local"] = count
 
 
-def getbuf(s):
+def getbuf(s: Union[str, bytes, bytearray]) -> Union[bytes, bytearray]:
     if isinstance(s, str):
         return s.encode("ascii")
     return bytes(s)
 
 
-def sha_final(sha_info):
+def sha_final(sha_info: dict) -> bytes:
     """Finish computing the SHA Digest."""
     lo_bit_count = sha_info["count_lo"]
     hi_bit_count = sha_info["count_hi"]
@@ -393,28 +400,28 @@ class sha256:
     block_size = SHA_BLOCKSIZE
     name = "sha256"
 
-    def __init__(self, s=None):
+    def __init__(self, s: Union[str, bytes, bytearray] = None):
         """Constructs a SHA256 hash object."""
         self._sha = sha_init()
         if s:
             sha_update(self._sha, getbuf(s))
 
-    def update(self, s):
+    def update(self, s: Union[str, bytes, bytearray]) -> None:
         """Updates the hash object with a bytes-like object, s."""
         sha_update(self._sha, getbuf(s))
 
-    def digest(self):
+    def digest(self) -> bytes:
         """Returns the digest of the data passed to the update()
         method so far."""
         return sha_final(self._sha.copy())[: self._sha["digestsize"]]
 
-    def hexdigest(self):
+    def hexdigest(self) -> str:
         """Like digest() except the digest is returned as a string object of
         double length, containing only hexadecimal digits.
         """
         return "".join(["%.2x" % i for i in self.digest()])
 
-    def copy(self):
+    def copy(self) -> sha256:
         """Return a copy (“clone”) of the hash object."""
         new = sha256()
         new._sha = self._sha.copy()
@@ -429,7 +436,9 @@ class HMAC:
 
     blocksize = 64  # 512-bit HMAC; can be changed in subclasses.
 
-    def __init__(self, key, msg=None):
+    def __init__(
+        self, key: Union[bytes, bytearray], msg: Union[bytes, bytearray] = None
+    ):
         """Create a new HMAC object.
 
         key:       key for the keyed hash object.
@@ -478,15 +487,15 @@ class HMAC:
             self.update(msg)
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Return the name of this object"""
         return "hmac-" + self.inner.name
 
-    def update(self, msg):
+    def update(self, msg: Union[bytes, bytearray]) -> None:
         """Update this hashing object with the string msg."""
         self.inner.update(msg)
 
-    def copy(self):
+    def copy(self) -> HMAC:
         """Return a separate copy of this hashing object.
 
         An update to this copy won't affect the original object.
@@ -499,7 +508,7 @@ class HMAC:
         other.outer = self.outer.copy()
         return other
 
-    def _current(self):
+    def _current(self) -> sha256:
         """Return a hash object for the current state.
 
         To be used only internally with digest() and hexdigest().
@@ -508,7 +517,7 @@ class HMAC:
         hmac.update(self.inner.digest())
         return hmac
 
-    def digest(self):
+    def digest(self) -> bytes:
         """Return the hash value of this hashing object.
 
         This returns a string containing 8-bit data.  The object is
@@ -518,13 +527,13 @@ class HMAC:
         hmac = self._current()
         return hmac.digest()
 
-    def hexdigest(self):
+    def hexdigest(self) -> str:
         """Like digest(), but returns a string of hexadecimal digits instead."""
         hmac = self._current()
         return hmac.hexdigest()
 
 
-def new_hmac(key, msg=None):
+def new_hmac(key: Union[bytes, bytearray], msg: Union[bytes, bytearray] = None) -> HMAC:
     """Create a new hashing object and return it.
 
     key: The starting key for the hash.
