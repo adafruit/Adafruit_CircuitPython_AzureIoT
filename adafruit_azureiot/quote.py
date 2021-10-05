@@ -23,7 +23,7 @@ _ALWAYS_SAFE = frozenset(
     b"ABCDEFGHIJKLMNOPQRSTUVWXYZ" b"abcdefghijklmnopqrstuvwxyz" b"0123456789" b"_.-~"
 )
 _ALWAYS_SAFE_BYTES = bytes(_ALWAYS_SAFE)
-SAFE_QUOTERS: dict = {}
+SAFE_QUOTERS = {}
 
 
 def quote(bytes_val: bytes, safe: Union[str, bytes, bytearray] = "/") -> str:

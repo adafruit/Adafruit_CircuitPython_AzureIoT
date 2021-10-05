@@ -149,7 +149,7 @@ class IoTHubDevice(IoTMQTTCallback):
         self._token_expires = token_expires
         self._logger = logger if logger is not None else logging.getLogger("log")
 
-        connection_string_values: dict = {}
+        connection_string_values = {}
 
         try:
             cs_args = device_connection_string.split(DELIMITER)
