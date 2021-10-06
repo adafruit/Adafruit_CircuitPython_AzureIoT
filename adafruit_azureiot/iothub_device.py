@@ -174,11 +174,11 @@ class IoTHubDevice(IoTMQTTCallback):
         self._logger.debug("Device Id: " + self._device_id)
         self._logger.debug("Shared Access Key: " + self._shared_access_key)
 
-        self._on_connection_status_changed = lambda *x: None
-        self._on_direct_method_invoked = lambda *x: None
-        self._on_cloud_to_device_message_received = lambda *x: None
-        self._on_device_twin_desired_updated = lambda *x: None
-        self._on_device_twin_reported_updated = lambda *x: None
+        self._on_connection_status_changed = None
+        self._on_direct_method_invoked = None
+        self._on_cloud_to_device_message_received = None
+        self._on_device_twin_desired_updated = None
+        self._on_device_twin_reported_updated = None
 
         self._mqtt = None
 
