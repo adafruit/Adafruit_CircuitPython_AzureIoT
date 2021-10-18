@@ -12,8 +12,6 @@ safe arg.
 
 """
 
-from __future__ import annotations
-
 try:
     from typing import Any, Union
 except ImportError:
@@ -77,7 +75,7 @@ class defaultdict:
 
     @staticmethod
     # pylint: disable=W0613
-    def __new__(cls, default_factory: Any = None, **kwargs: Any) -> defaultdict:
+    def __new__(cls, default_factory: Any = None, **kwargs: Any) -> "defaultdict":
         self = super(defaultdict, cls).__new__(cls)
         # pylint: disable=C0103
         self.d = {}

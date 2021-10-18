@@ -16,8 +16,6 @@ as we only need sha256, so just having the code we need saves 19k of RAM
 
 # pylint: disable=C0103, W0108, R0915, C0116, C0115
 
-from __future__ import annotations
-
 try:
     from typing import Union
 except ImportError:
@@ -421,7 +419,7 @@ class sha256:
         """
         return "".join(["%.2x" % i for i in self.digest()])
 
-    def copy(self) -> sha256:
+    def copy(self) -> "sha256":
         """Return a copy (“clone”) of the hash object."""
         new = sha256()
         new._sha = self._sha.copy()
@@ -495,7 +493,7 @@ class HMAC:
         """Update this hashing object with the string msg."""
         self.inner.update(msg)
 
-    def copy(self) -> HMAC:
+    def copy(self) -> "HMAC":
         """Return a separate copy of this hashing object.
 
         An update to this copy won't affect the original object.
@@ -508,7 +506,7 @@ class HMAC:
         other.outer = self.outer.copy()
         return other
 
-    def _current(self) -> sha256:
+    def _current(self) -> "sha256":
         """Return a hash object for the current state.
 
         To be used only internally with digest() and hexdigest().
@@ -533,7 +531,9 @@ class HMAC:
         return hmac.hexdigest()
 
 
-def new_hmac(key: Union[bytes, bytearray], msg: Union[bytes, bytearray] = None) -> HMAC:
+def new_hmac(
+    key: Union[bytes, bytearray], msg: Union[bytes, bytearray] = None
+) -> "HMAC":
     """Create a new hashing object and return it.
 
     key: The starting key for the hash.
