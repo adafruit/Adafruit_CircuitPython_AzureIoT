@@ -257,6 +257,11 @@ If you want to learn more about setting up or using Azure IoT Services, check ou
 - `Azure IoT documentation on Microsoft Docs <https://docs.microsoft.com/azure/iot-fundamentals/?WT.mc_id=academic-3168-jabenn>`_
 - `IoT learning paths and modules on Microsoft Learn <https://docs.microsoft.com/learn/browse/?term=iot&WT.mc_id=academic-3168-jabenn>`_ - Free, online, self-guided hands on learning with Azure IoT services
 
+Documentation
+=============
+
+API documentation for this library can be found on `Read the Docs <https://circuitpython.readthedocs.io/projects/azureiot/en/latest/>`_.
+
 Contributing
 ============
 
