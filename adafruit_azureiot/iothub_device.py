@@ -12,13 +12,18 @@ Connectivity to Azure IoT Hub
 * Author(s): Jim Bennett, Elena Horton
 """
 
+try:
+    from typing import Any, Callable, Mapping, Union
+except ImportError:
+    pass
+
 import json
 import adafruit_logging as logging
 from .iot_error import IoTError
 from .iot_mqtt import IoTMQTT, IoTMQTTCallback, IoTResponse
 
 
-def _validate_keys(connection_string_parts):
+def _validate_keys(connection_string_parts: Mapping) -> None:
     """Raise ValueError if incorrect combination of keys"""
     host_name = connection_string_parts.get(HOST_NAME)
     shared_access_key_name = connection_string_parts.get(SHARED_ACCESS_KEY_NAME)
@@ -67,7 +72,7 @@ class IoTHubDevice(IoTMQTTCallback):
             self._on_connection_status_changed(connected)
 
     # pylint: disable=W0613, R0201
-    def direct_method_invoked(self, method_name: str, payload) -> IoTResponse:
+    def direct_method_invoked(self, method_name: str, payload: str) -> IoTResponse:
         """Called when a direct method is invoked
         :param str method_name: The name of the method that was invoked
         :param str payload: The payload with the message
@@ -91,7 +96,10 @@ class IoTHubDevice(IoTMQTTCallback):
             self._on_cloud_to_device_message_received(body, properties)
 
     def device_twin_desired_updated(
-        self, desired_property_name: str, desired_property_value, desired_version: int
+        self,
+        desired_property_name: str,
+        desired_property_value: Any,
+        desired_version: int,
     ) -> None:
         """Called when the device twin desired properties are updated
         :param str desired_property_name: The name of the desired property that was updated
@@ -107,7 +115,7 @@ class IoTHubDevice(IoTMQTTCallback):
     def device_twin_reported_updated(
         self,
         reported_property_name: str,
-        reported_property_value,
+        reported_property_value: Any,
         reported_version: int,
     ) -> None:
         """Called when the device twin reported values are updated
@@ -175,21 +183,23 @@ class IoTHubDevice(IoTMQTTCallback):
         self._mqtt = None
 
     @property
-    def on_connection_status_changed(self):
+    def on_connection_status_changed(self) -> Callable:
         """A callback method that is called when the connection status is changed. This method should have the following signature:
         def connection_status_changed(connected: bool) -> None
         """
         return self._on_connection_status_changed
 
     @on_connection_status_changed.setter
-    def on_connection_status_changed(self, new_on_connection_status_changed):
+    def on_connection_status_changed(
+        self, new_on_connection_status_changed: Callable
+    ) -> None:
         """A callback method that is called when the connection status is changed. This method should have the following signature:
         def connection_status_changed(connected: bool) -> None
         """
         self._on_connection_status_changed = new_on_connection_status_changed
 
     @property
-    def on_direct_method_invoked(self):
+    def on_direct_method_invoked(self) -> Callable:
         """A callback method that is called when a direct method is invoked.  This method should have the following signature:
         def direct_method_invoked(method_name: str, payload: str) -> IoTResponse:
 
@@ -202,7 +212,7 @@ class IoTHubDevice(IoTMQTTCallback):
         return self._on_direct_method_invoked
 
     @on_direct_method_invoked.setter
-    def on_direct_method_invoked(self, new_on_direct_method_invoked):
+    def on_direct_method_invoked(self, new_on_direct_method_invoked: Callable) -> None:
         """A callback method that is called when a direct method is invoked.  This method should have the following signature:
         def direct_method_invoked(method_name: str, payload: str) -> IoTResponse:
 
@@ -215,7 +225,7 @@ class IoTHubDevice(IoTMQTTCallback):
         self._on_direct_method_invoked = new_on_direct_method_invoked
 
     @property
-    def on_cloud_to_device_message_received(self):
+    def on_cloud_to_device_message_received(self) -> Callable:
         """A callback method that is called when a cloud to device message is received. This method should have the following signature:
         def cloud_to_device_message_received(body: str, properties: dict) -> None:
         """
@@ -223,8 +233,8 @@ class IoTHubDevice(IoTMQTTCallback):
 
     @on_cloud_to_device_message_received.setter
     def on_cloud_to_device_message_received(
-        self, new_on_cloud_to_device_message_received
-    ):
+        self, new_on_cloud_to_device_message_received: Callable
+    ) -> None:
         """A callback method that is called when a cloud to device message is received. This method should have the following signature:
         def cloud_to_device_message_received(body: str, properties: dict) -> None:
         """
@@ -233,7 +243,7 @@ class IoTHubDevice(IoTMQTTCallback):
         )
 
     @property
-    def on_device_twin_desired_updated(self):
+    def on_device_twin_desired_updated(self) -> Callable:
         """A callback method that is called when the desired properties of the devices device twin are updated.
         This method should have the following signature:
         def device_twin_desired_updated(desired_property_name: str, desired_property_value, desired_version: int) -> None:
@@ -241,7 +251,9 @@ class IoTHubDevice(IoTMQTTCallback):
         return self._on_device_twin_desired_updated
 
     @on_device_twin_desired_updated.setter
-    def on_device_twin_desired_updated(self, new_on_device_twin_desired_updated):
+    def on_device_twin_desired_updated(
+        self, new_on_device_twin_desired_updated: Callable
+    ) -> None:
         """A callback method that is called when the desired properties of the devices device twin are updated.
         This method should have the following signature:
         def device_twin_desired_updated(desired_property_name: str, desired_property_value, desired_version: int) -> None:
@@ -252,7 +264,7 @@ class IoTHubDevice(IoTMQTTCallback):
             self._mqtt.subscribe_to_twins()
 
     @property
-    def on_device_twin_reported_updated(self):
+    def on_device_twin_reported_updated(self) -> Callable:
         """A callback method that is called when the reported properties of the devices device twin are updated.
         This method should have the following signature:
         def device_twin_reported_updated(reported_property_name: str, reported_property_value, reported_version: int) -> None:
@@ -260,7 +272,9 @@ class IoTHubDevice(IoTMQTTCallback):
         return self._on_device_twin_reported_updated
 
     @on_device_twin_reported_updated.setter
-    def on_device_twin_reported_updated(self, new_on_device_twin_reported_updated):
+    def on_device_twin_reported_updated(
+        self, new_on_device_twin_reported_updated: Callable
+    ) -> None:
         """A callback method that is called when the reported properties of the devices device twin are updated.
         This method should have the following signature:
         def device_twin_reported_updated(reported_property_name: str, reported_property_value, reported_version: int) -> None:
@@ -327,7 +341,9 @@ class IoTHubDevice(IoTMQTTCallback):
 
         return False
 
-    def send_device_to_cloud_message(self, message, system_properties=None) -> None:
+    def send_device_to_cloud_message(
+        self, message: Union[str, dict], system_properties: dict = None
+    ) -> None:
         """Send a device to cloud message from this device to Azure IoT Hub
         :param message: The message data as a JSON string or a dictionary
         :param system_properties: System properties to send with the message
@@ -339,7 +355,7 @@ class IoTHubDevice(IoTMQTTCallback):
 
         self._mqtt.send_device_to_cloud_message(message, system_properties)
 
-    def update_twin(self, patch) -> None:
+    def update_twin(self, patch: Union[str, dict]) -> None:
         """Updates the reported properties in the devices device twin
         :param patch: The JSON patch to apply to the device twin reported properties
         """

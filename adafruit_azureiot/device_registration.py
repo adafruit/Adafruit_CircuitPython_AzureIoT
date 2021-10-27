@@ -28,7 +28,7 @@ class DeviceRegistrationError(Exception):
     An error from the device registration
     """
 
-    def __init__(self, message):
+    def __init__(self, message: str):
         super().__init__(message)
         self.message = message
 
