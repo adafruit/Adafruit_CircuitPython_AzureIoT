@@ -27,7 +27,7 @@ secrets = {
     # key comes from either the Primary key or Secondary key
     "id_scope": "",
     "device_id": "",
-    "key": "",
+    "sas_key": "",
     # Azure IoT Hub settings - if you are connecting to Azure IoT Hub, fill in this value
     # To get this value, from the Azure Portal (https://aka.ms/AzurePortalHome), select your IoT Hub,
     # then select Explorers -> IoT devices, select your device, then copy the entire primary or secondary

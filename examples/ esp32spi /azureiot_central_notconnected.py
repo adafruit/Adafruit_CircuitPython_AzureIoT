@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
+import json
+import random
 import time
 import board
 import busio
@@ -92,47 +94,23 @@ print("Time:", str(time.time()))
 # * adafruit-circuitpython-minimqtt
 # * adafruit-circuitpython-requests
 # pylint: disable=wrong-import-position
-from adafruit_azureiot import IoTCentralDevice
-from adafruit_azureiot.iot_mqtt import IoTResponse
+from adafruit_azureiot import (
+    IoTCentralDevice,
+    IoTError,
+)
 
 # pylint: enable=wrong-import-position
 
 # Create an IoT Hub device client and connect
 device = IoTCentralDevice(
-    socket, esp, secrets["id_scope"], secrets["device_id"], secrets["key"]
+    socket, esp, secrets["id_scope"], secrets["device_id"], secrets["sas_key"]
 )
 
-# Subscribe to commands
-# Commands can be sent from the devices Dashboard in IoT Central, assuming
-# the device template and view has been set up with the commands
-# Command handlers need to return a response to show if the command was handled
-# successfully or not, returning an HTTP status code and message
-def command_executed(command_name: str, payload) -> IoTResponse:
-    print("Command", command_name, "executed with payload", str(payload))
-    # return a status code and message to indicate if the command was handled correctly
-    return IoTResponse(200, "OK")
+# don't connect
+# device.connect()
 
-
-# Subscribe to the command execute event
-device.on_command_executed = command_executed
-
-print("Connecting to Azure IoT Central...")
-
-# Connect to IoT Central
-device.connect()
-
-print("Connected to Azure IoT Central!")
-
-while True:
-    try:
-        # Poll every second for messages from the cloud
-        device.loop()
-    except (ValueError, RuntimeError) as e:
-        print("Connection error, reconnecting\n", str(e))
-        # If we lose connectivity, reset the wifi and reconnect
-        wifi.reset()
-        wifi.connect()
-        device.reconnect()
-        continue
-
-    time.sleep(1)
+try:
+    message = {"Temperature": random.randint(0, 50)}
+    device.send_telemetry(json.dumps(message))
+except IoTError as iot_error:
+    print("Error - ", iot_error.message)

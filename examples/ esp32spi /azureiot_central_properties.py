@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-import json
 import random
 import time
 import board
@@ -97,8 +96,25 @@ from adafruit_azureiot import IoTCentralDevice  # pylint: disable=wrong-import-p
 
 # Create an IoT Hub device client and connect
 device = IoTCentralDevice(
-    socket, esp, secrets["id_scope"], secrets["device_id"], secrets["key"]
+    socket, esp, secrets["id_scope"], secrets["device_id"], secrets["sas_key"]
 )
+
+# Subscribe to property changes
+# Properties can be updated either in code, or by adding a form to the view
+# in the device template, and setting the value on the dashboard for the device
+def property_changed(property_name, property_value, version):
+    print(
+        "Property",
+        property_name,
+        "updated to",
+        str(property_value),
+        "version",
+        str(version),
+    )
+
+
+# Subscribe to the property changed event
+device.on_property_changed = property_changed
 
 print("Connecting to Azure IoT Central...")
 
@@ -111,11 +127,10 @@ message_counter = 60
 
 while True:
     try:
-        # Send telemetry every minute
+        # Send property values every minute
         # You can see the values in the devices dashboard
         if message_counter >= 60:
-            message = {"Temperature": random.randint(0, 50)}
-            device.send_telemetry(json.dumps(message))
+            device.send_property("Desired_Temperature", random.randint(0, 50))
             message_counter = 0
         else:
             message_counter = message_counter + 1

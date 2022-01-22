@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-import random
 import time
 import board
 import busio
@@ -92,29 +91,30 @@ print("Time:", str(time.time()))
 # From the Adafruit CircuitPython Bundle (https://github.com/adafruit/Adafruit_CircuitPython_Bundle):
 # * adafruit-circuitpython-minimqtt
 # * adafruit-circuitpython-requests
-from adafruit_azureiot import IoTCentralDevice  # pylint: disable=wrong-import-position
+# pylint: disable=wrong-import-position
+from adafruit_azureiot import IoTCentralDevice
+from adafruit_azureiot.iot_mqtt import IoTResponse
+
+# pylint: enable=wrong-import-position
 
 # Create an IoT Hub device client and connect
 device = IoTCentralDevice(
-    socket, esp, secrets["id_scope"], secrets["device_id"], secrets["key"]
+    socket, esp, secrets["id_scope"], secrets["device_id"], secrets["sas_key"]
 )
 
-# Subscribe to property changes
-# Properties can be updated either in code, or by adding a form to the view
-# in the device template, and setting the value on the dashboard for the device
-def property_changed(property_name, property_value, version):
-    print(
-        "Property",
-        property_name,
-        "updated to",
-        str(property_value),
-        "version",
-        str(version),
-    )
+# Subscribe to commands
+# Commands can be sent from the devices Dashboard in IoT Central, assuming
+# the device template and view has been set up with the commands
+# Command handlers need to return a response to show if the command was handled
+# successfully or not, returning an HTTP status code and message
+def command_executed(command_name: str, payload) -> IoTResponse:
+    print("Command", command_name, "executed with payload", str(payload))
+    # return a status code and message to indicate if the command was handled correctly
+    return IoTResponse(200, "OK")
 
 
-# Subscribe to the property changed event
-device.on_property_changed = property_changed
+# Subscribe to the command execute event
+device.on_command_executed = command_executed
 
 print("Connecting to Azure IoT Central...")
 
@@ -123,18 +123,8 @@ device.connect()
 
 print("Connected to Azure IoT Central!")
 
-message_counter = 60
-
 while True:
     try:
-        # Send property values every minute
-        # You can see the values in the devices dashboard
-        if message_counter >= 60:
-            device.send_property("Desired_Temperature", random.randint(0, 50))
-            message_counter = 0
-        else:
-            message_counter = message_counter + 1
-
         # Poll every second for messages from the cloud
         device.loop()
     except (ValueError, RuntimeError) as e:

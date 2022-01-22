@@ -93,24 +93,41 @@ print("Time:", str(time.time()))
 # From the Adafruit CircuitPython Bundle (https://github.com/adafruit/Adafruit_CircuitPython_Bundle):
 # * adafruit-circuitpython-minimqtt
 # * adafruit-circuitpython-requests
-# pylint: disable=wrong-import-position
-from adafruit_azureiot import (
-    IoTCentralDevice,
-    IoTError,
-)
-
-# pylint: enable=wrong-import-position
+from adafruit_azureiot import IoTCentralDevice  # pylint: disable=wrong-import-position
 
 # Create an IoT Hub device client and connect
 device = IoTCentralDevice(
-    socket, esp, secrets["id_scope"], secrets["device_id"], secrets["key"]
+    socket, esp, secrets["id_scope"], secrets["device_id"], secrets["sas_key"]
 )
 
-# don't connect
-# device.connect()
+print("Connecting to Azure IoT Central...")
 
-try:
-    message = {"Temperature": random.randint(0, 50)}
-    device.send_telemetry(json.dumps(message))
-except IoTError as iot_error:
-    print("Error - ", iot_error.message)
+# Connect to IoT Central
+device.connect()
+
+print("Connected to Azure IoT Central!")
+
+message_counter = 60
+
+while True:
+    try:
+        # Send telemetry every minute
+        # You can see the values in the devices dashboard
+        if message_counter >= 60:
+            message = {"Temperature": random.randint(0, 50)}
+            device.send_telemetry(json.dumps(message))
+            message_counter = 0
+        else:
+            message_counter = message_counter + 1
+
+        # Poll every second for messages from the cloud
+        device.loop()
+    except (ValueError, RuntimeError) as e:
+        print("Connection error, reconnecting\n", str(e))
+        # If we lose connectivity, reset the wifi and reconnect
+        wifi.reset()
+        wifi.connect()
+        device.reconnect()
+        continue
+
+    time.sleep(1)

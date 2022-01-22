@@ -14,10 +14,13 @@ to IoT Central over MQTT
 """
 
 import json
+import ssl
 import time
+
 import adafruit_logging as logging
 from adafruit_logging import Logger
-import adafruit_minimqtt.adafruit_minimqtt as minimqtt
+import adafruit_minimqtt.adafruit_minimqtt as MQTT
+
 from . import constants
 from .quote import quote
 from .keys import compute_derived_symmetric_key
@@ -177,16 +180,16 @@ class DeviceRegistration:
         sig_encoded = quote(sig_no_encode, "~()*!.'")
         auth_string = f"SharedAccessSignature sr={sr}&sig={sig_encoded}&se={str(expiry)}&skn=registration"
 
-        minimqtt.set_socket(self._socket, self._iface)
+        MQTT.set_socket(self._socket, self._iface)
 
-        self._mqtt = minimqtt.MQTT(
+        self._mqtt = MQTT.MQTT(
             broker=constants.DPS_END_POINT,
             username=username,
             password=auth_string,
             port=8883,
             keep_alive=120,
-            is_ssl=True,
             client_id=self._device_id,
+            ssl_context=ssl.create_default_context(),
         )
 
         self._mqtt.enable_logger(logging, self._logger.getEffectiveLevel())
