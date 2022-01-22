@@ -14,9 +14,12 @@ An MQTT client for Azure IoT
 
 import gc
 import json
+import ssl
 import time
-import adafruit_minimqtt.adafruit_minimqtt as minimqtt
+
+import adafruit_minimqtt.adafruit_minimqtt as MQTT
 import adafruit_logging as logging
+
 from .iot_error import IoTError
 from .keys import compute_derived_symmetric_key
 from .quote import quote
@@ -108,7 +111,7 @@ class IoTMQTT:
         return token
 
     def _create_mqtt_client(self) -> None:
-        minimqtt.set_socket(self._socket, self._iface)
+        MQTT.set_socket(self._socket, self._iface)
 
         self._logger.debug(
             str.replace(
@@ -118,14 +121,14 @@ class IoTMQTT:
             )
         )
 
-        self._mqtts = minimqtt.MQTT(
+        self._mqtts = MQTT.MQTT(
             broker=self._hostname,
             username=self._username,
             password=self._passwd,
             port=8883,
             keep_alive=120,
-            is_ssl=True,
             client_id=self._device_id,
+            ssl_context=ssl.create_default_context(),
         )
 
         self._mqtts.enable_logger(logging, self._logger.getEffectiveLevel())
