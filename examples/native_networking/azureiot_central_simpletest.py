@@ -76,12 +76,10 @@ if time.localtime().tm_year < 2022:
 esp = None
 pool = socketpool.SocketPool(wifi.radio)
 device = IoTCentralDevice(
-    pool, esp, secrets["id_scope"], secrets["device_id"], secrets["sas_key"]
+    pool, esp, secrets["id_scope"], secrets["device_id"], secrets["device_sas_key"]
 )
 
 print("Connecting to Azure IoT Central...")
-print(dir(device))
-# Connect to IoT Central
 device.connect()
 
 print("Connected to Azure IoT Central!")

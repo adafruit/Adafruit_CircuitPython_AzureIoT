@@ -112,16 +112,14 @@ while True:
             device.send_device_to_cloud_message(json.dumps(message))
             message_counter = 0
         else:
-            message_counter = message_counter + 1
+            message_counter += 1
 
         # Poll every second for messages from the cloud
         device.loop()
     except (ValueError, RuntimeError) as e:
         print("Connection error, reconnecting\n", str(e))
-        # If we lose connectivity, reset the wifi and reconnect
         wifi.reset()
         wifi.connect()
         device.reconnect()
         continue
-
     time.sleep(1)

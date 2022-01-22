@@ -37,7 +37,7 @@ def quote(bytes_val: bytes, safe: Union[str, bytes, bytearray] = "/") -> str:
         # Normalize 'safe' by converting to bytes and removing non-ASCII chars
         safe = safe.encode("ascii", "ignore")
     else:
-        safe = bytes([char for char in safe if char < 128])
+        safe = bytes(char for char in safe if char < 128)
     if not bytes_val.rstrip(_ALWAYS_SAFE_BYTES + safe):
         return bytes_val.decode()
     try:

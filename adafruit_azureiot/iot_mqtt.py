@@ -98,17 +98,16 @@ class IoTMQTT:
         token_expiry = int(time.time() + self._token_expires)
         uri = self._hostname + "%2Fdevices%2F" + self._device_id
         signed_hmac_sha256 = compute_derived_symmetric_key(
-            self._key, uri + "\n" + str(token_expiry)
+            self._device_sas_key, uri + "\n" + str(token_expiry)
         )
         signature = quote(signed_hmac_sha256, "~()*!.'")
         if signature.endswith(
             "\n"
         ):  # somewhere along the crypto chain a newline is inserted
             signature = signature[:-1]
-        token = "SharedAccessSignature sr={}&sig={}&se={}".format(
+        return "SharedAccessSignature sr={}&sig={}&se={}".format(
             uri, signature, token_expiry
         )
-        return token
 
     def _create_mqtt_client(self) -> None:
         MQTT.set_socket(self._socket, self._iface)
@@ -205,11 +204,7 @@ class IoTMQTT:
 
         is_patch = "desired" not in twin
 
-        if is_patch:
-            desired = twin
-        else:
-            desired = twin["desired"]
-
+        desired = twin if is_patch else twin["desired"]
         if "$version" in desired:
             desired_version = desired["$version"]
             desired.pop("$version")
@@ -295,18 +290,18 @@ class IoTMQTT:
                 break
             except RuntimeError as runtime_error:
                 self._logger.info(
-                    "Could not send data, retrying after 0.5 seconds: "
-                    + str(runtime_error)
+                    (
+                        "Could not send data, retrying after 0.5 seconds: "
+                        + str(runtime_error)
+                    )
                 )
-                retry = retry + 1
 
+                retry += 1
                 if retry >= 10:
                     self._logger.error("Failed to send data")
                     raise
-
                 time.sleep(0.5)
                 continue
-
         gc.collect()
 
     def _get_device_settings(self) -> None:
@@ -322,7 +317,7 @@ class IoTMQTT:
         iface,
         hostname: str,
         device_id: str,
-        key: str,
+        device_sas_key: str,
         token_expires: int = 21600,
         logger: logging = None,
     ):
@@ -332,7 +327,7 @@ class IoTMQTT:
         :param iface: The network interface to communicate over
         :param str hostname: The hostname of the MQTT broker to connect to, get this by registering the device
         :param str device_id: The device ID of the device to register
-        :param str key: The primary or secondary key of the device to register
+        :param str device_sas_key: The primary or secondary key of the device to register
         :param int token_expires: The number of seconds till the token expires, defaults to 6 hours
         :param adafruit_logging logger: The logger
         """
@@ -343,7 +338,7 @@ class IoTMQTT:
         self._mqtts = None
         self._device_id = device_id
         self._hostname = hostname
-        self._key = key
+        self._device_sas_key = device_sas_key
         self._token_expires = token_expires
         self._username = "{}/{}/?api-version={}".format(
             self._hostname, device_id, constants.IOTC_API_VERSION
@@ -458,12 +453,12 @@ class IoTMQTT:
 
         if system_properties is not None:
             firstProp = True
-            for prop in system_properties:
+            for prop, value in system_properties.items():
                 if not firstProp:
                     topic += "&"
                 else:
                     firstProp = False
-                topic += prop + "=" + str(system_properties[prop])
+                topic += prop + "=" + str(value)
 
         # Convert message to a string
         if isinstance(message, dict):
