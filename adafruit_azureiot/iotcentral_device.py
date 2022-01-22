@@ -86,7 +86,7 @@ class IoTCentralDevice(IoTMQTTCallback):
         iface,
         id_scope: str,
         device_id: str,
-        key: str,
+        device_sas_key: str,
         token_expires: int = 21600,
         logger: logging = None,
     ):
@@ -95,7 +95,7 @@ class IoTCentralDevice(IoTMQTTCallback):
         :param iface: The network interface
         :param str id_scope: The ID Scope of the device in IoT Central
         :param str device_id: The device ID of the device in IoT Central
-        :param str key: The primary or secondary key of the device in IoT Central
+        :param str device_sas_key: The primary or secondary key of the device in IoT Central
         :param int token_expires: The number of seconds till the token expires, defaults to 6 hours
         :param adafruit_logging logger: The logger
         """
@@ -103,7 +103,7 @@ class IoTCentralDevice(IoTMQTTCallback):
         self._iface = iface
         self._id_scope = id_scope
         self._device_id = device_id
-        self._key = key
+        self._device_sas_key = device_sas_key
         self._token_expires = token_expires
         self._logger = logger if logger is not None else logging.getLogger("log")
         self._device_registration = None
@@ -140,7 +140,7 @@ class IoTCentralDevice(IoTMQTTCallback):
             self._iface,
             self._id_scope,
             self._device_id,
-            self._key,
+            self._device_sas_key,
             self._logger,
         )
 
@@ -152,14 +152,14 @@ class IoTCentralDevice(IoTMQTTCallback):
             self._iface,
             hostname,
             self._device_id,
-            self._key,
+            self._device_sas_key,
             self._token_expires,
             self._logger,
         )
 
         self._logger.debug("Hostname: " + hostname)
         self._logger.debug("Device Id: " + self._device_id)
-        self._logger.debug("Shared Access Key: " + self._key)
+        self._logger.debug("Shared Access Key: " + self._device_sas_key)
 
         self._mqtt.connect()
         self._mqtt.subscribe_to_twins()
@@ -185,10 +185,7 @@ class IoTCentralDevice(IoTMQTTCallback):
         :returns: True if there is an open connection, False if not
         :rtype: bool
         """
-        if self._mqtt is not None:
-            return self._mqtt.is_connected()
-
-        return False
+        return self._mqtt.is_connected() if self._mqtt is not None else False
 
     def loop(self) -> None:
         """Listens for MQTT messages

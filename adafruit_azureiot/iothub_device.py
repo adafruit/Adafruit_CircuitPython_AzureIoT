@@ -336,10 +336,7 @@ class IoTHubDevice(IoTMQTTCallback):
         :returns: True if there is an open connection, False if not
         :rtype: bool
         """
-        if self._mqtt is not None:
-            return self._mqtt.is_connected()
-
-        return False
+        return self._mqtt.is_connected() if self._mqtt is not None else False
 
     def send_device_to_cloud_message(
         self, message: Union[str, dict], system_properties: dict = None

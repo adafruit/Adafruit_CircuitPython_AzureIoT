@@ -97,7 +97,7 @@ from adafruit_azureiot import IoTCentralDevice  # pylint: disable=wrong-import-p
 
 # Create an IoT Hub device client and connect
 device = IoTCentralDevice(
-    socket, esp, secrets["id_scope"], secrets["device_id"], secrets["sas_key"]
+    socket, esp, secrets["id_scope"], secrets["device_id"], secrets["device_sas_key"]
 )
 
 print("Connecting to Azure IoT Central...")
@@ -118,7 +118,7 @@ while True:
             device.send_telemetry(json.dumps(message))
             message_counter = 0
         else:
-            message_counter = message_counter + 1
+            message_counter += 1
 
         # Poll every second for messages from the cloud
         device.loop()

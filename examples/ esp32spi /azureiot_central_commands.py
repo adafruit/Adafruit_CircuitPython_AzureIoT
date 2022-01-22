@@ -99,7 +99,7 @@ from adafruit_azureiot.iot_mqtt import IoTResponse
 
 # Create an IoT Hub device client and connect
 device = IoTCentralDevice(
-    socket, esp, secrets["id_scope"], secrets["device_id"], secrets["sas_key"]
+    socket, esp, secrets["id_scope"], secrets["device_id"], secrets["device_sas_key"]
 )
 
 # Subscribe to commands

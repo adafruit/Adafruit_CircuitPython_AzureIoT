@@ -331,12 +331,11 @@ def sha_update(sha_info: dict, buffer: Union[bytes, bytearray]) -> None:
         buffer_idx += i
 
         sha_info["local"] += i
-        if sha_info["local"] == SHA_BLOCKSIZE:
-            sha_transform(sha_info)
-            sha_info["local"] = 0
-        else:
+        if sha_info["local"] != SHA_BLOCKSIZE:
             return
 
+        sha_transform(sha_info)
+        sha_info["local"] = 0
     while count >= SHA_BLOCKSIZE:
         # copy buffer
         sha_info["data"] = list(buffer[buffer_idx : buffer_idx + SHA_BLOCKSIZE])
@@ -351,9 +350,7 @@ def sha_update(sha_info: dict, buffer: Union[bytes, bytearray]) -> None:
 
 
 def getbuf(s: Union[str, bytes, bytearray]) -> Union[bytes, bytearray]:
-    if isinstance(s, str):
-        return s.encode("ascii")
-    return bytes(s)
+    return s.encode("ascii") if isinstance(s, str) else bytes(s)
 
 
 def sha_final(sha_info: dict) -> bytes:

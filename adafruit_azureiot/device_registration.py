@@ -49,19 +49,19 @@ class DeviceRegistration:
         iface,
         id_scope: str,
         device_id: str,
-        key: str,
+        device_sas_key: str,
         logger: Logger = None,
     ):
         """Creates an instance of the device registration service
         :param socket: The network socket
         :param str id_scope: The ID scope of the device to register
         :param str device_id: The device ID of the device to register
-        :param str key: The primary or secondary key of the device to register
+        :param str device_sas_key: The primary or secondary key of the device to register
         :param adafruit_logging.Logger logger: The logger to use to log messages
         """
         self._id_scope = id_scope
         self._device_id = device_id
-        self._key = key
+        self._device_sas_key = device_sas_key
         self._logger = logger if logger is not None else logging.getLogger("log")
 
         self._mqtt = None
@@ -76,7 +76,7 @@ class DeviceRegistration:
     # pylint: disable=C0103
     def _on_connect(self, client, userdata, _, rc) -> None:
         self._logger.info(
-            f"- device_registration :: _on_connect :: rc = {str(rc)}, userdata = {str(userdata)}"
+            f"- device_registration :: _on_connect :: rc = {rc}, userdata = {userdata}"
         )
 
         self._auth_response_received = True
@@ -110,7 +110,7 @@ class DeviceRegistration:
             self._mqtt.loop()
 
         self._logger.info(
-            f" - device_registration :: connect :: on_connect must be fired. Connected ? {str(self._mqtt.is_connected())}"
+            f" - device_registration :: connect :: on_connect must be fired. Connected ? {self._mqtt.is_connected()}"
         )
 
         if not self._mqtt.is_connected():
@@ -132,7 +132,7 @@ class DeviceRegistration:
 
         while self._operation_id is None and retry < 10:
             time.sleep(1)
-            retry = retry + 1
+            retry += 1
             self._mqtt.loop()
 
         if self._operation_id is None:
@@ -151,7 +151,7 @@ class DeviceRegistration:
 
         while self._hostname is None and retry < 10:
             time.sleep(1)
-            retry = retry + 1
+            retry += 1
             self._mqtt.loop()
 
         if self._hostname is None:
@@ -175,10 +175,10 @@ class DeviceRegistration:
         # pylint: disable=C0103
         sr = self._id_scope + "%2Fregistrations%2F" + self._device_id
         sig_no_encode = compute_derived_symmetric_key(
-            self._key, sr + "\n" + str(expiry)
+            self._device_sas_key, sr + "\n" + str(expiry)
         )
         sig_encoded = quote(sig_no_encode, "~()*!.'")
-        auth_string = f"SharedAccessSignature sr={sr}&sig={sig_encoded}&se={str(expiry)}&skn=registration"
+        auth_string = f"SharedAccessSignature sr={sr}&sig={sig_encoded}&se={expiry}&skn=registration"
 
         MQTT.set_socket(self._socket, self._iface)
 
