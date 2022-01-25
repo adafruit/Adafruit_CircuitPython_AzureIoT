@@ -1,5 +1,5 @@
 IoT Hub ESP32SPI Networking
-------------
+---------------------------
 
 Ensure your IoT Hub device works with this simple test.
 
@@ -26,7 +26,7 @@ Update the reported properties of the devices device twin, and receive updates t
     :linenos:
 
 IoT Central ESP32SPI Networking
-------------
+-------------------------------
 
 Ensure your IoT Central device works with this simple test.
 
@@ -53,7 +53,7 @@ Handle connection errors.
     :linenos:
 
 IoT Hub Native Networking
-------------
+-------------------------
 
 Ensure your IoT Hub device works with this simple test.
 
@@ -80,7 +80,7 @@ Update the reported properties of the devices device twin, and receive updates t
     :linenos:
 
 IoT Central Native Networking
-------------
+-----------------------------
 
 Ensure your IoT Central device works with this simple test.
 

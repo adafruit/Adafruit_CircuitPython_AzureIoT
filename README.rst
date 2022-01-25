@@ -79,7 +79,7 @@ To use this library, you will need to create an ESP32_SPI WifiManager, connected
 
 Native Networking
 =================
-To use this library, with boards that have native networking support, you need to be connected to a network. You will also need to set the current time, as this is used to generate time-based authentication keys. One way to do this is by using the `Adafruit IoT Time Service <https://io.adafruit.com/api/docs/#time>`_ via the `Requests library <https://github.com/adafruit/Adafruit_CircuitPython_Requests/>_` with the following code:
+To use this library, with boards that have native networking support, you need to be connected to a network. You will also need to set the current time, as this is used to generate time-based authentication keys. One way to do this is by using the `Adafruit IoT Time Service <https://io.adafruit.com/api/docs/#time>`_ via the `Adafruit Requests library <https://github.com/adafruit/Adafruit_CircuitPython_Requests>`_ with the following code:
 
 .. code-block:: python
 
