@@ -2,7 +2,7 @@ Adafruit_CircuitPython_AzureIoT
 ================================
 
 .. image:: https://readthedocs.org/projects/adafruit-circuitpython-azureiot/badge/?version=latest
-    :target: https://circuitpython.readthedocs.io/projects/azureiot/en/latest/
+    :target: https://docs.circuitpython.org/projects/azureiot/en/latest/
     :alt: Documentation Status
 
 .. image:: https://img.shields.io/discord/327254708534116352.svg
@@ -280,7 +280,7 @@ If you want to learn more about setting up or using Azure IoT Services, check ou
 Documentation
 =============
 
-API documentation for this library can be found on `Read the Docs <https://circuitpython.readthedocs.io/projects/azureiot/en/latest/>`_.
+API documentation for this library can be found on `Read the Docs <https://docs.circuitpython.org/projects/azureiot/en/latest/>`_.
 
 Contributing
 ============
