@@ -1,8 +1,6 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-import json
-import random
 import ssl
 import time
 
@@ -12,6 +10,7 @@ import wifi
 
 import adafruit_requests
 from adafruit_azureiot import IoTHubDevice
+from adafruit_azureiot.iot_mqtt import IoTResponse
 
 # Get wifi details and more from a secrets.py file
 try:
@@ -71,8 +70,20 @@ esp = None
 pool = socketpool.SocketPool(wifi.radio)
 # Create an IoT Hub device client and connect
 device = IoTHubDevice(pool, esp, secrets["device_connection_string"])
-print(dir(device))
 
+# Subscribe to direct method calls
+# To invoke a method on the device, select it in the Azure Portal, select Direct Method,
+# fill in the method name and payload, then select Invoke Method
+# Direct method handlers need to return a response to show if the method was handled
+# successfully or not, returning an HTTP status code and message
+def direct_method_invoked(method_name: str, payload) -> IoTResponse:
+    print("Received direct method", method_name, "with data", str(payload))
+    # return a status code and message to indicate if the direct method was handled correctly
+    return IoTResponse(200, "OK")
+
+
+# Subscribe to the direct method invoked event
+device.on_direct_method_invoked = direct_method_invoked
 print("Connecting to Azure IoT Hub...")
 
 # Connect to IoT Central
@@ -80,20 +91,8 @@ device.connect()
 
 print("Connected to Azure IoT Hub!")
 
-message_counter = 60
-
 while True:
     try:
-        # Send a device to cloud message every minute
-        # You can see the overview of messages sent from the device in the Overview tab
-        # of the IoT Hub in the Azure Portal
-        if message_counter >= 60:
-            message = {"Temperature": random.randint(0, 50)}
-            device.send_device_to_cloud_message(json.dumps(message))
-            message_counter = 0
-        else:
-            message_counter += 1
-
         # Poll every second for messages from the cloud
         device.loop()
     except (ValueError, RuntimeError) as e:
@@ -104,4 +103,5 @@ while True:
         wifi.radio.connect(secrets["ssid"], secrets["password"])
         device.reconnect()
         continue
+
     time.sleep(1)

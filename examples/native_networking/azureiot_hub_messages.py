@@ -71,11 +71,18 @@ esp = None
 pool = socketpool.SocketPool(wifi.radio)
 # Create an IoT Hub device client and connect
 device = IoTHubDevice(pool, esp, secrets["device_connection_string"])
-print(dir(device))
+
+# Subscribe to cloud to device messages
+# To send a message to the device, select it in the Azure Portal, select Message To Device,
+# fill in the message and any properties you want to add, then select Send Message
+def cloud_to_device_message_received(body: str, properties: dict):
+    print("Received message with body", body, "and properties", json.dumps(properties))
+
+
+# Subscribe to the cloud to device message received events
+device.on_cloud_to_device_message_received = cloud_to_device_message_received
 
 print("Connecting to Azure IoT Hub...")
-
-# Connect to IoT Central
 device.connect()
 
 print("Connected to Azure IoT Hub!")

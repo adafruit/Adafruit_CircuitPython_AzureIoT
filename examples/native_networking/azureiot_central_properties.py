@@ -1,16 +1,16 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-import json
 import random
+import ssl
 import time
-import board
-import busio
-from digitalio import DigitalInOut
-import neopixel
-from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
-import adafruit_esp32spi.adafruit_esp32spi_socket as socket
-from adafruit_ntp import NTP
+
+import rtc
+import socketpool
+import wifi
+
+import adafruit_requests
+from adafruit_azureiot import IoTCentralDevice
 
 # Get wifi details and more from a secrets.py file
 try:
@@ -19,49 +19,25 @@ except ImportError:
     print("WiFi secrets are kept in secrets.py, please add them there!")
     raise
 
-# ESP32 Setup
-try:
-    esp32_cs = DigitalInOut(board.ESP_CS)
-    esp32_ready = DigitalInOut(board.ESP_BUSY)
-    esp32_reset = DigitalInOut(board.ESP_RESET)
-except AttributeError:
-    esp32_cs = DigitalInOut(board.D13)
-    esp32_ready = DigitalInOut(board.D11)
-    esp32_reset = DigitalInOut(board.D12)
-
-spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
-esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
-
-"""Use below for Most Boards"""
-status_light = neopixel.NeoPixel(
-    board.NEOPIXEL, 1, brightness=0.2
-)  # Uncomment for Most Boards
-"""Uncomment below for ItsyBitsy M4"""
-# status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
-# Uncomment below for an externally defined RGB LED
-# import adafruit_rgbled
-# from adafruit_esp32spi import PWMOut
-# RED_LED = PWMOut.PWMOut(esp, 26)
-# GREEN_LED = PWMOut.PWMOut(esp, 27)
-# BLUE_LED = PWMOut.PWMOut(esp, 25)
-# status_light = adafruit_rgbled.RGBLED(RED_LED, BLUE_LED, GREEN_LED)
-wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
-
 print("Connecting to WiFi...")
-
-wifi.connect()
+wifi.radio.connect(secrets["ssid"], secrets["password"])
 
 print("Connected to WiFi!")
 
-print("Getting the time...")
-
-ntp = NTP(esp)
-# Wait for a valid time to be received
-while not ntp.valid_time:
-    time.sleep(5)
-    ntp.set_time()
-
-print("Time:", str(time.time()))
+if time.localtime().tm_year < 2022:
+    print("Setting System Time in UTC")
+    pool = socketpool.SocketPool(wifi.radio)
+    requests = adafruit_requests.Session(pool, ssl.create_default_context())
+    response = requests.get("https://io.adafruit.com/api/v2/time/seconds")
+    if response:
+        if response.status_code == 200:
+            r = rtc.RTC()
+            r.datetime = time.localtime(int(response.text))
+            print(f"System Time: {r.datetime}")
+        else:
+            print("Setting time failed")
+    else:
+        print("Year seems good, skipping set time.")
 
 # To use Azure IoT Central, you will need to create an IoT Central app.
 # You can either create a free tier app that will live for 7 days without an Azure subscription,
@@ -93,16 +69,33 @@ print("Time:", str(time.time()))
 # From the Adafruit CircuitPython Bundle (https://github.com/adafruit/Adafruit_CircuitPython_Bundle):
 # * adafruit-circuitpython-minimqtt
 # * adafruit-circuitpython-requests
-from adafruit_azureiot import IoTCentralDevice  # pylint: disable=wrong-import-position
+
 
 # Create an IoT Hub device client and connect
+esp = None
+pool = socketpool.SocketPool(wifi.radio)
 device = IoTCentralDevice(
-    socket, esp, secrets["id_scope"], secrets["device_id"], secrets["device_sas_key"]
+    pool, esp, secrets["id_scope"], secrets["device_id"], secrets["device_sas_key"]
 )
 
-print("Connecting to Azure IoT Central...")
+# Subscribe to property changes
+# Properties can be updated either in code, or by adding a form to the view
+# in the device template, and setting the value on the dashboard for the device
+def property_changed(property_name, property_value, version):
+    print(
+        "Property",
+        property_name,
+        "updated to",
+        str(property_value),
+        "version",
+        str(version),
+    )
 
-# Connect to IoT Central
+
+# Subscribe to the property changed event
+device.on_property_changed = property_changed
+
+print("Connecting to Azure IoT Central...")
 device.connect()
 
 print("Connected to Azure IoT Central!")
@@ -111,11 +104,10 @@ message_counter = 60
 
 while True:
     try:
-        # Send telemetry every minute
+        # Send property values every minute
         # You can see the values in the devices dashboard
         if message_counter >= 60:
-            message = {"Temperature": random.randint(0, 50)}
-            device.send_telemetry(json.dumps(message))
+            device.send_property("Desired_Temperature", random.randint(0, 50))
             message_counter = 0
         else:
             message_counter += 1
@@ -124,10 +116,8 @@ while True:
         device.loop()
     except (ValueError, RuntimeError) as e:
         print("Connection error, reconnecting\n", str(e))
-        # If we lose connectivity, reset the wifi and reconnect
         wifi.reset()
         wifi.connect()
         device.reconnect()
         continue
-
     time.sleep(1)

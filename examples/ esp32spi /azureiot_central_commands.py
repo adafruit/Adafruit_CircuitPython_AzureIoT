@@ -84,7 +84,7 @@ print("Time:", str(time.time()))
 #
 # 'id_scope' - the devices ID scope
 # 'device_id' - the devices device id
-# 'key' - the devices primary key
+# 'device_sas_key' - the devices primary key
 #
 # The adafruit-circuitpython-azureiot library depends on the following libraries:
 #

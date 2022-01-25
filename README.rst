@@ -63,6 +63,9 @@ To create an Azure IoT Hub instance or an Azure IoT Central app, you will need a
 
 - If you are not a student, head to `aka.ms/FreeAz <https://aka.ms/FreeAz>`_ and sign up to get $200 of credit for 30 days, as well as free tiers of a load of services. You will need a credit card for validation only, your card will not be charged.
 
+ESP32SPI Networking
+===================
+
 To use this library, you will need to create an ESP32_SPI WifiManager, connected to WiFi. You will also need to set the current time, as this is used to generate time-based authentication keys. One way to do this is via the `Adafruit CircuitPython NTP <https://github.com/adafruit/Adafruit_CircuitPython_NTP>`_ library with the following code:
 
 .. code-block:: python
@@ -73,6 +76,23 @@ To use this library, you will need to create an ESP32_SPI WifiManager, connected
     while not ntp.valid_time:
         time.sleep(5)
         ntp.set_time()
+
+Native Networking
+=================
+To use this library, with boards that have native networking support, you need to be connected to a network. You will also need to set the current time, as this is used to generate time-based authentication keys. One way to do this is by using the `Adafruit IoT Time Service <https://io.adafruit.com/api/docs/#time>`_ via the `Requests library <https://github.com/adafruit/Adafruit_CircuitPython_Requests/>_` with the following code:
+
+.. code-block:: python
+
+    pool = socketpool.SocketPool(wifi.radio)
+    requests = adafruit_requests.Session(pool, ssl.create_default_context())
+    response = requests.get("https://io.adafruit.com/api/v2/time/seconds")
+    if response:
+        if response.status_code == 200:
+            r = rtc.RTC()
+            r.datetime = time.localtime(int(response.text))
+            print(f"System Time: {r.datetime}")
+        else:
+            print("Setting time failed")
 
 Azure IoT Hub
 -------------
@@ -172,7 +192,7 @@ To use Azure IoT Central, you will need to create an Azure IoT Central app, crea
 - Head to `Azure IoT Central <https://apps.azureiotcentral.com/?WT.mc_id=academic-3168-jabenn>`__
 - Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-deploy-iot-central?WT.mc_id=academic-3168-jabenn>`__ to create an application. Every tier is free for up to 2 devices.
 - Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-create-simulated-device?WT.mc_id=academic-3168-jabenn>`__ to create a device template.
-- Create a device based off the template, and select **Connect** to get the device connection details. Store the ID Scope, Device ID and either the Primary or secondary Key in your ``secrets.py`` file.
+- Create a device based off the template, and select **Connect** to get the device connection details. Store the ID Scope, Device ID and either the primary or secondary device SAS key in your ``secrets.py`` file.
 
 .. image:: iot-central-connect-button.png
    :alt: The IoT Central connect button
@@ -194,7 +214,7 @@ To use Azure IoT Central, you will need to create an Azure IoT Central app, crea
         # Azure IoT Central settings
         "id_scope": "",
         "device_id": "",
-        "key": ""
+        "device_sas_key": ""
     }
 
 **Connect your device to your Azure IoT Central app**

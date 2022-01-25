@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-import json
 import random
 import ssl
 import time
@@ -71,11 +70,28 @@ esp = None
 pool = socketpool.SocketPool(wifi.radio)
 # Create an IoT Hub device client and connect
 device = IoTHubDevice(pool, esp, secrets["device_connection_string"])
-print(dir(device))
+
+# Subscribe to device twin desired property updates
+# To see these changes, update the desired properties for the device either in code
+# or in the Azure portal by selecting the device in the IoT Hub blade, selecting
+# Device Twin then adding or amending an entry in the 'desired' section
+def device_twin_desired_updated(
+    desired_property_name: str, desired_property_value, desired_version: int
+):
+    print(
+        "Property",
+        desired_property_name,
+        "updated to",
+        str(desired_property_value),
+        "version",
+        desired_version,
+    )
+
+
+# Subscribe to the device twin desired property updated event
+device.on_device_twin_desired_updated = device_twin_desired_updated
 
 print("Connecting to Azure IoT Hub...")
-
-# Connect to IoT Central
 device.connect()
 
 print("Connected to Azure IoT Hub!")
@@ -84,12 +100,12 @@ message_counter = 60
 
 while True:
     try:
-        # Send a device to cloud message every minute
-        # You can see the overview of messages sent from the device in the Overview tab
-        # of the IoT Hub in the Azure Portal
         if message_counter >= 60:
-            message = {"Temperature": random.randint(0, 50)}
-            device.send_device_to_cloud_message(json.dumps(message))
+            # Send a reported property twin update every minute
+            # You can see these in the portal by selecting the device in the IoT Hub blade, selecting
+            # Device Twin then looking for the updates in the 'reported' section
+            patch = {"Temperature": random.randint(0, 50)}
+            device.update_twin(patch)
             message_counter = 0
         else:
             message_counter += 1

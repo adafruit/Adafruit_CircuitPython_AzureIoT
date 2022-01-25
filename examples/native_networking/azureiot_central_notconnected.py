@@ -6,12 +6,15 @@ import random
 import ssl
 import time
 
-import socketpool
 import rtc
+import socketpool
 import wifi
 
 import adafruit_requests
-from adafruit_azureiot import IoTHubDevice
+from adafruit_azureiot import (
+    IoTCentralDevice,
+    IoTError,
+)
 
 # Get wifi details and more from a secrets.py file
 try:
@@ -40,7 +43,10 @@ if time.localtime().tm_year < 2022:
     else:
         print("Year seems good, skipping set time.")
 
-# You will need an Azure subscription to create an Azure IoT Hub resource
+# To use Azure IoT Central, you will need to create an IoT Central app.
+# You can either create a free tier app that will live for 7 days without an Azure subscription,
+# Or a standard tier app that will last for ever with an Azure subscription.
+# The standard tiers are free for up to 2 devices
 #
 # If you don't have an Azure subscription:
 #
@@ -51,14 +57,16 @@ if time.localtime().tm_year < 2022:
 # If you are not a student, head to https://aka.ms/FreeAz and sign up to get $200 of credit for 30
 #  days, as well as free tiers of a load of services
 #
-# Create an Azure IoT Hub and an IoT device in the Azure portal here: https://aka.ms/AzurePortalHome.
-# Instructions to create an IoT Hub and device are here: https://aka.ms/CreateIoTHub
+# Create an Azure IoT Central app by following these instructions: https://aka.ms/CreateIoTCentralApp
+# Add a device template with telemetry, properties and commands, as well as a view to visualize the
+# telemetry and execute commands, and a form to set properties.
 #
-# The free tier of IoT Hub allows up to 8,000 messages a day, so try not to send messages too often
-# if you are using the free tier
+# Next create a device using the device template, and select Connect to get the device connection details.
+# Add the connection details to your secrets.py file, using the following values:
 #
-# Once you have a hub and a device, copy the device primary connection string.
-# Add it to the secrets.py file in an entry called device_connection_string
+# 'id_scope' - the devices ID scope
+# 'device_id' - the devices device id
+# 'device_sas_key' - the devices primary key
 #
 # The adafruit-circuitpython-azureiot library depends on the following libraries:
 #
@@ -67,41 +75,18 @@ if time.localtime().tm_year < 2022:
 # * adafruit-circuitpython-requests
 
 
+# Create an IoT Hub device client and connect
 esp = None
 pool = socketpool.SocketPool(wifi.radio)
-# Create an IoT Hub device client and connect
-device = IoTHubDevice(pool, esp, secrets["device_connection_string"])
-print(dir(device))
+device = IoTCentralDevice(
+    pool, esp, secrets["id_scope"], secrets["device_id"], secrets["device_sas_key"]
+)
 
-print("Connecting to Azure IoT Hub...")
+# don't connect
+# device.connect()
 
-# Connect to IoT Central
-device.connect()
-
-print("Connected to Azure IoT Hub!")
-
-message_counter = 60
-
-while True:
-    try:
-        # Send a device to cloud message every minute
-        # You can see the overview of messages sent from the device in the Overview tab
-        # of the IoT Hub in the Azure Portal
-        if message_counter >= 60:
-            message = {"Temperature": random.randint(0, 50)}
-            device.send_device_to_cloud_message(json.dumps(message))
-            message_counter = 0
-        else:
-            message_counter += 1
-
-        # Poll every second for messages from the cloud
-        device.loop()
-    except (ValueError, RuntimeError) as e:
-        print("Connection error, reconnecting\n", str(e))
-        # If we lose connectivity, reset the wifi and reconnect
-        wifi.radio.enabled = False
-        wifi.radio.enabled = True
-        wifi.radio.connect(secrets["ssid"], secrets["password"])
-        device.reconnect()
-        continue
-    time.sleep(1)
+try:
+    message = {"Temperature": random.randint(0, 50)}
+    device.send_telemetry(json.dumps(message))
+except IoTError as iot_error:
+    print("Error - ", iot_error.message)
