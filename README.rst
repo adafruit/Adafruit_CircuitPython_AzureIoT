@@ -203,7 +203,7 @@ To use Azure IoT Central, you will need to create an Azure IoT Central app, crea
 
     from adafruit_azureiot import IoTCentralDevice
 
-    device = IoTCentralDevice(wifi, secrets["id_scope"], secrets["device_id"], secrets["device_device_sas_key"])
+    device = IoTCentralDevice(wifi, secrets["id_scope"], secrets["device_id"], secrets["device_sas_key"])
     device.connect()
 
 Once the device is connected, you will regularly need to run a ``loop`` to poll for messages from the cloud.
