@@ -71,7 +71,6 @@ esp = None
 pool = socketpool.SocketPool(wifi.radio)
 # Create an IoT Hub device client and connect
 device = IoTHubDevice(pool, esp, secrets["device_connection_string"])
-print(dir(device))
 
 print("Connecting to Azure IoT Hub...")
 
