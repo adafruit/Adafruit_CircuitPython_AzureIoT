@@ -2,4 +2,4 @@
 #
 # SPDX-License-Identifier: Unlicense
 
-sphinx>=4.0.0
+sphinx>=4.3.2
