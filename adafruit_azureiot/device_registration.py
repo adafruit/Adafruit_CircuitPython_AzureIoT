@@ -53,6 +53,7 @@ class DeviceRegistration:
         logger: Logger = None,
     ):
         """Creates an instance of the device registration service
+
         :param socket: The network socket
         :param str id_scope: The ID scope of the device to register
         :param str device_id: The device ID of the device to register
@@ -163,6 +164,7 @@ class DeviceRegistration:
         """
         Registers the device with the IoT Central device registration service.
         Returns the hostname of the IoT hub to use over MQTT
+
         :param int expiry: The expiry time for the registration
         :returns: The underlying IoT Hub that this device should connect to
         :rtype: str

@@ -63,8 +63,8 @@ To create an Azure IoT Hub instance or an Azure IoT Central app, you will need a
 
 - If you are not a student, head to `aka.ms/FreeAz <https://aka.ms/FreeAz>`_ and sign up to get $200 of credit for 30 days, as well as free tiers of a load of services. You will need a credit card for validation only, your card will not be charged.
 
-ESP32SPI Networking
-===================
+ESP32 AirLift Networking
+========================
 
 To use this library, you will need to create an ESP32_SPI WifiManager, connected to WiFi. You will also need to set the current time, as this is used to generate time-based authentication keys. One way to do this is via the `Adafruit CircuitPython NTP <https://github.com/adafruit/Adafruit_CircuitPython_NTP>`_ library with the following code:
 
@@ -79,7 +79,7 @@ To use this library, you will need to create an ESP32_SPI WifiManager, connected
 
 Native Networking
 =================
-To use this library, with boards that have native networking support, you need to be connected to a network. You will also need to set the current time, as this is used to generate time-based authentication keys. One way to do this is by using the `Adafruit IoT Time Service <https://io.adafruit.com/api/docs/#time>`_ via the `Adafruit Requests library <https://github.com/adafruit/Adafruit_CircuitPython_Requests>`_ with the following code:
+To use this library, with boards that have native networking support, you need to be connected to a network. You will also need to set the current time, as this is used to generate time-based authentication keys. One way to do this is by using the `Adafruit IoT Time API <https://io.adafruit.com/api/docs/#time>`_ via the `Adafruit Requests library <https://github.com/adafruit/Adafruit_CircuitPython_Requests>`_ with the following code:
 
 .. code-block:: python
 
