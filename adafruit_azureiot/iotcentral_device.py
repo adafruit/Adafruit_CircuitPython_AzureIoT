@@ -15,6 +15,7 @@ Connectivity to Azure IoT Central
 import json
 import time
 import adafruit_logging as logging
+from adafruit_logging import Logger
 from .device_registration import DeviceRegistration
 from .iot_error import IoTError
 from .iot_mqtt import IoTMQTT, IoTMQTTCallback, IoTResponse
@@ -25,6 +26,7 @@ class IoTCentralDevice(IoTMQTTCallback):
 
     def connection_status_change(self, connected: bool) -> None:
         """Called when the connection status changes
+
         :param bool connected: True if the device is connected, otherwise false
         """
         if self.on_connection_status_changed is not None:
@@ -34,6 +36,7 @@ class IoTCentralDevice(IoTMQTTCallback):
     # pylint: disable=W0613, R0201
     def direct_method_called(self, method_name: str, payload: str) -> IoTResponse:
         """Called when a direct method is invoked
+
         :param str method_name: The name of the method that was invoked
         :param str payload: The payload with the message
         :returns: A response with a code and status to show if the method was correctly handled
@@ -49,6 +52,7 @@ class IoTCentralDevice(IoTMQTTCallback):
         self, desired_property_name: str, desired_property_value, desired_version: int
     ) -> None:
         """Called when the device twin desired properties are updated
+
         :param str desired_property_name: The name of the desired property that was updated
         :param desired_property_value: The value of the desired property that was updated
         :param int desired_version: The version of the desired property that was updated
@@ -69,6 +73,7 @@ class IoTCentralDevice(IoTMQTTCallback):
         reported_version: int,
     ) -> None:
         """Called when the device twin reported values are updated
+
         :param str reported_property_name: The name of the reported property that was updated
         :param reported_property_value: The value of the reported property that was updated
         :param int reported_version: The version of the reported property that was updated
@@ -88,16 +93,17 @@ class IoTCentralDevice(IoTMQTTCallback):
         device_id: str,
         device_sas_key: str,
         token_expires: int = 21600,
-        logger: logging = None,
+        logger: Logger = None,
     ):
         """Create the Azure IoT Central device client
+
         :param socket: The network socket
         :param iface: The network interface
         :param str id_scope: The ID Scope of the device in IoT Central
         :param str device_id: The device ID of the device in IoT Central
         :param str device_sas_key: The primary or secondary key of the device in IoT Central
         :param int token_expires: The number of seconds till the token expires, defaults to 6 hours
-        :param adafruit_logging logger: The logger
+        :param Logger logger: The logger
         """
         self._socket = socket
         self._iface = iface
@@ -132,6 +138,7 @@ class IoTCentralDevice(IoTMQTTCallback):
 
     def connect(self) -> None:
         """Connects to Azure IoT Central
+
         :raises DeviceRegistrationError: if the device cannot be registered successfully
         :raises RuntimeError: if the internet connection is not responding or is unable to connect
         """
@@ -166,6 +173,7 @@ class IoTCentralDevice(IoTMQTTCallback):
 
     def disconnect(self) -> None:
         """Disconnects from the MQTT broker
+
         :raises IoTError: if there is no open connection to the MQTT broker
         """
         if self._mqtt is None:
@@ -182,6 +190,7 @@ class IoTCentralDevice(IoTMQTTCallback):
 
     def is_connected(self) -> bool:
         """Gets if there is an open connection to the MQTT broker
+
         :returns: True if there is an open connection, False if not
         :rtype: bool
         """
@@ -189,6 +198,7 @@ class IoTCentralDevice(IoTMQTTCallback):
 
     def loop(self) -> None:
         """Listens for MQTT messages
+
         :raises IoTError: if there is no open connection to the MQTT broker
         """
         if self._mqtt is None:
@@ -198,6 +208,7 @@ class IoTCentralDevice(IoTMQTTCallback):
 
     def send_property(self, property_name: str, value) -> None:
         """Updates the value of a writable property
+
         :param str property_name: The name of the property to write to
         :param value: The value to set on the property
         :raises IoTError: if there is no open connection to the MQTT broker
@@ -211,6 +222,7 @@ class IoTCentralDevice(IoTMQTTCallback):
 
     def send_telemetry(self, data) -> None:
         """Sends telemetry to the IoT Central app
+
         :param data: The telemetry data to send
         :raises IoTError: if there is no open connection to the MQTT broker
         """

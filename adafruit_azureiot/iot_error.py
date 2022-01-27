@@ -20,6 +20,7 @@ class IoTError(Exception):
 
     def __init__(self, message: str):
         """Create the IoT Error
+
         :param str message: The error message
         """
         super().__init__(message)

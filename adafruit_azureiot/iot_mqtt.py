@@ -19,6 +19,7 @@ import time
 
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
 import adafruit_logging as logging
+from adafruit_logging import Logger
 
 from .iot_error import IoTError
 from .keys import compute_derived_symmetric_key
@@ -31,6 +32,7 @@ class IoTResponse:
 
     def __init__(self, code: int, message: str):
         """Creates an IoT Response object
+
         :param int code: The HTTP response code for this method call, for example 200 if the method was handled successfully
         :param str message: The HTTP response message for this method call
         """
@@ -43,17 +45,20 @@ class IoTMQTTCallback:
 
     def message_sent(self, data: str) -> None:
         """Called when a message is sent to the cloud
+
         :param str data: The data send with the message
         """
 
     def connection_status_change(self, connected: bool) -> None:
         """Called when the connection status changes
+
         :param bool connected: True if the device is connected, otherwise false
         """
 
     # pylint: disable=W0613, R0201
     def direct_method_invoked(self, method_name: str, payload: str) -> IoTResponse:
         """Called when a direct method is invoked
+
         :param str method_name: The name of the method that was invoked
         :param str payload: The payload with the message
         :returns: A response with a code and status to show if the method was correctly handled
@@ -64,6 +69,7 @@ class IoTMQTTCallback:
     # pylint: disable=C0103
     def cloud_to_device_message_received(self, body: str, properties: dict) -> None:
         """Called when a cloud to device message is received
+
         :param str body: The body of the message
         :param dict properties: The propreties sent with the mesage
         """
@@ -72,6 +78,7 @@ class IoTMQTTCallback:
         self, desired_property_name: str, desired_property_value, desired_version: int
     ) -> None:
         """Called when the device twin desired properties are updated
+
         :param str desired_property_name: The name of the desired property that was updated
         :param desired_property_value: The value of the desired property that was updated
         :param int desired_version: The version of the desired property that was updated
@@ -84,6 +91,7 @@ class IoTMQTTCallback:
         reported_version: int,
     ) -> None:
         """Called when the device twin reported values are updated
+
         :param str reported_property_name: The name of the reported property that was updated
         :param reported_property_value: The value of the reported property that was updated
         :param int reported_version: The version of the reported property that was updated
@@ -319,9 +327,10 @@ class IoTMQTT:
         device_id: str,
         device_sas_key: str,
         token_expires: int = 21600,
-        logger: logging = None,
+        logger: Logger = None,
     ):
         """Create the Azure IoT MQTT client
+
         :param IoTMQTTCallback callback: A callback class
         :param socket: The socket to communicate over
         :param iface: The network interface to communicate over
@@ -329,7 +338,7 @@ class IoTMQTT:
         :param str device_id: The device ID of the device to register
         :param str device_sas_key: The primary or secondary key of the device to register
         :param int token_expires: The number of seconds till the token expires, defaults to 6 hours
-        :param adafruit_logging logger: The logger
+        :param Logger logger: The logger
         """
         self._callback = callback
         self._socket = socket
@@ -372,6 +381,7 @@ class IoTMQTT:
 
     def connect(self) -> bool:
         """Connects to the MQTT broker
+
         :returns: True if the connection is successful, otherwise False
         :rtype: bool
         """
@@ -426,6 +436,7 @@ class IoTMQTT:
 
     def is_connected(self) -> bool:
         """Gets if there is an open connection to the MQTT broker
+
         :returns: True if there is an open connection, False if not
         :rtype: bool
         """
@@ -443,6 +454,7 @@ class IoTMQTT:
         self, message, system_properties: dict = None
     ) -> None:
         """Send a device to cloud message from this device to Azure IoT Hub
+
         :param message: The message data as a JSON string or a dictionary
         :param system_properties: System properties to send with the message
         :raises: ValueError if the message is not a string or dictionary
@@ -472,6 +484,7 @@ class IoTMQTT:
 
     def send_twin_patch(self, patch) -> None:
         """Send a patch for the reported properties of the device twin
+
         :param patch: The patch as a JSON string or a dictionary
         :raises: IoTError if the data is not a string or dictionary
         :raises RuntimeError: if the internet connection is not responding or is unable to connect
