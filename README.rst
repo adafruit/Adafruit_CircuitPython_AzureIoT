@@ -5,7 +5,7 @@ Adafruit_CircuitPython_AzureIoT
     :target: https://docs.circuitpython.org/projects/azureiot/en/latest/
     :alt: Documentation Status
 
-.. image:: https://img.shields.io/discord/327254708534116352.svg
+.. image:: https://github.com/adafruit/Adafruit_CircuitPython_Bundle/blob/main/badges/adafruit_discord.svg
     :target: https://adafru.it/discord
     :alt: Discord
 
