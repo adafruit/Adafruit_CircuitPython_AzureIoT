@@ -36,6 +36,7 @@ setup(
     install_requires=[
         "Adafruit-Blinka",
         "Adafruit-CircuitPython-miniMQTT",
+        "Adafruit-CircuitPython-Logging",
         "Adafruit-CircuitPython-Requests",
         "Adafruit-CircuitPython-Binascii",
     ],
