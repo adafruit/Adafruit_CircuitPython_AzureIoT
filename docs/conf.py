@@ -28,9 +28,7 @@ extensions = [
 autodoc_mock_imports = [
     "adafruit_binascii",
     "adafruit_logging",
-    "adafruit_requests",
     "adafruit_hashlib",
-    "adafruit_ntp",
     "adafruit_minimqtt",
 ]
 

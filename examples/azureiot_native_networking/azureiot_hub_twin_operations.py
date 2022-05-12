@@ -9,7 +9,7 @@ import socketpool
 import rtc
 import wifi
 
-import adafruit_requests
+import adafruit_ntp
 from adafruit_azureiot import IoTHubDevice
 
 # Get wifi details and more from a secrets.py file
@@ -27,17 +27,13 @@ print("Connected to WiFi!")
 if time.localtime().tm_year < 2022:
     print("Setting System Time in UTC")
     pool = socketpool.SocketPool(wifi.radio)
-    requests = adafruit_requests.Session(pool, ssl.create_default_context())
-    response = requests.get("https://io.adafruit.com/api/v2/time/seconds")
-    if response:
-        if response.status_code == 200:
-            r = rtc.RTC()
-            r.datetime = time.localtime(int(response.text))
-            print(f"System Time: {r.datetime}")
-        else:
-            print("Setting time failed")
-    else:
-        print("Year seems good, skipping set time.")
+    ntp = adafruit_ntp.NTP(pool, tz_offset=0)
+
+    # NOTE: This changes the system time so make sure you aren't assuming that time
+    # doesn't jump.
+    rtc.RTC().datetime = ntp.datetime
+else:
+    print("Year seems good, skipping set time.")
 
 # You will need an Azure subscription to create an Azure IoT Hub resource
 #
