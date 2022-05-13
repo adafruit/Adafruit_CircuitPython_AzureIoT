@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: MIT
 
 import random
-import ssl
 import time
 
 import socketpool

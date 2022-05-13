@@ -3,7 +3,6 @@
 
 import json
 import random
-import ssl
 import time
 
 import socketpool
