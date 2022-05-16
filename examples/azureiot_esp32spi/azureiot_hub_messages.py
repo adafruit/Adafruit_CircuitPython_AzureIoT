@@ -55,7 +55,15 @@ print("Connected to WiFi!")
 
 print("Getting the time...")
 
-rtc.RTC().datetime = time.localtime(esp.get_time()[0])
+# get_time will raise ValueError if the time isn't available yet so loop until
+# it works.
+now_utc = None
+while now_utc is None:
+    try:
+        now_utc = time.localtime(esp.get_time()[0])
+    except ValueError:
+        pass
+rtc.RTC().datetime = now_utc
 
 print("Time:", str(time.time()))
 
