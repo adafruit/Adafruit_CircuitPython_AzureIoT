@@ -6,9 +6,9 @@ import board
 import busio
 from digitalio import DigitalInOut
 import neopixel
+import rtc
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 import adafruit_esp32spi.adafruit_esp32spi_socket as socket
-from adafruit_ntp import NTP
 
 # Get wifi details and more from a secrets.py file
 try:
@@ -53,11 +53,15 @@ print("Connected to WiFi!")
 
 print("Getting the time...")
 
-ntp = NTP(esp)
-# Wait for a valid time to be received
-while not ntp.valid_time:
-    time.sleep(5)
-    ntp.set_time()
+# get_time will raise ValueError if the time isn't available yet so loop until
+# it works.
+now_utc = None
+while now_utc is None:
+    try:
+        now_utc = time.localtime(esp.get_time()[0])
+    except ValueError:
+        pass
+rtc.RTC().datetime = now_utc
 
 print("Time:", str(time.time()))
 
