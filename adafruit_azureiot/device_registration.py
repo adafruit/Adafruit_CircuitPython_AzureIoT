@@ -68,7 +68,6 @@ class DeviceRegistration:
         else:
             self._logger = logging.getLogger("log")
             self._logger.addHandler(logging.StreamHandler())
-            
 
         self._mqtt = None
         self._auth_response_received = False
