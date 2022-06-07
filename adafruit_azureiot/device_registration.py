@@ -63,7 +63,12 @@ class DeviceRegistration:
         self._id_scope = id_scope
         self._device_id = device_id
         self._device_sas_key = device_sas_key
-        self._logger = logger if logger is not None else logging.getLogger("log")
+        if logger is not None:
+            self._logger = logger
+        else:
+            self._logger = logging.getLogger("log")
+            self._logger.addHandler(logging.StreamHandler())
+            
 
         self._mqtt = None
         self._auth_response_received = False

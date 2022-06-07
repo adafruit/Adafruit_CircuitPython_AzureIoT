@@ -154,8 +154,11 @@ class IoTHubDevice(IoTMQTTCallback):
         self._socket = socket
         self._iface = iface
         self._token_expires = token_expires
-        self._logger = logger if logger is not None else logging.getLogger("log")
-
+        if logger is not None:
+            self._logger = logger
+        else:
+            self._logger = logging.getLogger("log")
+            self._logger.addHandler(logging.StreamHandler())
         connection_string_values = {}
 
         try:

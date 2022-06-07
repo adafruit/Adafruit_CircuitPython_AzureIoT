@@ -353,7 +353,11 @@ class IoTMQTT:
             self._hostname, device_id, constants.IOTC_API_VERSION
         )
         self._passwd = self._gen_sas_token()
-        self._logger = logger if logger is not None else logging.getLogger("log")
+        if logger is not None:
+            self._logger = logger
+        else:
+            self._logger = logging.getLogger("log")
+            self._logger.addHandler(logging.StreamHandler())
         self._is_subscribed_to_twins = False
 
     def _subscribe_to_core_topics(self):
