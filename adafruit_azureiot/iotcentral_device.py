@@ -111,7 +111,11 @@ class IoTCentralDevice(IoTMQTTCallback):
         self._device_id = device_id
         self._device_sas_key = device_sas_key
         self._token_expires = token_expires
-        self._logger = logger if logger is not None else logging.getLogger("log")
+        if logger is not None:
+            self._logger = logger
+        else:
+            self._logger = logging.getLogger("log")
+            self._logger.addHandler(logging.StreamHandler())
         self._device_registration = None
         self._mqtt = None
 
