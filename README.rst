@@ -66,33 +66,32 @@ To create an Azure IoT Hub instance or an Azure IoT Central app, you will need a
 ESP32 AirLift Networking
 ========================
 
-To use this library, you will need to create an ESP32_SPI WifiManager, connected to WiFi. You will also need to set the current time, as this is used to generate time-based authentication keys. One way to do this is via the `Adafruit CircuitPython NTP <https://github.com/adafruit/Adafruit_CircuitPython_NTP>`_ library with the following code:
+To use this library, you will need to create an ESP32_SPI WifiManager, connected to WiFi. You will also need to set the current time, as this is used to generate time-based authentication keys. One way to do this is with the following code:
 
 .. code-block:: python
 
-    ntp = NTP(esp)
-
-    # Wait for a valid time to be received
-    while not ntp.valid_time:
-        time.sleep(5)
-        ntp.set_time()
+    # get_time will raise ValueError if the time isn't available yet so loop until
+    # it works.
+    now_utc = None
+    while now_utc is None:
+        try:
+            now_utc = time.localtime(esp.get_time()[0])
+        except ValueError:
+            pass
+    rtc.RTC().datetime = now_utc
 
 Native Networking
 =================
-To use this library, with boards that have native networking support, you need to be connected to a network. You will also need to set the current time, as this is used to generate time-based authentication keys. One way to do this is by using the `Adafruit IoT Time API <https://io.adafruit.com/api/docs/#time>`_ via the `Adafruit Requests library <https://github.com/adafruit/Adafruit_CircuitPython_Requests>`_ with the following code:
+To use this library, with boards that have native networking support, you need to be connected to a network. You will also need to set the current time, as this is used to generate time-based authentication keys. One way to do this is the `Adafruit NTP library <https://github.com/adafruit/Adafruit_CircuitPython_NTP>`_ with the following code:
 
 .. code-block:: python
 
     pool = socketpool.SocketPool(wifi.radio)
-    requests = adafruit_requests.Session(pool, ssl.create_default_context())
-    response = requests.get("https://io.adafruit.com/api/v2/time/seconds")
-    if response:
-        if response.status_code == 200:
-            r = rtc.RTC()
-            r.datetime = time.localtime(int(response.text))
-            print(f"System Time: {r.datetime}")
-        else:
-            print("Setting time failed")
+    ntp = adafruit_ntp.NTP(pool, tz_offset=0)
+
+    # NOTE: This changes the system time so make sure you aren't assuming that time
+    # doesn't jump.
+    rtc.RTC().datetime = ntp.datetime
 
 Azure IoT Hub
 -------------
