@@ -13,6 +13,10 @@ Adafruit_CircuitPython_AzureIoT
     :target: https://github.com/adafruit/Adafruit_CircuitPython_AzureIoT/actions/
     :alt: Build Status
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+    :alt: Code Style: Black
+
 A CircuitPython device library for `Microsoft Azure IoT Services <https://azure.microsoft.com/overview/iot/?WT.mc_id=academic-3168-jabenn>`_ from a CircuitPython device. This library only supports key-base authentication, it currently doesn't support X.509 certificates.
 
 Installing from PyPI
