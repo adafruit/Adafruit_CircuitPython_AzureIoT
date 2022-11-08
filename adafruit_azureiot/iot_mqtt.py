@@ -33,7 +33,8 @@ class IoTResponse:
     def __init__(self, code: int, message: str):
         """Creates an IoT Response object
 
-        :param int code: The HTTP response code for this method call, for example 200 if the method was handled successfully
+        :param int code: The HTTP response code for this method call, for example 200 if the method
+            was handled successfully
         :param str message: The HTTP response message for this method call
         """
         self.response_code = code
@@ -122,7 +123,8 @@ class IoTMQTT:
 
         self._logger.debug(
             str.replace(
-                f"- iot_mqtt :: _on_connect :: username = {self._username}, password = {self._passwd}",
+                f"- iot_mqtt :: _on_connect :: username = {self._username}, password ="
+                f"{self._passwd}",
                 "%",
                 "%%",
             )
@@ -334,7 +336,8 @@ class IoTMQTT:
         :param IoTMQTTCallback callback: A callback class
         :param socket: The socket to communicate over
         :param iface: The network interface to communicate over
-        :param str hostname: The hostname of the MQTT broker to connect to, get this by registering the device
+        :param str hostname: The hostname of the MQTT broker to connect to, get this by registering
+            the device
         :param str device_id: The device ID of the device to register
         :param str device_sas_key: The primary or secondary key of the device to register
         :param int token_expires: The number of seconds till the token expires, defaults to 6 hours
