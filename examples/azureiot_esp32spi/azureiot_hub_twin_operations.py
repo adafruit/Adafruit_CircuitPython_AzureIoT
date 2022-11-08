@@ -77,7 +77,8 @@ print("Time:", str(time.time()))
 # If you are not a student, head to https://aka.ms/FreeAz and sign up to get $200 of credit for 30
 #  days, as well as free tiers of a load of services
 #
-# Create an Azure IoT Hub and an IoT device in the Azure portal here: https://aka.ms/AzurePortalHome.
+# Create an Azure IoT Hub and an IoT device in the Azure portal here:
+# https://aka.ms/AzurePortalHome.
 # Instructions to create an IoT Hub and device are here: https://aka.ms/CreateIoTHub
 #
 # The free tier of IoT Hub allows up to 8,000 messages a day, so try not to send messages too often
@@ -91,7 +92,7 @@ print("Time:", str(time.time()))
 #
 # The adafruit-circuitpython-azureiot library depends on the following libraries:
 #
-# From the Adafruit CircuitPython Bundle (https://github.com/adafruit/Adafruit_CircuitPython_Bundle):
+# From the Adafruit CircuitPython Bundle https://github.com/adafruit/Adafruit_CircuitPython_Bundle:
 # * adafruit-circuitpython-minimqtt
 # * adafruit-circuitpython-requests
 from adafruit_azureiot import IoTHubDevice  # pylint: disable=wrong-import-position
@@ -132,8 +133,8 @@ while True:
     try:
         if message_counter >= 60:
             # Send a reported property twin update every minute
-            # You can see these in the portal by selecting the device in the IoT Hub blade, selecting
-            # Device Twin then looking for the updates in the 'reported' section
+            # You can see these in the portal by selecting the device in the IoT Hub blade,
+            # selecting device Twin then looking for the updates in the 'reported' section
             patch = {"Temperature": random.randint(0, 50)}
             device.update_twin(patch)
             message_counter = 0

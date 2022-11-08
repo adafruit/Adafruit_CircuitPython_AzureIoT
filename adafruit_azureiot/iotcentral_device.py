@@ -21,7 +21,7 @@ from .iot_error import IoTError
 from .iot_mqtt import IoTMQTT, IoTMQTTCallback, IoTResponse
 
 
-class IoTCentralDevice(IoTMQTTCallback):
+class IoTCentralDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-attributes
     """A device client for the Azure IoT Central service"""
 
     def connection_status_change(self, connected: bool) -> None:

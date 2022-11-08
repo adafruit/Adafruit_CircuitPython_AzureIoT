@@ -178,8 +178,10 @@ class DeviceRegistration:
         :raises RuntimeError: if the internet connection is not responding or is unable to connect
         """
 
-        username = (f"{self._id_scope}/registrations/{self._device_id}/api-version="
-                    f"{constants.DPS_API_VERSION}")
+        username = (
+            f"{self._id_scope}/registrations/{self._device_id}/api-version="
+            f"{constants.DPS_API_VERSION}"
+        )
 
         # pylint: disable=C0103
         sr = self._id_scope + "%2Fregistrations%2F" + self._device_id
@@ -187,8 +189,10 @@ class DeviceRegistration:
             self._device_sas_key, sr + "\n" + str(expiry)
         )
         sig_encoded = quote(sig_no_encode, "~()*!.'")
-        auth_string = (f"SharedAccessSignature sr={sr}&sig={sig_encoded}&se={expiry}"
-                       f"&skn=registration")
+        auth_string = (
+            f"SharedAccessSignature sr={sr}&sig={sig_encoded}&se={expiry}"
+            f"&skn=registration"
+        )
 
         MQTT.set_socket(self._socket, self._iface)
 

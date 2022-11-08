@@ -61,7 +61,7 @@ VALID_KEYS = [
 ]
 
 
-class IoTHubDevice(IoTMQTTCallback):
+class IoTHubDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-attributes
     """A device client for the Azure IoT Hub service"""
 
     def connection_status_change(self, connected: bool) -> None:
@@ -135,7 +135,7 @@ class IoTHubDevice(IoTMQTTCallback):
                 reported_property_name, reported_property_value, reported_version
             )
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         socket,
         iface,

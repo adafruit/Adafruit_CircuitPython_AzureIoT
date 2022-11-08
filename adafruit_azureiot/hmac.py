@@ -68,29 +68,37 @@ def sha_init() -> dict:
 def ROR(x, y):
     return (((x & 0xFFFFFFFF) >> (y & 31)) | (x << (32 - (y & 31)))) & 0xFFFFFFFF
 
+
 def Ch(x, y, z):
-    return (z ^ (x & (y ^ z)))
+    return z ^ (x & (y ^ z))
+
 
 def Maj(x, y, z):
-    return (((x | y) & z) | (x & y))
+    return ((x | y) & z) | (x & y)
+
 
 def S(x, n):
     return ROR(x, n)
 
+
 def R(x, n):
     return (x & 0xFFFFFFFF) >> n
 
+
 def Sigma0(x):
-    return (S(x, 2) ^ S(x, 13) ^ S(x, 22))
+    return S(x, 2) ^ S(x, 13) ^ S(x, 22)
+
 
 def Sigma1(x):
-    return (S(x, 6) ^ S(x, 11) ^ S(x, 25))
+    return S(x, 6) ^ S(x, 11) ^ S(x, 25)
+
 
 def Gamma0(x):
-    return (S(x, 7) ^ S(x, 18) ^ R(x, 3))
+    return S(x, 7) ^ S(x, 18) ^ R(x, 3)
+
 
 def Gamma1(x):
-    return (S(x, 17) ^ S(x, 19) ^ R(x, 10))
+    return S(x, 17) ^ S(x, 19) ^ R(x, 10)
 
 
 def sha_transform(sha_info: dict) -> None:
