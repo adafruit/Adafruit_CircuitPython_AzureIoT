@@ -14,7 +14,7 @@ as we only need sha256, so just having the code we need saves 19k of RAM
 
 """
 
-# pylint: disable=C0103, W0108, R0915, C0116, C0115
+# pylint: disable=C0103, W0108, R0915, C0116, C0115, unnecessary-lambda-assignment
 
 try:
     from typing import Union

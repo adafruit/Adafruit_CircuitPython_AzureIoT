@@ -48,11 +48,13 @@ else:
 # If you are not a student, head to https://aka.ms/FreeAz and sign up to get $200 of credit for 30
 #  days, as well as free tiers of a load of services
 #
-# Create an Azure IoT Central app by following these instructions: https://aka.ms/CreateIoTCentralApp
+# Create an Azure IoT Central app by following these instructions:
+# https://aka.ms/CreateIoTCentralApp
 # Add a device template with telemetry, properties and commands, as well as a view to visualize the
 # telemetry and execute commands, and a form to set properties.
 #
-# Next create a device using the device template, and select Connect to get the device connection details.
+# Next create a device using the device template, and select Connect to get the device connection
+# details.
 # Add the connection details to your secrets.py file, using the following values:
 #
 # 'id_scope' - the devices ID scope
@@ -61,7 +63,7 @@ else:
 #
 # The adafruit-circuitpython-azureiot library depends on the following libraries:
 #
-# From the Adafruit CircuitPython Bundle (https://github.com/adafruit/Adafruit_CircuitPython_Bundle):
+# From the Adafruit CircuitPython Bundle https://github.com/adafruit/Adafruit_CircuitPython_Bundle:
 # * adafruit-circuitpython-minimqtt
 # * adafruit-circuitpython-requests
 

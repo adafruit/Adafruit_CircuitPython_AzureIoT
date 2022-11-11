@@ -21,7 +21,7 @@ from .iot_error import IoTError
 from .iot_mqtt import IoTMQTT, IoTMQTTCallback, IoTResponse
 
 
-class IoTCentralDevice(IoTMQTTCallback):
+class IoTCentralDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-attributes
     """A device client for the Azure IoT Central service"""
 
     def connection_status_change(self, connected: bool) -> None:
@@ -120,23 +120,27 @@ class IoTCentralDevice(IoTMQTTCallback):
         self._mqtt = None
 
         self.on_connection_status_changed = None
-        """A callback method that is called when the connection status is changed. This method should have the following signature:
+        """A callback method that is called when the connection status is changed.
+        This method should have the following signature:
         def connection_status_changed(connected: bool) -> None
         """
 
         self.on_command_executed = None
-        """A callback method that is called when a command is executed on the device. This method should have the following signature:
+        """A callback method that is called when a command is executed on the device.
+        This method should have the following signature:
         def connection_status_changed(method_name: str, payload: str) -> IoTResponse:
 
-        This method returns an IoTResponse containing a status code and message from the command call. Set this appropriately
-        depending on if the command was successfully handled or not. For example, if the command was handled successfully, set
-        the code to 200 and message to "OK":
+        This method returns an IoTResponse containing a status code and message from the command
+        call. Set this appropriately depending on if the command was successfully handled or not.
+        For example, if the command was handled successfully, set the code to 200 and message to
+        "OK":
 
         return IoTResponse(200, "OK")
         """
 
         self.on_property_changed = None
-        """A callback method that is called when property values are updated. This method should have the following signature:
+        """A callback method that is called when property values are updated.
+        This method should have the following signature:
         def property_changed(_property_name: str, property_value, version: int) -> None
         """
 

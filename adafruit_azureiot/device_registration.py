@@ -115,7 +115,8 @@ class DeviceRegistration:
             self._mqtt.loop()
 
         self._logger.info(
-            f" - device_registration :: connect :: on_connect must be fired. Connected ? {self._mqtt.is_connected()}"
+            " - device_registration :: connect :: on_connect must be fired. Connected ?"
+            f"{self._mqtt.is_connected()}"
         )
 
         if not self._mqtt.is_connected():
@@ -148,7 +149,8 @@ class DeviceRegistration:
     def _wait_for_operation(self) -> None:
         message = json.dumps({"operationId": self._operation_id})
         self._mqtt.publish(
-            f"$dps/registrations/GET/iotdps-get-operationstatus/?$rid={self._device_id}&operationId={self._operation_id}",
+            "$dps/registrations/GET/iotdps-get-operationstatus/?$rid="
+            f"{self._device_id}&operationId={self._operation_id}",
             message,
         )
 
@@ -176,7 +178,10 @@ class DeviceRegistration:
         :raises RuntimeError: if the internet connection is not responding or is unable to connect
         """
 
-        username = f"{self._id_scope}/registrations/{self._device_id}/api-version={constants.DPS_API_VERSION}"
+        username = (
+            f"{self._id_scope}/registrations/{self._device_id}/api-version="
+            + f"{constants.DPS_API_VERSION}"
+        )
 
         # pylint: disable=C0103
         sr = self._id_scope + "%2Fregistrations%2F" + self._device_id
@@ -184,7 +189,10 @@ class DeviceRegistration:
             self._device_sas_key, sr + "\n" + str(expiry)
         )
         sig_encoded = quote(sig_no_encode, "~()*!.'")
-        auth_string = f"SharedAccessSignature sr={sr}&sig={sig_encoded}&se={expiry}&skn=registration"
+        auth_string = (
+            f"SharedAccessSignature sr={sr}&sig={sig_encoded}&se={expiry}"
+            "&skn=registration"
+        )
 
         MQTT.set_socket(self._socket, self._iface)
 

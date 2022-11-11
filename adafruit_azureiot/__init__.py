@@ -27,7 +27,8 @@ Implementation Notes
 
 **With Native Networking**
 
-* CircuitPython's Wifi Module: https://docs.circuitpython.org/en/latest/shared-bindings/wifi/index.html
+* CircuitPython's Wifi Module:
+    https://docs.circuitpython.org/en/latest/shared-bindings/wifi/index.html
 * Adafruit's Requests Library: https://github.com/adafruit/Adafruit_CircuitPython_Requests/
 """
 
