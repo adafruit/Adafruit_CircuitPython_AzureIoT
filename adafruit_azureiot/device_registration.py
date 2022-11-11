@@ -115,7 +115,7 @@ class DeviceRegistration:
             self._mqtt.loop()
 
         self._logger.info(
-            f" - device_registration :: connect :: on_connect must be fired. Connected ?"
+            " - device_registration :: connect :: on_connect must be fired. Connected ?"
             f"{self._mqtt.is_connected()}"
         )
 
@@ -149,7 +149,7 @@ class DeviceRegistration:
     def _wait_for_operation(self) -> None:
         message = json.dumps({"operationId": self._operation_id})
         self._mqtt.publish(
-            f"$dps/registrations/GET/iotdps-get-operationstatus/?$rid="
+            "$dps/registrations/GET/iotdps-get-operationstatus/?$rid="
             f"{self._device_id}&operationId={self._operation_id}",
             message,
         )
@@ -180,7 +180,7 @@ class DeviceRegistration:
 
         username = (
             f"{self._id_scope}/registrations/{self._device_id}/api-version="
-            f"{constants.DPS_API_VERSION}"
+            + f"{constants.DPS_API_VERSION}"
         )
 
         # pylint: disable=C0103
@@ -191,7 +191,7 @@ class DeviceRegistration:
         sig_encoded = quote(sig_no_encode, "~()*!.'")
         auth_string = (
             f"SharedAccessSignature sr={sr}&sig={sig_encoded}&se={expiry}"
-            f"&skn=registration"
+            "&skn=registration"
         )
 
         MQTT.set_socket(self._socket, self._iface)

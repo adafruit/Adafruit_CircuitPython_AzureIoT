@@ -121,10 +121,12 @@ class IoTMQTT:
     def _create_mqtt_client(self) -> None:
         MQTT.set_socket(self._socket, self._iface)
 
+        log_text = (
+            f"- iot_mqtt :: _on_connect :: username = {self._username}, password = "
+            + f"{self._passwd}"
+        )
         self._logger.debug(
-            str.replace(
-                f"- iot_mqtt :: _on_connect :: username = {self._username}, password ="
-                f"{self._passwd}",
+            log_text.replace(
                 "%",
                 "%%",
             )
