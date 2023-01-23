@@ -51,10 +51,13 @@ This driver depends on:
 * `Adafruit CircuitPython MiniMQTT <https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT>`_
 * `Adafruit CircuitPython Requests <https://github.com/adafruit/Adafruit_CircuitPython_Requests>`_
 * `Adafruit CircuitPython BinASCII <https://github.com/adafruit/Adafruit_CircuitPython_Binascii>`_
+* `Adafruit CircuitPython Logging <https://github.com/adafruit/Adafruit_CircuitPython_Logging>`_
 
 Please ensure all dependencies are available on the CircuitPython filesystem.
 This is easily achieved by downloading
 `the Adafruit library and driver bundle <https://github.com/adafruit/Adafruit_CircuitPython_Bundle>`_.
+
+**Board Compatibility:** The following built-in modules must be available: gc, json, ssl, time
 
 Usage Example
 =============
