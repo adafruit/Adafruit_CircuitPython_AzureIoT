@@ -26,6 +26,7 @@ from .keys import compute_derived_symmetric_key
 from .quote import quote
 from . import constants
 
+
 # pylint: disable=R0903
 class IoTResponse:
     """A response from a direct method call"""

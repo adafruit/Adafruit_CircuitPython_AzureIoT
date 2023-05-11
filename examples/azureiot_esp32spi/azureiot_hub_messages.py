@@ -98,6 +98,7 @@ from adafruit_azureiot import IoTHubDevice  # pylint: disable=wrong-import-posit
 # Create an IoT Hub device client and connect
 device = IoTHubDevice(socket, esp, secrets["device_connection_string"])
 
+
 # Subscribe to cloud to device messages
 # To send a message to the device, select it in the Azure Portal, select Message To Device,
 # fill in the message and any properties you want to add, then select Send Message

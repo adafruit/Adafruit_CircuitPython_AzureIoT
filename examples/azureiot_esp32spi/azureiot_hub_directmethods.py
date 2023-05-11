@@ -100,6 +100,7 @@ from adafruit_azureiot.iot_mqtt import IoTResponse
 # Create an IoT Hub device client and connect
 device = IoTHubDevice(socket, esp, secrets["device_connection_string"])
 
+
 # Subscribe to direct method calls
 # To invoke a method on the device, select it in the Azure Portal, select Direct Method,
 # fill in the method name and payload, then select Invoke Method

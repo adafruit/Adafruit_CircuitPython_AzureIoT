@@ -75,6 +75,7 @@ device = IoTCentralDevice(
     pool, esp, secrets["id_scope"], secrets["device_id"], secrets["device_sas_key"]
 )
 
+
 # Subscribe to commands
 # Commands can be sent from the devices Dashboard in IoT Central, assuming
 # the device template and view has been set up with the commands

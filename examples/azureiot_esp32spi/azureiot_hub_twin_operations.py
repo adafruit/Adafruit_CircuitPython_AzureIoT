@@ -100,6 +100,7 @@ from adafruit_azureiot import IoTHubDevice  # pylint: disable=wrong-import-posit
 # Create an IoT Hub device client and connect
 device = IoTHubDevice(socket, esp, secrets["device_connection_string"])
 
+
 # Subscribe to device twin desired property updates
 # To see these changes, update the desired properties for the device either in code
 # or in the Azure portal by selecting the device in the IoT Hub blade, selecting

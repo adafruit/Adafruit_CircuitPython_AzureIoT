@@ -105,6 +105,7 @@ device = IoTCentralDevice(
     socket, esp, secrets["id_scope"], secrets["device_id"], secrets["device_sas_key"]
 )
 
+
 # Subscribe to property changes
 # Properties can be updated either in code, or by adding a form to the view
 # in the device template, and setting the value on the dashboard for the device
