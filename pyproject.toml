@@ -43,7 +43,7 @@ classifiers = [
 dynamic = ["dependencies", "optional-dependencies"]
 
 [tool.setuptools]
-py-modules = ["adafruit_azureiot"]
+packages = ["adafruit_azureiot"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
