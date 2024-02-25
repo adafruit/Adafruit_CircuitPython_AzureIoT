@@ -73,6 +73,8 @@ To create an Azure IoT Hub instance or an Azure IoT Central app, you will need a
 ESP32 AirLift Networking
 ========================
 
+*NOTE* currently the ESP32 AirLift is not supported due to the requirment of `ssl`, which is only on boards with native WiFi.
+
 To use this library, you will need to create an ESP32_SPI WifiManager, connected to WiFi. You will also need to set the current time, as this is used to generate time-based authentication keys. One way to do this is with the following code:
 
 .. code-block:: python
