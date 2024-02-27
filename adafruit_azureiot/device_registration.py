@@ -112,7 +112,7 @@ class DeviceRegistration:
             " - device_registration :: connect :: created mqtt client. connecting.."
         )
         while not self._auth_response_received:
-            self._mqtt.loop()
+            self._mqtt.loop(2)
 
         self._logger.info(
             " - device_registration :: connect :: on_connect must be fired. Connected ?"
@@ -139,7 +139,7 @@ class DeviceRegistration:
         while self._operation_id is None and retry < 10:
             time.sleep(1)
             retry += 1
-            self._mqtt.loop()
+            self._mqtt.loop(2)
 
         if self._operation_id is None:
             raise DeviceRegistrationError(
@@ -159,7 +159,7 @@ class DeviceRegistration:
         while self._hostname is None and retry < 10:
             time.sleep(1)
             retry += 1
-            self._mqtt.loop()
+            self._mqtt.loop(2)
 
         if self._hostname is None:
             raise DeviceRegistrationError(
@@ -194,15 +194,15 @@ class DeviceRegistration:
             "&skn=registration"
         )
 
-        MQTT.set_socket(self._socket, self._iface)
-
         self._mqtt = MQTT.MQTT(
             broker=constants.DPS_END_POINT,
+            port=8883,
             username=username,
             password=auth_string,
-            port=8883,
-            keep_alive=120,
             client_id=self._device_id,
+            is_ssl=True,
+            keep_alive=120,
+            socket_pool=self._socket,
             ssl_context=ssl.create_default_context(),
         )
 

@@ -120,8 +120,6 @@ class IoTMQTT:
         )
 
     def _create_mqtt_client(self) -> None:
-        MQTT.set_socket(self._socket, self._iface)
-
         log_text = (
             f"- iot_mqtt :: _on_connect :: username = {self._username}, password = "
             + f"{self._passwd}"
@@ -135,11 +133,13 @@ class IoTMQTT:
 
         self._mqtts = MQTT.MQTT(
             broker=self._hostname,
+            port=8883,
             username=self._username,
             password=self._passwd,
-            port=8883,
-            keep_alive=120,
             client_id=self._device_id,
+            is_ssl=True,
+            keep_alive=120,
+            socket_pool=self._socket,
             ssl_context=ssl.create_default_context(),
         )
 
@@ -457,7 +457,7 @@ class IoTMQTT:
         if not self.is_connected():
             return
 
-        self._mqtts.loop()
+        self._mqtts.loop(2)
         gc.collect()
 
     def send_device_to_cloud_message(
