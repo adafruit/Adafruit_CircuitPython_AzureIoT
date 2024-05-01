@@ -14,7 +14,6 @@ to IoT Central over MQTT
 """
 
 import json
-import ssl
 import time
 
 import adafruit_logging as logging
@@ -45,8 +44,8 @@ class DeviceRegistration:
     # pylint: disable=R0913
     def __init__(
         self,
-        socket,
-        iface,
+        socket_pool,
+        ssl_context,
         id_scope: str,
         device_id: str,
         device_sas_key: str,
@@ -74,8 +73,8 @@ class DeviceRegistration:
         self._operation_id = None
         self._hostname = None
 
-        self._socket = socket
-        self._iface = iface
+        self._socket_pool = socket_pool
+        self._ssl_context = ssl_context
 
     # pylint: disable=W0613
     # pylint: disable=C0103
@@ -202,8 +201,8 @@ class DeviceRegistration:
             client_id=self._device_id,
             is_ssl=True,
             keep_alive=120,
-            socket_pool=self._socket,
-            ssl_context=ssl.create_default_context(),
+            socket_pool=self._socket_pool,
+            ssl_context=self._ssl_context,
         )
 
         self._mqtt.enable_logger(logging, self._logger.getEffectiveLevel())

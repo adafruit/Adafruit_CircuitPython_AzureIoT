@@ -14,7 +14,6 @@ An MQTT client for Azure IoT
 
 import gc
 import json
-import ssl
 import time
 
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
@@ -139,8 +138,8 @@ class IoTMQTT:
             client_id=self._device_id,
             is_ssl=True,
             keep_alive=120,
-            socket_pool=self._socket,
-            ssl_context=ssl.create_default_context(),
+            socket_pool=self._socket_pool,
+            ssl_context=self._ssl_context,
         )
 
         self._mqtts.enable_logger(logging, self._logger.getEffectiveLevel())
@@ -326,8 +325,8 @@ class IoTMQTT:
     def __init__(
         self,
         callback: IoTMQTTCallback,
-        socket,
-        iface,
+        socket_pool,
+        ssl_context,
         hostname: str,
         device_id: str,
         device_sas_key: str,
@@ -347,8 +346,8 @@ class IoTMQTT:
         :param Logger logger: The logger
         """
         self._callback = callback
-        self._socket = socket
-        self._iface = iface
+        self._socket_pool = socket_pool
+        self._ssl_context = ssl_context
         self._auth_response_received = False
         self._mqtts = None
         self._device_id = device_id

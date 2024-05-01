@@ -9,7 +9,7 @@ from digitalio import DigitalInOut
 import neopixel
 import rtc
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
-import adafruit_esp32spi.adafruit_esp32spi_socket as socket
+import adafruit_connection_manager
 
 # Get wifi details and more from a secrets.py file
 try:
@@ -97,8 +97,10 @@ print("Time:", str(time.time()))
 # * adafruit-circuitpython-requests
 from adafruit_azureiot import IoTHubDevice  # pylint: disable=wrong-import-position
 
+pool = adafruit_connection_manager.get_radio_socketpool(esp)
+ssl_context = adafruit_connection_manager.get_radio_ssl_context(esp)
 # Create an IoT Hub device client and connect
-device = IoTHubDevice(socket, esp, secrets["device_connection_string"])
+device = IoTHubDevice(pool, ssl_context, secrets["device_connection_string"])
 
 
 # Subscribe to device twin desired property updates
