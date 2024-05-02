@@ -90,7 +90,6 @@ print("Time:", str(time.time()))
 #
 # From the Adafruit CircuitPython Bundle https://github.com/adafruit/Adafruit_CircuitPython_Bundle:
 # * adafruit-circuitpython-minimqtt
-# * adafruit-circuitpython-requests
 # pylint: disable=wrong-import-position
 from adafruit_azureiot import IoTHubDevice
 from adafruit_azureiot.iot_mqtt import IoTResponse

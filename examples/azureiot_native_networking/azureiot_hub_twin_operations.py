@@ -61,7 +61,6 @@ else:
 #
 # From the Adafruit CircuitPython Bundle https://github.com/adafruit/Adafruit_CircuitPython_Bundle:
 # * adafruit-circuitpython-minimqtt
-# * adafruit-circuitpython-requests
 
 
 # Create an IoT Hub device client and connect
