@@ -5,5 +5,4 @@
 Adafruit-Blinka
 adafruit-circuitpython-logging>=4.0.1
 adafruit-circuitpython-minimqtt
-adafruit-circuitpython-requests
 adafruit-circuitpython-binascii

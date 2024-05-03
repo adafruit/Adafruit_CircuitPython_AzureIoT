@@ -49,16 +49,14 @@ This driver depends on:
 
 * `Adafruit CircuitPython <https://github.com/adafruit/circuitpython>`_
 * `Adafruit CircuitPython BinASCII <https://github.com/adafruit/Adafruit_CircuitPython_Binascii>`_
-* `Adafruit CircuitPython ConnectionManager <https://github.com/adafruit/Adafruit_CircuitPython_ConnectionManager/>`_
 * `Adafruit CircuitPython Logging <https://github.com/adafruit/Adafruit_CircuitPython_Logging>`_
 * `Adafruit CircuitPython MiniMQTT <https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT>`_
-* `Adafruit CircuitPython Requests <https://github.com/adafruit/Adafruit_CircuitPython_Requests>`_
 
 Please ensure all dependencies are available on the CircuitPython filesystem.
 This is easily achieved by downloading
 `the Adafruit library and driver bundle <https://github.com/adafruit/Adafruit_CircuitPython_Bundle>`_.
 
-**Board Compatibility:** The following built-in modules must be available: gc, json, ssl, time
+**Board Compatibility:** The following built-in modules must be available: gc, json, time
 
 Usage Example
 =============
@@ -73,8 +71,6 @@ To create an Azure IoT Hub instance or an Azure IoT Central app, you will need a
 
 ESP32 AirLift Networking
 ========================
-
-*NOTE* currently the ESP32 AirLift is not supported due to the requirment of `ssl`, which is only on boards with native WiFi.
 
 To use this library, you will need to create an ESP32_SPI WifiManager, connected to WiFi. You will also need to set the current time, as this is used to generate time-based authentication keys. One way to do this is with the following code:
 
@@ -96,7 +92,7 @@ To use this library, with boards that have native networking support, you need t
 
 .. code-block:: python
 
-    pool = socketpool.SocketPool(wifi.radio)
+    pool = adafruit_connection_manager.get_radio_socketpool(wifi.radio)
     ntp = adafruit_ntp.NTP(pool, tz_offset=0)
 
     # NOTE: This changes the system time so make sure you aren't assuming that time

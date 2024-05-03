@@ -5,10 +5,10 @@ import json
 import random
 import time
 
-import socketpool
 import rtc
 import wifi
 
+import adafruit_connection_manager
 import adafruit_ntp
 from adafruit_azureiot import IoTHubDevice
 
@@ -22,11 +22,13 @@ except ImportError:
 print("Connecting to WiFi...")
 wifi.radio.connect(secrets["ssid"], secrets["password"])
 
+pool = adafruit_connection_manager.get_radio_socketpool(wifi.radio)
+ssl_context = adafruit_connection_manager.get_radio_ssl_context(wifi.radio)
+
 print("Connected to WiFi!")
 
 if time.localtime().tm_year < 2022:
     print("Setting System Time in UTC")
-    pool = socketpool.SocketPool(wifi.radio)
     ntp = adafruit_ntp.NTP(pool, tz_offset=0)
 
     # NOTE: This changes the system time so make sure you aren't assuming that time
@@ -60,13 +62,10 @@ else:
 #
 # From the Adafruit CircuitPython Bundle https://github.com/adafruit/Adafruit_CircuitPython_Bundle:
 # * adafruit-circuitpython-minimqtt
-# * adafruit-circuitpython-requests
 
 
-esp = None
-pool = socketpool.SocketPool(wifi.radio)
 # Create an IoT Hub device client and connect
-device = IoTHubDevice(pool, esp, secrets["device_connection_string"])
+device = IoTHubDevice(pool, ssl_context, secrets["device_connection_string"])
 
 
 # Subscribe to cloud to device messages

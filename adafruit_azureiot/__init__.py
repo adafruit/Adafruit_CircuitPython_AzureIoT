@@ -21,15 +21,12 @@ Implementation Notes
 
 **With ESP32 Airlift Networking**
 
-* Adafruit's Bus Device library: https://github.com/adafruit/Adafruit_CircuitPython_BusDevice
 * Adafruit's ESP32SPI library: https://github.com/adafruit/Adafruit_CircuitPython_ESP32SPI
-* Adafruit's NTP library: https://github.com/adafruit/Adafruit_CircuitPython_NTP
 
 **With Native Networking**
 
 * CircuitPython's Wifi Module:
     https://docs.circuitpython.org/en/latest/shared-bindings/wifi/index.html
-* Adafruit's Requests Library: https://github.com/adafruit/Adafruit_CircuitPython_Requests/
 """
 
 from .iot_error import IoTError
