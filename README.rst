@@ -106,7 +106,7 @@ To interact with Azure IoT Hub, you will need to create a hub, and a register a 
 
 - Open the `Azure Portal <https://aka.ms/AzurePortalHome>`_.
 - Follow the instructions in `Microsoft Docs <https://aka.ms/CreateIoTHub>`_ to create an Azure IoT Hub and register a device.
-- Copy the devices Primary or secondary connection string, and add this to your ``secrets.py`` file.
+- Copy the devices Primary or secondary connection string, and add this to your ``settings.toml`` file.
 
 You can find the device connection string by selecting the IoT Hub in the `Azure Portal <https://aka.ms/AzurePortalHome>`_, *selecting Explorer -> IoT devices*, then selecting your device.
 
@@ -128,7 +128,7 @@ Then copy either the primary or secondary connection string using the copy butto
 
     from adafruit_azureiot import IoTHubDevice
 
-    device = IoTHubDevice(wifi, secrets["device_connection_string"])
+    device = IoTHubDevice(wifi, device_connection_string)
     device.connect()
 
 Once the device is connected, you will regularly need to run a ``loop`` to poll for messages from the cloud.
@@ -197,7 +197,7 @@ To use Azure IoT Central, you will need to create an Azure IoT Central app, crea
 - Head to `Azure IoT Central <https://apps.azureiotcentral.com/?WT.mc_id=academic-3168-jabenn>`__
 - Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-deploy-iot-central?WT.mc_id=academic-3168-jabenn>`__ to create an application. Every tier is free for up to 2 devices.
 - Follow the instructions in the `Microsoft Docs <https://docs.microsoft.com/azure/iot-central/core/quick-create-simulated-device?WT.mc_id=academic-3168-jabenn>`__ to create a device template.
-- Create a device based off the template, and select **Connect** to get the device connection details. Store the ID Scope, Device ID and either the primary or secondary device SAS key in your ``secrets.py`` file.
+- Create a device based off the template, and select **Connect** to get the device connection details. Store the ID Scope, Device ID and either the primary or secondary device SAS key in your ``settings.toml`` file.
 
 .. image:: iot-central-connect-button.png
    :alt: The IoT Central connect button
@@ -209,26 +209,40 @@ To use Azure IoT Central, you will need to create an Azure IoT Central app, crea
 
 *The connection details dialog*
 
+
+settings.toml:
+
 .. code-block:: python
 
-    secrets = {
-        # WiFi settings
-        "ssid": "",
-        "password": "",
+    # WiFi settings
+    CIRCUITPY_WIFI_SSID="Your WiFi ssid"
+    CIRCUITPY_WIFI_PASSWORD="Your WiFi password"
 
-        # Azure IoT Central settings
-        "id_scope": "",
-        "device_id": "",
-        "device_sas_key": ""
-    }
+    # Azure IoT Central settings
+    id_scope="Your ID Scope"
+    device_id="Your Device ID"
+    device_sas_key="Your Primary Key"
 
 **Connect your device to your Azure IoT Central app**
 
 .. code-block:: python
 
+    import wifi
+    from os import getenv
     from adafruit_azureiot import IoTCentralDevice
+    import adafruit_connection_manager
 
-    device = IoTCentralDevice(wifi, secrets["id_scope"], secrets["device_id"], secrets["device_sas_key"])
+    ssid = getenv("CIRCUITPY_WIFI_SSID")
+    password = getenv("CIRCUITPY_WIFI_PASSWORD")
+    id_scope = getenv("id_scope")
+    device_id = getenv("device_id")
+    device_sas_key = getenv("device_sas_key")
+
+    wifi.radio.connect(ssid, password)
+
+    pool = adafruit_connection_manager.get_radio_socketpool(wifi.radio)
+
+    device = IoTCentralDevice(pool, id_scope, device_id, device_sas_key)
     device.connect()
 
 Once the device is connected, you will regularly need to run a ``loop`` to poll for messages from the cloud.

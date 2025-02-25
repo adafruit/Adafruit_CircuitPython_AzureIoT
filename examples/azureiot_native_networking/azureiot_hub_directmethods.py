@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
+from os import getenv
 import time
 
 import rtc
@@ -11,15 +12,13 @@ import adafruit_ntp
 from adafruit_azureiot import IoTHubDevice
 from adafruit_azureiot.iot_mqtt import IoTResponse
 
-# Get wifi details and more from a secrets.py file
-try:
-    from secrets import secrets
-except ImportError:
-    print("WiFi secrets are kept in secrets.py, please add them there!")
-    raise
+# Get WiFi details, ensure these are setup in settings.toml
+ssid = getenv("CIRCUITPY_WIFI_SSID")
+password = getenv("CIRCUITPY_WIFI_PASSWORD")
+device_connection_string = getenv("device_connection_string")
 
 print("Connecting to WiFi...")
-wifi.radio.connect(secrets["ssid"], secrets["password"])
+wifi.radio.connect(ssid, password)
 
 pool = adafruit_connection_manager.get_radio_socketpool(wifi.radio)
 ssl_context = adafruit_connection_manager.get_radio_ssl_context(wifi.radio)
@@ -55,7 +54,7 @@ else:
 # if you are using the free tier
 #
 # Once you have a hub and a device, copy the device primary connection string.
-# Add it to the secrets.py file in an entry called device_connection_string
+# Add it to the settings.toml file in an entry called device_connection_string
 #
 # The adafruit-circuitpython-azureiot library depends on the following libraries:
 #
@@ -64,7 +63,7 @@ else:
 
 
 # Create an IoT Hub device client and connect
-device = IoTHubDevice(pool, ssl_context, secrets["device_connection_string"])
+device = IoTHubDevice(pool, ssl_context, device_connection_string)
 
 
 # Subscribe to direct method calls
@@ -96,7 +95,7 @@ while True:
         # If we lose connectivity, reset the wifi and reconnect
         wifi.radio.enabled = False
         wifi.radio.enabled = True
-        wifi.radio.connect(secrets["ssid"], secrets["password"])
+        wifi.radio.connect(ssid, password)
         device.reconnect()
         continue
 

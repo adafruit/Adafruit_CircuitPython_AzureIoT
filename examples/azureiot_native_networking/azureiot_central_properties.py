@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
+from os import getenv
 import random
 import time
 
@@ -11,15 +12,15 @@ import adafruit_connection_manager
 import adafruit_ntp
 from adafruit_azureiot import IoTCentralDevice
 
-# Get wifi details and more from a secrets.py file
-try:
-    from secrets import secrets
-except ImportError:
-    print("WiFi secrets are kept in secrets.py, please add them there!")
-    raise
+# Get WiFi details and AWS Keys, ensure these are setup in settings.toml
+ssid = getenv("CIRCUITPY_WIFI_SSID")
+password = getenv("CIRCUITPY_WIFI_PASSWORD")
+id_scope = getenv("id_scope")
+device_id = getenv("device_id")
+device_sas_key = getenv("device_sas_key")
 
 print("Connecting to WiFi...")
-wifi.radio.connect(secrets["ssid"], secrets["password"])
+wifi.radio.connect(ssid, password)
 
 pool = adafruit_connection_manager.get_radio_socketpool(wifi.radio)
 ssl_context = adafruit_connection_manager.get_radio_ssl_context(wifi.radio)
@@ -57,7 +58,7 @@ else:
 #
 # Next create a device using the device template, and select Connect to get the device connection
 # details.
-# Add the connection details to your secrets.py file, using the following values:
+# Add the connection details to your settings.toml file, using the following values:
 #
 # 'id_scope' - the devices ID scope
 # 'device_id' - the devices device id
@@ -73,9 +74,9 @@ else:
 device = IoTCentralDevice(
     pool,
     ssl_context,
-    secrets["id_scope"],
-    secrets["device_id"],
-    secrets["device_sas_key"],
+    id_scope,
+    device_id,
+    device_sas_key,
 )
 
 

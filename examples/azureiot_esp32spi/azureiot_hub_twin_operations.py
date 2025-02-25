@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
+from os import getenv
 import random
 import time
 import board
@@ -11,12 +12,10 @@ import rtc
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 import adafruit_connection_manager
 
-# Get wifi details and more from a secrets.py file
-try:
-    from secrets import secrets
-except ImportError:
-    print("WiFi secrets are kept in secrets.py, please add them there!")
-    raise
+# Get WiFi details and Azure keys, ensure these are setup in settings.toml
+ssid = getenv("CIRCUITPY_WIFI_SSID")
+password = getenv("CIRCUITPY_WIFI_PASSWORD")
+device_connection_string = getenv("device_connection_string")
 
 # ESP32 Setup
 try:
@@ -32,19 +31,21 @@ spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 
 """Use below for Most Boards"""
-status_light = neopixel.NeoPixel(
+status_pixel = neopixel.NeoPixel(
     board.NEOPIXEL, 1, brightness=0.2
 )  # Uncomment for Most Boards
 """Uncomment below for ItsyBitsy M4"""
-# status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
+# status_pixel = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
 # Uncomment below for an externally defined RGB LED
 # import adafruit_rgbled
 # from adafruit_esp32spi import PWMOut
 # RED_LED = PWMOut.PWMOut(esp, 26)
 # GREEN_LED = PWMOut.PWMOut(esp, 27)
 # BLUE_LED = PWMOut.PWMOut(esp, 25)
-# status_light = adafruit_rgbled.RGBLED(RED_LED, BLUE_LED, GREEN_LED)
-wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
+# status_pixel = adafruit_rgbled.RGBLED(RED_LED, BLUE_LED, GREEN_LED)
+wifi = adafruit_esp32spi_wifimanager.WiFiManager(
+    esp, ssid, password, status_pixel=status_pixel
+)
 
 print("Connecting to WiFi...")
 
@@ -85,7 +86,7 @@ print("Time:", str(time.time()))
 # if you are using the free tier
 #
 # Once you have a hub and a device, copy the device primary connection string.
-# Add it to the secrets.py file in an entry called device_connection_string
+# Add it to the settings.toml file in an entry called device_connection_string
 #
 # To us twins, you will need either a free or standard tier IoT Hub. Basic tier doesn't
 # support twins
@@ -99,7 +100,7 @@ from adafruit_azureiot import IoTHubDevice  # pylint: disable=wrong-import-posit
 pool = adafruit_connection_manager.get_radio_socketpool(esp)
 ssl_context = adafruit_connection_manager.get_radio_ssl_context(esp)
 # Create an IoT Hub device client and connect
-device = IoTHubDevice(pool, ssl_context, secrets["device_connection_string"])
+device = IoTHubDevice(pool, ssl_context, device_connection_string)
 
 
 # Subscribe to device twin desired property updates
