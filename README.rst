@@ -215,8 +215,8 @@ settings.toml:
 .. code-block:: python
 
     # WiFi settings
-    CIRCUITPY_WIFI_SSID="",
-    CIRCUITPY_WIFI_PASSWORD="",
+    CIRCUITPY_WIFI_SSID=""
+    CIRCUITPY_WIFI_PASSWORD=""
 
     # Azure IoT Central settings
     id_scope=""
