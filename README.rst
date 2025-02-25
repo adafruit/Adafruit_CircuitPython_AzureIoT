@@ -215,21 +215,34 @@ settings.toml:
 .. code-block:: python
 
     # WiFi settings
-    CIRCUITPY_WIFI_SSID=""
-    CIRCUITPY_WIFI_PASSWORD=""
+    CIRCUITPY_WIFI_SSID="Your WiFi ssid"
+    CIRCUITPY_WIFI_PASSWORD="Your WiFi password"
 
     # Azure IoT Central settings
-    id_scope=""
-    device_id=""
-    device_sas_key=""
+    id_scope="Your ID Scope"
+    device_id="Your Device ID"
+    device_sas_key="Your Primary Key"
 
 **Connect your device to your Azure IoT Central app**
 
 .. code-block:: python
 
+    import wifi
+    from os import getenv
     from adafruit_azureiot import IoTCentralDevice
+    import adafruit_connection_manager
 
-    device = IoTCentralDevice(wifi, id_scope, device_id, device_sas_key)
+    ssid = getenv("CIRCUITPY_WIFI_SSID")
+    password = getenv("CIRCUITPY_WIFI_PASSWORD")
+    id_scope = getenv("id_scope")
+    device_id = getenv("device_id")
+    device_sas_key = getenv("device_sas_key")
+
+    wifi.radio.connect(ssid, password)
+
+    pool = adafruit_connection_manager.get_radio_socketpool(wifi.radio)
+
+    device = IoTCentralDevice(pool, id_scope, device_id, device_sas_key)
     device.connect()
 
 Once the device is connected, you will regularly need to run a ``loop`` to poll for messages from the cloud.
