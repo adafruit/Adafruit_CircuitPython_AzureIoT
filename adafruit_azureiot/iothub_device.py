@@ -18,8 +18,10 @@ except ImportError:
     pass
 
 import json
+
 import adafruit_logging as logging
 from adafruit_logging import Logger
+
 from .iot_error import IoTError
 from .iot_mqtt import IoTMQTT, IoTMQTTCallback, IoTResponse
 
@@ -61,7 +63,7 @@ VALID_KEYS = [
 ]
 
 
-class IoTHubDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-attributes
+class IoTHubDevice(IoTMQTTCallback):
     """A device client for the Azure IoT Hub service"""
 
     def connection_status_change(self, connected: bool) -> None:
@@ -70,10 +72,8 @@ class IoTHubDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-attrib
         :param bool connected: True if the device is connected, otherwise false
         """
         if self._on_connection_status_changed is not None:
-            # pylint: disable=E1102
             self._on_connection_status_changed(connected)
 
-    # pylint: disable=W0613, R0201
     def direct_method_invoked(self, method_name: str, payload: str) -> IoTResponse:
         """Called when a direct method is invoked
 
@@ -83,12 +83,10 @@ class IoTHubDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-attrib
         :rtype: IoTResponse
         """
         if self._on_direct_method_invoked is not None:
-            # pylint: disable=E1102
             return self._on_direct_method_invoked(method_name, payload)
 
         raise IoTError("on_direct_method_invoked not set")
 
-    # pylint: disable=C0103
     def cloud_to_device_message_received(self, body: str, properties: dict) -> None:
         """Called when a cloud to device message is received
 
@@ -96,7 +94,6 @@ class IoTHubDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-attrib
         :param dict properties: The propreties sent with the mesage
         """
         if self._on_cloud_to_device_message_received is not None:
-            # pylint: disable=E1102
             self._on_cloud_to_device_message_received(body, properties)
 
     def device_twin_desired_updated(
@@ -112,7 +109,6 @@ class IoTHubDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-attrib
         :param int desired_version: The version of the desired property that was updated
         """
         if self._on_device_twin_desired_updated is not None:
-            # pylint: disable=E1102
             self._on_device_twin_desired_updated(
                 desired_property_name, desired_property_value, desired_version
             )
@@ -130,12 +126,11 @@ class IoTHubDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-attrib
         :param int reported_version: The version of the reported property that was updated
         """
         if self._on_device_twin_reported_updated is not None:
-            # pylint: disable=E1102
             self._on_device_twin_reported_updated(
                 reported_property_name, reported_property_value, reported_version
             )
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         socket,
         iface,
@@ -163,9 +158,7 @@ class IoTHubDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-attrib
 
         try:
             cs_args = device_connection_string.split(DELIMITER)
-            connection_string_values = dict(
-                arg.split(VALUE_SEPARATOR, 1) for arg in cs_args
-            )
+            connection_string_values = dict(arg.split(VALUE_SEPARATOR, 1) for arg in cs_args)
         except (ValueError, AttributeError) as e:
             raise ValueError(
                 "Connection string is required and should not be empty or blank and must be"
@@ -202,9 +195,7 @@ class IoTHubDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-attrib
         return self._on_connection_status_changed
 
     @on_connection_status_changed.setter
-    def on_connection_status_changed(
-        self, new_on_connection_status_changed: Callable
-    ) -> None:
+    def on_connection_status_changed(self, new_on_connection_status_changed: Callable) -> None:
         """A callback method that is called when the connection status is changed.
         This method should have the following signature:
         def connection_status_changed(connected: bool) -> None
@@ -257,9 +248,7 @@ class IoTHubDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-attrib
         This method should have the following signature:
         def cloud_to_device_message_received(body: str, properties: dict) -> None:
         """
-        self._on_cloud_to_device_message_received = (
-            new_on_cloud_to_device_message_received
-        )
+        self._on_cloud_to_device_message_received = new_on_cloud_to_device_message_received
 
     @property
     def on_device_twin_desired_updated(self) -> Callable:
@@ -271,9 +260,7 @@ class IoTHubDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-attrib
         return self._on_device_twin_desired_updated
 
     @on_device_twin_desired_updated.setter
-    def on_device_twin_desired_updated(
-        self, new_on_device_twin_desired_updated: Callable
-    ) -> None:
+    def on_device_twin_desired_updated(self, new_on_device_twin_desired_updated: Callable) -> None:
         """A callback method that is called when the desired properties of the devices device twin
         are updated. This method should have the following signature:
         def device_twin_desired_updated(desired_property_name: str, desired_property_value,

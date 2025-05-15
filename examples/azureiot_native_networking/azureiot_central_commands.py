@@ -1,14 +1,14 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-from os import getenv
 import time
-
-import rtc
-import wifi
+from os import getenv
 
 import adafruit_connection_manager
 import adafruit_ntp
+import rtc
+import wifi
+
 from adafruit_azureiot import IoTCentralDevice
 from adafruit_azureiot.iot_mqtt import IoTResponse
 

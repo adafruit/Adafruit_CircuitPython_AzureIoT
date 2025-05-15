@@ -47,7 +47,6 @@ def quote(bytes_val: bytes, safe: Union[str, bytes, bytearray] = "/") -> str:
     return "".join([quoter(char) for char in bytes_val])
 
 
-# pylint: disable=C0103
 class defaultdict:
     """
     Default Dict Implementation.
@@ -74,10 +73,8 @@ class defaultdict:
     """
 
     @staticmethod
-    # pylint: disable=W0613
     def __new__(cls, default_factory: Any = None, **kwargs: Any) -> "defaultdict":
-        self = super(defaultdict, cls).__new__(cls)
-        # pylint: disable=C0103
+        self = super(defaultdict, cls).__new__(cls)  # noqa: UP008
         self.d = {}
         return self
 
@@ -124,6 +121,6 @@ class Quoter(defaultdict):
 
     def __missing__(self, b: int) -> str:
         # Handle a cache miss. Store quoted string in cache and return.
-        res = chr(b) if b in self.safe else "%{:02X}".format(b)
+        res = chr(b) if b in self.safe else f"%{b:02X}"
         self[b] = res
         return res
