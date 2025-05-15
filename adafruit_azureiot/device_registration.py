@@ -17,12 +17,12 @@ import json
 import time
 
 import adafruit_logging as logging
-from adafruit_logging import Logger
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
+from adafruit_logging import Logger
 
 from . import constants
-from .quote import quote
 from .keys import compute_derived_symmetric_key
+from .quote import quote
 
 
 class DeviceRegistrationError(Exception):
@@ -41,7 +41,6 @@ class DeviceRegistration:
     to IoT Central over MQTT
     """
 
-    # pylint: disable=R0913
     def __init__(
         self,
         socket_pool,
@@ -76,8 +75,6 @@ class DeviceRegistration:
         self._socket_pool = socket_pool
         self._ssl_context = ssl_context
 
-    # pylint: disable=W0613
-    # pylint: disable=C0103
     def _on_connect(self, client, userdata, _, rc) -> None:
         self._logger.info(
             f"- device_registration :: _on_connect :: rc = {rc}, userdata = {userdata}"
@@ -85,7 +82,6 @@ class DeviceRegistration:
 
         self._auth_response_received = True
 
-    # pylint: disable=W0613
     def _handle_dps_update(self, client, topic: str, msg: str) -> None:
         self._logger.info(f"Received registration results on topic {topic} - {msg}")
         message = json.loads(msg)
@@ -107,9 +103,7 @@ class DeviceRegistration:
 
         self._mqtt.connect()
 
-        self._logger.info(
-            " - device_registration :: connect :: created mqtt client. connecting.."
-        )
+        self._logger.info(" - device_registration :: connect :: created mqtt client. connecting..")
         while not self._auth_response_received:
             self._mqtt.loop(2)
 
@@ -122,9 +116,7 @@ class DeviceRegistration:
             raise DeviceRegistrationError("Cannot connect to MQTT")
 
     def _start_registration(self) -> None:
-        self._mqtt.add_topic_callback(
-            "$dps/registrations/res/#", self._handle_dps_update
-        )
+        self._mqtt.add_topic_callback("$dps/registrations/res/#", self._handle_dps_update)
         self._mqtt.subscribe("$dps/registrations/res/#")
 
         message = json.dumps({"registrationId": self._device_id})
@@ -182,15 +174,11 @@ class DeviceRegistration:
             + f"{constants.DPS_API_VERSION}"
         )
 
-        # pylint: disable=C0103
         sr = self._id_scope + "%2Fregistrations%2F" + self._device_id
-        sig_no_encode = compute_derived_symmetric_key(
-            self._device_sas_key, sr + "\n" + str(expiry)
-        )
+        sig_no_encode = compute_derived_symmetric_key(self._device_sas_key, sr + "\n" + str(expiry))
         sig_encoded = quote(sig_no_encode, "~()*!.'")
         auth_string = (
-            f"SharedAccessSignature sr={sr}&sig={sig_encoded}&se={expiry}"
-            "&skn=registration"
+            f"SharedAccessSignature sr={sr}&sig={sig_encoded}&se={expiry}" "&skn=registration"
         )
 
         self._mqtt = MQTT.MQTT(

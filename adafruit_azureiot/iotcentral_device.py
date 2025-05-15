@@ -14,14 +14,16 @@ Connectivity to Azure IoT Central
 
 import json
 import time
+
 import adafruit_logging as logging
 from adafruit_logging import Logger
+
 from .device_registration import DeviceRegistration
 from .iot_error import IoTError
 from .iot_mqtt import IoTMQTT, IoTMQTTCallback, IoTResponse
 
 
-class IoTCentralDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-attributes
+class IoTCentralDevice(IoTMQTTCallback):
     """A device client for the Azure IoT Central service"""
 
     def connection_status_change(self, connected: bool) -> None:
@@ -30,10 +32,8 @@ class IoTCentralDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-at
         :param bool connected: True if the device is connected, otherwise false
         """
         if self.on_connection_status_changed is not None:
-            # pylint: disable=E1102
             self.on_connection_status_changed(connected)
 
-    # pylint: disable=W0613, R0201
     def direct_method_called(self, method_name: str, payload: str) -> IoTResponse:
         """Called when a direct method is invoked
 
@@ -43,7 +43,6 @@ class IoTCentralDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-at
         :rtype: IoTResponse
         """
         if self.on_command_executed is not None:
-            # pylint: disable=E1102
             return self.on_command_executed(method_name, payload)
 
         raise IoTError("on_command_executed not set")
@@ -58,10 +57,7 @@ class IoTCentralDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-at
         :param int desired_version: The version of the desired property that was updated
         """
         if self.on_property_changed is not None:
-            # pylint: disable=E1102
-            self.on_property_changed(
-                desired_property_name, desired_property_value, desired_version
-            )
+            self.on_property_changed(desired_property_name, desired_property_value, desired_version)
 
         # when a desired property changes, update the reported to match to keep them in sync
         self.send_property(desired_property_name, desired_property_value)
@@ -79,12 +75,10 @@ class IoTCentralDevice(IoTMQTTCallback):  # pylint: disable=too-many-instance-at
         :param int reported_version: The version of the reported property that was updated
         """
         if self.on_property_changed is not None:
-            # pylint: disable=E1102
             self.on_property_changed(
                 reported_property_name, reported_property_value, reported_version
             )
 
-    # pylint: disable=R0913
     def __init__(
         self,
         socket,

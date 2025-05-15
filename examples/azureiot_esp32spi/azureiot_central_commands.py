@@ -1,15 +1,16 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-from os import getenv
 import time
+from os import getenv
+
+import adafruit_connection_manager
 import board
 import busio
-from digitalio import DigitalInOut
 import neopixel
 import rtc
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
-import adafruit_connection_manager
+from digitalio import DigitalInOut
 
 # Get WiFi details and AWS Keys, ensure these are setup in settings.toml
 ssid = getenv("CIRCUITPY_WIFI_SSID")
@@ -32,9 +33,7 @@ spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 
 """Use below for Most Boards"""
-status_pixel = neopixel.NeoPixel(
-    board.NEOPIXEL, 1, brightness=0.2
-)  # Uncomment for Most Boards
+status_pixel = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2)  # Uncomment for Most Boards
 """Uncomment below for ItsyBitsy M4"""
 # status_pixel = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
 # Uncomment below for an externally defined RGB LED
@@ -44,9 +43,7 @@ status_pixel = neopixel.NeoPixel(
 # GREEN_LED = PWMOut.PWMOut(esp, 27)
 # BLUE_LED = PWMOut.PWMOut(esp, 25)
 # status_pixel = adafruit_rgbled.RGBLED(RED_LED, BLUE_LED, GREEN_LED)
-wifi = adafruit_esp32spi_wifimanager.WiFiManager(
-    esp, ssid, password, status_pixel=status_pixel
-)
+wifi = adafruit_esp32spi_wifimanager.WiFiManager(esp, ssid, password, status_pixel=status_pixel)
 
 print("Connecting to WiFi...")
 
@@ -99,11 +96,8 @@ print("Time:", str(time.time()))
 #
 # From the Adafruit CircuitPython Bundle https://github.com/adafruit/Adafruit_CircuitPython_Bundle:
 # * adafruit-circuitpython-minimqtt
-# pylint: disable=wrong-import-position
 from adafruit_azureiot import IoTCentralDevice
 from adafruit_azureiot.iot_mqtt import IoTResponse
-
-# pylint: enable=wrong-import-position
 
 pool = adafruit_connection_manager.get_radio_socketpool(esp)
 ssl_context = adafruit_connection_manager.get_radio_ssl_context(esp)

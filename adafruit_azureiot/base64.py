@@ -30,9 +30,7 @@ def _bytes_from_decode_data(data: str):
     try:
         return data.encode("ascii")
     except Exception as exc:
-        raise ValueError(
-            "string argument should contain only ASCII characters"
-        ) from exc
+        raise ValueError("string argument should contain only ASCII characters") from exc
 
 
 def b64encode(toencode: bytes) -> bytes:
