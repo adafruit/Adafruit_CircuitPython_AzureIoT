@@ -178,7 +178,7 @@ class DeviceRegistration:
         sig_no_encode = compute_derived_symmetric_key(self._device_sas_key, sr + "\n" + str(expiry))
         sig_encoded = quote(sig_no_encode, "~()*!.'")
         auth_string = (
-            f"SharedAccessSignature sr={sr}&sig={sig_encoded}&se={expiry}" "&skn=registration"
+            f"SharedAccessSignature sr={sr}&sig={sig_encoded}&se={expiry}&skn=registration"
         )
 
         self._mqtt = MQTT.MQTT(

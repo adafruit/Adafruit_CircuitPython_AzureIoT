@@ -17,9 +17,7 @@ try:
 except ImportError:
     pass
 
-_ALWAYS_SAFE = frozenset(
-    b"ABCDEFGHIJKLMNOPQRSTUVWXYZ" b"abcdefghijklmnopqrstuvwxyz" b"0123456789" b"_.-~"
-)
+_ALWAYS_SAFE = frozenset(b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-~")
 _ALWAYS_SAFE_BYTES = bytes(_ALWAYS_SAFE)
 SAFE_QUOTERS = {}
 
